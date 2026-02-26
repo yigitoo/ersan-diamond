@@ -1,26 +1,159 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================
+   ERSAN DIAMOND — Luxury Design System
+   ============================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Colors */
+  --color-brand-black: #0A0A0A;
+  --color-brand-white: #FAFAFA;
+  --color-brand-gold: #C9A84C;
+  --color-charcoal: #1A1A1A;
+  --color-slate: #2A2A2A;
+  --color-mist: #8A8A8A;
+  --color-soft-white: #E5E5E5;
+
+  /* Fonts */
+  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-inter);
+
+  /* Custom Timing */
+  --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Animations */
+  --animate-fade-up: fade-up 0.8s var(--ease-luxury) both;
+  --animate-reveal: reveal 1s var(--ease-luxury) both;
+  --animate-slide-in: slide-in 0.6s var(--ease-luxury) both;
+  --animate-scale-in: scale-in 0.5s var(--ease-luxury) both;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
+@keyframes reveal {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Base */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-brand-black);
+  color: var(--color-brand-white);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-brand-gold);
+  color: var(--color-brand-black);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-brand-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-slate);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-mist);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 1px solid var(--color-brand-gold);
+  outline-offset: 2px;
+}
+
+/* Typography utility classes */
+.font-serif {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.font-sans {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Luxury heading style */
+.luxury-heading {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* Luxury button base */
+.luxury-btn {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: all 0.5s var(--ease-luxury);
+}
+
+/* Glass effect */
+.glass {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
