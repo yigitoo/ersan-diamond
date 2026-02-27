@@ -18,43 +18,71 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://ersandiamond.com"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://ersandiamond.com"
+  ),
   title: {
-    default: "Ersan Diamond | Luxury Watches & Hermès",
+    default: "Ersan Diamond | Lüks Saat & Hermès",
     template: "%s | Ersan Diamond",
   },
   description:
-    "İstanbul merkezli lüks saat ve Hermès ürünleri alım-satım. Only Original. Authentication guaranteed.",
+    "İstanbul merkezli lüks saat ve Hermès ürünleri alım-satım. Sadece Orijinal. Orijinal garantili.",
   keywords: [
-    "luxury watches",
+    "Ersan Diamond",
+    "Ersan Diamond Istanbul",
+    "Ersan Diamond Luxury",
+    "Ersan Gülmez",
+    "lüks saat",
     "Rolex",
     "Patek Philippe",
     "Hermès",
     "Birkin",
     "Kelly",
     "İstanbul",
+    "ikinci el lüks",
+    "luxury watches",
     "pre-owned luxury",
+    "luxury watch dealer",
   ],
   authors: [{ name: "Ersan Diamond" }],
+  icons: {
+    icon: [
+      { url: "/imgs/logo-square.png", type: "image/png", sizes: "1024x1024" },
+    ],
+    apple: [{ url: "/imgs/logo-square.png", sizes: "1024x1024" }],
+    shortcut: "/imgs/logo-square.png",
+  },
   openGraph: {
     type: "website",
     locale: "tr_TR",
+    alternateLocale: "en_US",
     url: "https://ersandiamond.com",
     siteName: "Ersan Diamond",
-    title: "Ersan Diamond | Luxury Watches & Hermès",
+    title: "Ersan Diamond | Lüks Saat & Hermès",
     description:
-      "İstanbul merkezli lüks saat ve Hermès ürünleri alım-satım. Only Original.",
-    images: [{ url: "/imgs/logo-square.png", width: 1024, height: 1024 }],
+      "İstanbul merkezli lüks saat ve Hermès ürünleri alım-satım. Sadece Orijinal. Orijinal garantili.",
+    images: [
+      {
+        url: "/imgs/logo-square.png",
+        width: 1024,
+        height: 1024,
+        alt: "Ersan Diamond Logo",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ersan Diamond | Luxury Watches & Hermès",
+    title: "Ersan Diamond | Lüks Saat & Hermès",
     description:
-      "İstanbul merkezli lüks saat ve Hermès ürünleri alım-satım. Only Original.",
+      "İstanbul merkezli lüks saat ve Hermès ürünleri alım-satım. Sadece Orijinal. Orijinal garantili.",
+    images: ["/imgs/logo-square.png"],
   },
   robots: {
     index: true,
     follow: true,
+  },
+  other: {
+    "apple-mobile-web-app-title": "Ersan Diamond",
   },
 };
 

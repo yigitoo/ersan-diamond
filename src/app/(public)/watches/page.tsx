@@ -11,6 +11,7 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { staggerContainer, staggerItem } from "@/lib/animations";
 import { useSwrFetch } from "@/lib/hooks";
+import { useI18n } from "@/lib/i18n";
 import { WATCH_BRANDS, CONDITION_LABELS } from "@/lib/utils/constants";
 import { formatPrice } from "@/lib/utils/formatters";
 import { cn } from "@/lib/utils/cn";
@@ -18,6 +19,7 @@ import Link from "next/link";
 import type { IProduct } from "@/types";
 
 export default function WatchesPage() {
+  const { t } = useI18n();
   const [filterOpen, setFilterOpen] = useState(false);
   const [brand, setBrand] = useState("");
   const [condition, setCondition] = useState("");
@@ -35,10 +37,10 @@ export default function WatchesPage() {
   const brandOptions = WATCH_BRANDS.map((b) => ({ value: b, label: b }));
   const conditionOptions = Object.entries(CONDITION_LABELS).map(([v, l]) => ({ value: v, label: l }));
   const sortOptions = [
-    { value: "createdAt", label: "Newest" },
-    { value: "price_asc", label: "Price: Low to High" },
-    { value: "price_desc", label: "Price: High to Low" },
-    { value: "year", label: "Year" },
+    { value: "createdAt", label: t("En Yeni", "Newest") },
+    { value: "price_asc", label: t("Fiyat: Düşükten Yukarıya", "Price: Low to High") },
+    { value: "price_desc", label: t("Fiyat: Yüksekten Aşağıya", "Price: High to Low") },
+    { value: "year", label: t("Yıl", "Year") },
   ];
 
   return (
@@ -46,17 +48,20 @@ export default function WatchesPage() {
       {/* Header */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <SectionHeading
-          title="Watches"
-          subtitle="Curated collection of the world's finest timepieces"
+          title={t("Saatler", "Watches")}
+          subtitle={t(
+            "Dünyanın en iyi saatlerinden oluşturduğumuz seçkin koleksiyon",
+            "Curated collection of the world's finest timepieces"
+          )}
           align="left"
         />
 
         {/* Toolbar */}
         <div className="flex items-center justify-between mb-8 gap-4">
           <div className="hidden lg:flex items-center gap-4 flex-1">
-            <Select options={brandOptions} placeholder="All Brands" value={brand} onChange={(e) => setBrand(e.target.value)} className="w-48" />
-            <Select options={conditionOptions} placeholder="All Conditions" value={condition} onChange={(e) => setCondition(e.target.value)} className="w-48" />
-            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-64" />
+            <Select options={brandOptions} placeholder={t("Tüm Markalar", "All Brands")} value={brand} onChange={(e) => setBrand(e.target.value)} className="w-48" />
+            <Select options={conditionOptions} placeholder={t("Tüm Durumlar", "All Conditions")} value={condition} onChange={(e) => setCondition(e.target.value)} className="w-48" />
+            <Input placeholder={t("Ara...", "Search...")} value={search} onChange={(e) => setSearch(e.target.value)} className="w-64" />
           </div>
           <div className="flex items-center gap-3">
             <Select options={sortOptions} value={sort} onChange={(e) => setSort(e.target.value)} className="w-48" />
@@ -65,7 +70,7 @@ export default function WatchesPage() {
               className="lg:hidden flex items-center gap-2 text-sm text-mist hover:text-brand-white transition-colors"
             >
               <SlidersHorizontal size={16} />
-              Filters
+              {t("Filtreler", "Filters")}
             </button>
           </div>
         </div>
@@ -95,7 +100,7 @@ export default function WatchesPage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-mist text-xs">No Image</div>
+                      <div className="w-full h-full flex items-center justify-center text-mist text-xs">{t("Görsel Yok", "No Image")}</div>
                     )}
                     <div className="absolute top-3 left-3">
                       <StatusBadge status={product.availability} type="availability" />
@@ -110,7 +115,7 @@ export default function WatchesPage() {
                     <p className="text-xs text-mist tracking-wider uppercase">{product.brand}</p>
                     <h3 className="font-serif text-base group-hover:text-brand-gold transition-colors">{product.model}</h3>
                     <p className="text-sm text-soft-white">
-                      {product.priceOnRequest ? "Price on Request" : product.price ? formatPrice(product.price, product.currency) : ""}
+                      {product.priceOnRequest ? t("Fiyat Sorunuz", "Price on Request") : product.price ? formatPrice(product.price, product.currency) : ""}
                     </p>
                   </div>
                 </Link>
@@ -119,18 +124,18 @@ export default function WatchesPage() {
           </motion.div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-mist">No watches found matching your criteria.</p>
+            <p className="text-mist">{t("Kriterlerinize uygun saat bulunamadı.", "No watches found matching your criteria.")}</p>
           </div>
         )}
       </div>
 
       {/* Mobile Filter Sheet */}
-      <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="Filters">
+      <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title={t("Filtreler", "Filters")}>
         <div className="space-y-6">
-          <Select options={brandOptions} placeholder="All Brands" label="Brand" value={brand} onChange={(e) => setBrand(e.target.value)} />
-          <Select options={conditionOptions} placeholder="All Conditions" label="Condition" value={condition} onChange={(e) => setCondition(e.target.value)} />
-          <Input label="Search" placeholder="Search watches..." value={search} onChange={(e) => setSearch(e.target.value)} />
-          <Button variant="primary" className="w-full" onClick={() => setFilterOpen(false)}>Apply Filters</Button>
+          <Select options={brandOptions} placeholder={t("Tüm Markalar", "All Brands")} label={t("Marka", "Brand")} value={brand} onChange={(e) => setBrand(e.target.value)} />
+          <Select options={conditionOptions} placeholder={t("Tüm Durumlar", "All Conditions")} label={t("Durum", "Condition")} value={condition} onChange={(e) => setCondition(e.target.value)} />
+          <Input label={t("Ara", "Search")} placeholder={t("Saat ara...", "Search watches...")} value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Button variant="primary" className="w-full" onClick={() => setFilterOpen(false)}>{t("Filtreleri Uygula", "Apply Filters")}</Button>
         </div>
       </Sheet>
     </div>

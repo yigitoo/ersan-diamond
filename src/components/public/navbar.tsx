@@ -4,42 +4,14 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Heart, User, Menu, ChevronRight } from "lucide-react";
+import { Heart, Menu, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/shared/logo";
 import { Sheet } from "@/components/ui/sheet";
+import { LanguageToggle } from "@/components/shared/language-toggle";
+import { useI18n } from "@/lib/i18n";
 import { navSlide } from "@/lib/animations";
-import { WATCH_BRANDS, HERMES_MODELS } from "@/lib/utils/constants";
-
-/* ─── Navigation data ─── */
-const NAV_ITEMS = [
-  { label: "Watches", href: "/watches" },
-  { label: "Hermes", href: "/hermes" },
-  { label: "Sell to Us", href: "/sell" },
-  { label: "Concierge", href: "/concierge" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-] as const;
-
-const MEGA_MENUS: Record<
-  string,
-  { title: string; links: { label: string; href: string }[] }
-> = {
-  Watches: {
-    title: "Timepieces",
-    links: WATCH_BRANDS.slice(0, 8).map((b) => ({
-      label: b,
-      href: `/watches?brand=${encodeURIComponent(b)}`,
-    })),
-  },
-  Hermes: {
-    title: "Hermes Collection",
-    links: HERMES_MODELS.slice(0, 8).map((m) => ({
-      label: m,
-      href: `/hermes?model=${encodeURIComponent(m)}`,
-    })),
-  },
-};
+import { WATCH_BRANDS, HERMES_MODELS, BRAND_WHATSAPP, BRAND_INSTAGRAM } from "@/lib/utils/constants";
 
 /* ─── Component ─── */
 export function Navbar() {
@@ -47,6 +19,37 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const pathname = usePathname();
+  const { t } = useI18n();
+
+  /* Navigation data (uses t for labels) */
+  const NAV_ITEMS = [
+    { label: t("Saatler", "Watches"), href: "/watches", key: "Watches" },
+    { label: t("Hermès", "Hermès"), href: "/hermes", key: "Hermes" },
+    { label: t("Bize Satın", "Sell to Us"), href: "/sell", key: "Sell" },
+    { label: t("Konsiyerj", "Concierge"), href: "/concierge", key: "Concierge" },
+    { label: t("Hakkımızda", "About"), href: "/about", key: "About" },
+    { label: t("İletişim", "Contact"), href: "/contact", key: "Contact" },
+  ];
+
+  const MEGA_MENUS: Record<
+    string,
+    { title: string; links: { label: string; href: string }[] }
+  > = {
+    Watches: {
+      title: t("Saatler", "Timepieces"),
+      links: WATCH_BRANDS.slice(0, 8).map((b) => ({
+        label: b,
+        href: `/watches?brand=${encodeURIComponent(b)}`,
+      })),
+    },
+    Hermes: {
+      title: t("Hermès Koleksiyon", "Hermès Collection"),
+      links: HERMES_MODELS.slice(0, 8).map((m) => ({
+        label: m,
+        href: `/hermes?model=${encodeURIComponent(m)}`,
+      })),
+    },
+  };
 
   /* Scroll listener */
   useEffect(() => {
@@ -61,6 +64,12 @@ export function Navbar() {
   }, [pathname]);
 
   const closeMega = useCallback(() => setActiveMenu(null), []);
+
+  /* Mega menu key lookup */
+  const getMegaKey = (navKey: string) => {
+    if (navKey === "Watches" || navKey === "Hermes") return navKey;
+    return null;
+  };
 
   return (
     <>
@@ -82,16 +91,17 @@ export function Navbar() {
             {/* ── Center: Desktop links ── */}
             <ul className="hidden lg:flex items-center gap-1">
               {NAV_ITEMS.map((item) => {
-                const hasMega = item.label in MEGA_MENUS;
+                const megaKey = getMegaKey(item.key);
+                const hasMega = megaKey !== null;
                 const isActive =
                   pathname === item.href ||
                   pathname.startsWith(item.href + "/");
 
                 return (
                   <li
-                    key={item.label}
+                    key={item.key}
                     className="relative"
-                    onMouseEnter={() => hasMega && setActiveMenu(item.label)}
+                    onMouseEnter={() => hasMega && setActiveMenu(item.key)}
                     onMouseLeave={closeMega}
                   >
                     <Link
@@ -108,7 +118,7 @@ export function Navbar() {
 
                     {/* Mega-menu dropdown */}
                     <AnimatePresence>
-                      {hasMega && activeMenu === item.label && (
+                      {hasMega && activeMenu === item.key && MEGA_MENUS[megaKey!] && (
                         <motion.div
                           variants={navSlide}
                           initial="hidden"
@@ -118,10 +128,10 @@ export function Navbar() {
                         >
                           <div className="w-[320px] bg-charcoal/95 glass border border-slate/60 rounded p-6">
                             <p className="text-xs uppercase tracking-[0.2em] text-mist mb-4">
-                              {MEGA_MENUS[item.label].title}
+                              {MEGA_MENUS[megaKey!].title}
                             </p>
                             <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                              {MEGA_MENUS[item.label].links.map((link) => (
+                              {MEGA_MENUS[megaKey!].links.map((link) => (
                                 <Link
                                   key={link.label}
                                   href={link.href}
@@ -136,7 +146,7 @@ export function Navbar() {
                                 href={item.href}
                                 className="text-xs uppercase tracking-[0.15em] text-brand-gold hover:text-brand-gold/80 transition-colors duration-300 flex items-center gap-1"
                               >
-                                View All
+                                {t("Tümünü Gör", "View All")}
                                 <ChevronRight size={12} />
                               </Link>
                             </div>
@@ -151,25 +161,13 @@ export function Navbar() {
 
             {/* ── Right: Icons ── */}
             <div className="flex items-center gap-1">
-              <button
-                className="p-2.5 text-soft-white/70 hover:text-brand-white transition-colors duration-500"
-                aria-label="Search"
-              >
-                <Search size={18} strokeWidth={1.5} />
-              </button>
+              <LanguageToggle className="mr-2 hidden sm:flex" />
               <Link
                 href="/wishlist"
-                className="hidden sm:flex p-2.5 text-soft-white/70 hover:text-brand-white transition-colors duration-500"
-                aria-label="Wishlist"
+                className="p-2.5 text-soft-white/70 hover:text-brand-white transition-colors duration-500"
+                aria-label={t("Favoriler", "Wishlist")}
               >
                 <Heart size={18} strokeWidth={1.5} />
-              </Link>
-              <Link
-                href="/panel/login"
-                className="hidden sm:flex p-2.5 text-soft-white/70 hover:text-brand-white transition-colors duration-500"
-                aria-label="Account"
-              >
-                <User size={18} strokeWidth={1.5} />
               </Link>
 
               {/* Mobile hamburger */}
@@ -192,11 +190,16 @@ export function Navbar() {
         side="right"
       >
         <div className="flex flex-col h-full">
+          {/* Language toggle in mobile */}
+          <div className="mb-4">
+            <LanguageToggle />
+          </div>
+
           {/* Menu items */}
           <nav className="flex-1 flex flex-col justify-center -mt-8">
             {NAV_ITEMS.map((item, i) => (
               <motion.div
-                key={item.label}
+                key={item.key}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{
@@ -231,20 +234,12 @@ export function Navbar() {
                 className="flex items-center gap-2 text-sm text-mist hover:text-brand-white transition-colors duration-300"
               >
                 <Heart size={16} strokeWidth={1.5} />
-                Wishlist
-              </Link>
-              <Link
-                href="/panel/login"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 text-sm text-mist hover:text-brand-white transition-colors duration-300"
-              >
-                <User size={16} strokeWidth={1.5} />
-                Account
+                {t("Favoriler", "Wishlist")}
               </Link>
             </div>
             <div className="flex items-center gap-4 text-xs text-mist">
               <a
-                href="https://instagram.com"
+                href={BRAND_INSTAGRAM}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-brand-white transition-colors duration-300"
@@ -253,7 +248,7 @@ export function Navbar() {
               </a>
               <span className="w-px h-3 bg-slate/60" />
               <a
-                href="https://wa.me/"
+                href={BRAND_WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-brand-white transition-colors duration-300"

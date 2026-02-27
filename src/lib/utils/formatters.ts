@@ -49,7 +49,7 @@ export function truncate(str: string, maxLength: number): string {
 }
 
 export function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  return str.charAt(0).toLocaleUpperCase("tr") + str.slice(1).toLocaleLowerCase("tr");
 }
 
 export function initials(name: string): string {
@@ -57,6 +57,6 @@ export function initials(name: string): string {
     .split(" ")
     .map((n) => n[0])
     .join("")
-    .toUpperCase()
+    .toLocaleUpperCase("tr")
     .slice(0, 2);
 }

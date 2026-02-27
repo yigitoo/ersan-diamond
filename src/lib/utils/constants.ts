@@ -1,7 +1,9 @@
 // Brand
 export const BRAND_NAME = "Ersan Diamond";
 export const BRAND_EMAIL = "info@ersandiamond.com";
-export const BRAND_PHONE = "+90 (212) 000 0000";
+export const BRAND_PHONE = "0850 562 13 13";
+export const BRAND_WHATSAPP = "https://wa.me/908505621313";
+export const BRAND_INSTAGRAM = "https://instagram.com/ersandiamond";
 export const BRAND_ADDRESS = "İstanbul, Türkiye";
 export const BRAND_WORKING_HOURS = "Pazartesi - Cumartesi: 10:00 - 19:00";
 

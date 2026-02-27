@@ -18,8 +18,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { useI18n } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/formatters";
-import { CONDITION_LABELS } from "@/lib/utils/constants";
+import { CONDITION_LABELS, BRAND_WHATSAPP } from "@/lib/utils/constants";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 import type { IProduct, HermesSpecs } from "@/types";
 
@@ -37,13 +38,14 @@ function SpecRow({ label, value }: { label: string; value?: string | React.React
 }
 
 function BooleanValue({ value }: { value: boolean }) {
+  const { t } = useI18n();
   return value ? (
     <span className="inline-flex items-center gap-1 text-green-400">
-      <Check size={14} /> Yes
+      <Check size={14} /> {t("Evet", "Yes")}
     </span>
   ) : (
     <span className="inline-flex items-center gap-1 text-mist">
-      <X size={14} /> No
+      <X size={14} /> {t("Hayır", "No")}
     </span>
   );
 }
@@ -52,6 +54,7 @@ function BooleanValue({ value }: { value: boolean }) {
 // Main detail component
 // ---------------------------------------------------------------------------
 export function HermesDetailClient({ product }: { product: IProduct }) {
+  const { t } = useI18n();
   const [selectedImage, setSelectedImage] = useState(0);
   const specs = (product.specs || {}) as HermesSpecs;
 
@@ -66,7 +69,7 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
           className="inline-flex items-center gap-2 text-sm text-mist hover:text-brand-white transition-colors"
         >
           <ChevronLeft size={16} />
-          Back to Herm&egrave;s
+          {t("Hermès'e Dön", "Back to Hermès")}
         </Link>
       </div>
 
@@ -137,8 +140,8 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
               </h1>
               <p className="text-sm text-mist">
                 {specs.material}
-                {specs.color ? ` \u00b7 ${specs.color}` : ""}
-                {specs.hardware ? ` \u00b7 ${specs.hardware} Hardware` : ""}
+                {specs.color ? ` · ${specs.color}` : ""}
+                {specs.hardware ? ` · ${specs.hardware} Hardware` : ""}
               </p>
             </div>
 
@@ -146,7 +149,7 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
             <div>
               {product.priceOnRequest ? (
                 <Button variant="outline" size="lg">
-                  Price on Request
+                  {t("Fiyat Sorunuz", "Price on Request")}
                 </Button>
               ) : product.price ? (
                 <p className="font-serif text-2xl">{formatPrice(product.price, product.currency)}</p>
@@ -166,15 +169,15 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
 
             {/* Specs table */}
             <div className="border-t border-slate/40 pt-2">
-              <SpecRow label="Model" value={product.model} />
-              <SpecRow label="Size" value={specs.size ? `${specs.size} cm` : undefined} />
-              <SpecRow label="Material" value={specs.material} />
-              <SpecRow label="Color" value={specs.color} />
-              <SpecRow label="Hardware" value={specs.hardware} />
-              <SpecRow label="Stamp" value={specs.stamp} />
-              <SpecRow label="Accessories" value={specs.accessories} />
+              <SpecRow label={t("Model", "Model")} value={product.model} />
+              <SpecRow label={t("Boyut", "Size")} value={specs.size ? `${specs.size} cm` : undefined} />
+              <SpecRow label={t("Malzeme", "Material")} value={specs.material} />
+              <SpecRow label={t("Renk", "Color")} value={specs.color} />
+              <SpecRow label={t("Aksesuar Metali", "Hardware")} value={specs.hardware} />
+              <SpecRow label={t("Damga", "Stamp")} value={specs.stamp} />
+              <SpecRow label={t("Aksesuarlar", "Accessories")} value={specs.accessories} />
               <SpecRow
-                label="Dustbag"
+                label={t("Toz Torbası", "Dustbag")}
                 value={
                   specs.dustbag !== undefined ? (
                     <BooleanValue value={specs.dustbag} />
@@ -182,23 +185,26 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
                 }
               />
               <SpecRow
-                label="Box"
+                label={t("Kutu", "Box")}
                 value={
                   specs.box !== undefined ? (
                     <BooleanValue value={specs.box} />
                   ) : undefined
                 }
               />
-              <SpecRow label="Condition" value={CONDITION_LABELS[product.condition] || product.condition} />
+              <SpecRow label={t("Durum", "Condition")} value={CONDITION_LABELS[product.condition] || product.condition} />
             </div>
 
             {/* Trust badge */}
             <div className="flex items-center gap-3 py-4 border border-slate/30 rounded-sm px-4 bg-charcoal/50">
               <Shield size={20} className="text-brand-gold flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium">Authenticity Guaranteed</p>
+                <p className="text-sm font-medium">{t("Orijinallik Garantisi", "Authenticity Guaranteed")}</p>
                 <p className="text-xs text-mist">
-                  Every piece undergoes our rigorous authentication process
+                  {t(
+                    "Her parça titiz orijinallik kontrolümüzden geçirilir",
+                    "Every piece undergoes our rigorous authentication process"
+                  )}
                 </p>
               </div>
             </div>
@@ -208,17 +214,17 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
               <Link href="/concierge" className="block">
                 <Button variant="primary" size="lg" className="w-full">
                   <CalendarDays size={16} className="mr-2" />
-                  Book Appointment
+                  {t("Randevu Al", "Book Appointment")}
                 </Button>
               </Link>
               <Link href="/concierge" className="block">
                 <Button variant="outline" size="lg" className="w-full">
                   <Video size={16} className="mr-2" />
-                  Request Video Call
+                  {t("Görüntülü Görüşme", "Request Video Call")}
                 </Button>
               </Link>
               <a
-                href="https://wa.me/902120000000"
+                href={BRAND_WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block"
@@ -235,12 +241,12 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
 
       {/* Similar Pieces */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 mt-24">
-        <SectionHeading title="Similar Pieces" subtitle="You may also like" />
+        <SectionHeading title={t("Benzer Ürünler", "Similar Pieces")} subtitle={t("Bunları da beğenebilirsiniz", "You may also like")} />
         <div className="text-center py-12">
-          <p className="text-mist text-sm">More pieces from our collection coming soon.</p>
+          <p className="text-mist text-sm">{t("Koleksiyonumuzdan daha fazla ürün yakında.", "More pieces from our collection coming soon.")}</p>
           <Link href="/hermes" className="inline-block mt-4">
             <Button variant="outline" size="sm">
-              Browse All Herm&egrave;s
+              {t("Tüm Hermès Ürünlerini Gör", "Browse All Hermès")}
             </Button>
           </Link>
         </div>

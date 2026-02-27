@@ -19,7 +19,7 @@ export function KPICard({ title, value, subtitle, icon: Icon, trend, className }
       {subtitle && <p className="text-xs text-mist mt-1">{subtitle}</p>}
       {trend && (
         <p className={cn("text-xs mt-2", trend.positive ? "text-green-400" : "text-red-400")}>
-          {trend.positive ? "\u2191" : "\u2193"} {Math.abs(trend.value)}%
+          {trend.positive ? "↑" : "↓"} {Math.abs(trend.value)}%
         </p>
       )}
     </div>

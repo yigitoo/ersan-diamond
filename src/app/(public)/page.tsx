@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { useI18n } from "@/lib/i18n";
 import {
   heroReveal,
   fadeUp,
@@ -20,96 +21,91 @@ import {
   staggerItem,
 } from "@/lib/animations";
 
-/* ─── Data ─── */
-const CATEGORIES = [
-  {
-    title: "Watches",
-    description: "Curated timepieces from the world's finest maisons",
-    href: "/watches",
-  },
-  {
-    title: "Hermes",
-    description: "Iconic leather goods, authenticated and pristine",
-    href: "/hermes",
-  },
-  {
-    title: "Sell to Us",
-    description: "Consign or sell your luxury pieces with confidence",
-    href: "/sell",
-  },
-];
-
-const TRUST_ITEMS = [
-  {
-    icon: Shield,
-    title: "Authentication",
-    description: "Multi-point verification by certified experts",
-  },
-  {
-    icon: Award,
-    title: "Provenance",
-    description: "Complete history and documentation verified",
-  },
-  {
-    icon: Eye,
-    title: "Inspection",
-    description: "Movement and case examination under magnification",
-  },
-  {
-    icon: Star,
-    title: "Guarantee",
-    description: "Full authenticity guarantee with every purchase",
-  },
-];
-
-const PLACEHOLDER_PRODUCTS = [
-  { brand: "Rolex", model: "Daytona Cosmograph", price: "Price on Request" },
-  {
-    brand: "Patek Philippe",
-    model: "Nautilus 5711/1A",
-    price: "Price on Request",
-  },
-  {
-    brand: "Audemars Piguet",
-    model: "Royal Oak 15500ST",
-    price: "Price on Request",
-  },
-  {
-    brand: "Richard Mille",
-    model: "RM 011 Felipe Massa",
-    price: "Price on Request",
-  },
-  { brand: "Rolex", model: 'Submariner "Hulk"', price: "Price on Request" },
-  {
-    brand: "Patek Philippe",
-    model: "Aquanaut 5167A",
-    price: "Price on Request",
-  },
-  {
-    brand: "Vacheron Constantin",
-    model: "Overseas Dual Time",
-    price: "Price on Request",
-  },
-  {
-    brand: "A. Lange & Sohne",
-    model: "Lange 1",
-    price: "Price on Request",
-  },
-];
-
 /* ─── Page ─── */
 export default function HomePage() {
+  const { t } = useI18n();
+
+  /* ─── Data ─── */
+  const CATEGORIES = [
+    {
+      title: t("Saatler", "Watches"),
+      description: t(
+        "Dünyanın en prestijli markalarından seçilmiş saatler",
+        "Curated timepieces from the world's finest maisons"
+      ),
+      href: "/watches",
+    },
+    {
+      title: t("Hermès", "Hermès"),
+      description: t(
+        "Orijinallik onaylanmış ikonik deri ürünler",
+        "Iconic leather goods, authenticated and pristine"
+      ),
+      href: "/hermes",
+    },
+    {
+      title: t("Bize Satın", "Sell to Us"),
+      description: t(
+        "Lüks parçalarınızı güvenle satın veya konsiye bırakın",
+        "Consign or sell your luxury pieces with confidence"
+      ),
+      href: "/sell",
+    },
+  ];
+
+  const TRUST_ITEMS = [
+    {
+      icon: Shield,
+      title: t("Orijinallik Kontrolü", "Authentication"),
+      description: t(
+        "Sertifikalı uzmanlar tarafından çoklu doğrulama",
+        "Multi-point verification by certified experts"
+      ),
+    },
+    {
+      icon: Award,
+      title: t("Köken", "Provenance"),
+      description: t(
+        "Tam geçmiş ve belgelendirme doğrulanmış",
+        "Complete history and documentation verified"
+      ),
+    },
+    {
+      icon: Eye,
+      title: t("İnceleme", "Inspection"),
+      description: t(
+        "Mekanizma ve kasa büyüteç altında incelenir",
+        "Movement and case examination under magnification"
+      ),
+    },
+    {
+      icon: Star,
+      title: t("Garanti", "Guarantee"),
+      description: t(
+        "Her satın alımda tam orijinallik garantisi",
+        "Full authenticity guarantee with every purchase"
+      ),
+    },
+  ];
+
+  const PLACEHOLDER_PRODUCTS = [
+    { brand: "Rolex", model: "Daytona Cosmograph", price: t("Fiyat Sorunuz", "Price on Request") },
+    { brand: "Patek Philippe", model: "Nautilus 5711/1A", price: t("Fiyat Sorunuz", "Price on Request") },
+    { brand: "Audemars Piguet", model: "Royal Oak 15500ST", price: t("Fiyat Sorunuz", "Price on Request") },
+    { brand: "Richard Mille", model: "RM 011 Felipe Massa", price: t("Fiyat Sorunuz", "Price on Request") },
+    { brand: "Rolex", model: 'Submariner "Hulk"', price: t("Fiyat Sorunuz", "Price on Request") },
+    { brand: "Patek Philippe", model: "Aquanaut 5167A", price: t("Fiyat Sorunuz", "Price on Request") },
+    { brand: "Vacheron Constantin", model: "Overseas Dual Time", price: t("Fiyat Sorunuz", "Price on Request") },
+    { brand: "A. Lange & Söhne", model: "Lange 1", price: t("Fiyat Sorunuz", "Price on Request") },
+  ];
+
   return (
     <>
       {/* ═══════════════════ HERO ═══════════════════ */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background gradient */}
         <div
-          className="absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 60% at 50% 40%, #1A1A1A 0%, #0A0A0A 70%, #000 100%)",
-          }}
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-charcoal via-brand-black to-brand-black"
         />
 
         {/* Subtle gold light bleed */}
@@ -134,27 +130,29 @@ export default function HomePage() {
 
           {/* Main heading */}
           <h1 className="font-serif text-5xl md:text-7xl font-normal leading-[1.08] tracking-tight">
-            Where Rarity Meets
+            {t("Nadirlik ve Orijinalliğin", "Where Rarity Meets")}
             <br />
-            Authenticity
+            {t("Buluştuğu Yer", "Authenticity")}
           </h1>
 
           {/* Subtitle */}
           <p className="text-mist text-base md:text-lg max-w-xl mx-auto mt-6 leading-relaxed">
-            Istanbul&apos;s premier destination for authenticated luxury
-            timepieces and Hermes
+            {t(
+              "İstanbul'un orijinallik onaylanmış lüks saatler ve Hermès için en prestijli adresi",
+              "Istanbul's premier destination for authenticated luxury timepieces and Hermès"
+            )}
           </p>
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
             <Link href="/concierge">
               <Button variant="primary" size="lg">
-                Book Appointment
+                {t("Randevu Al", "Book Appointment")}
               </Button>
             </Link>
             <Link href="/watches">
               <Button variant="outline" size="lg">
-                Explore Collection
+                {t("Koleksiyonu Keşfet", "Explore Collection")}
               </Button>
             </Link>
           </div>
@@ -168,7 +166,7 @@ export default function HomePage() {
           className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
           <span className="text-[10px] uppercase tracking-[0.2em] text-mist/60">
-            Scroll
+            {t("Kaydır", "Scroll")}
           </span>
           <motion.div
             animate={{ y: [0, 6, 0] }}
@@ -182,7 +180,7 @@ export default function HomePage() {
       {/* ═══════════════════ CATEGORY TILES ═══════════════════ */}
       <section className="py-24 px-6">
         <div className="mx-auto max-w-7xl">
-          <SectionHeading title="The Collection" />
+          <SectionHeading title={t("Koleksiyon", "The Collection")} />
 
           <motion.div
             variants={staggerContainer}
@@ -224,8 +222,11 @@ export default function HomePage() {
       <section className="py-24 bg-charcoal">
         <div className="mx-auto max-w-7xl px-6">
           <SectionHeading
-            title="Only Original"
-            subtitle="Every piece authenticated through our rigorous 5-step process"
+            title={t("Sadece Orijinal", "Only Original")}
+            subtitle={t(
+              "Her parça titiz 5 adımlı sürecimizle orijinallik kontrolünden geçirilir",
+              "Every piece authenticated through our rigorous 5-step process"
+            )}
           />
 
           <motion.div
@@ -261,7 +262,7 @@ export default function HomePage() {
       {/* ═══════════════════ LATEST DROPS ═══════════════════ */}
       <section className="py-24 px-6">
         <div className="mx-auto max-w-7xl">
-          <SectionHeading title="Latest Arrivals" />
+          <SectionHeading title={t("Son Gelenler", "Latest Arrivals")} />
 
           <motion.div
             variants={staggerContainer}
@@ -282,7 +283,7 @@ export default function HomePage() {
                   {/* Placeholder image area */}
                   <div className="aspect-square bg-slate/20 flex items-center justify-center">
                     <span className="text-mist/30 text-xs uppercase tracking-[0.15em]">
-                      Image
+                      {t("Görsel", "Image")}
                     </span>
                   </div>
                   {/* Info */}
@@ -312,7 +313,7 @@ export default function HomePage() {
               href="/watches"
               className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.15em] text-mist hover:text-brand-white transition-colors duration-500"
             >
-              View All Timepieces
+              {t("Tüm Saatleri Gör", "View All Timepieces")}
               <ArrowRight size={14} strokeWidth={1.5} />
             </Link>
           </motion.div>
@@ -329,14 +330,17 @@ export default function HomePage() {
           className="text-center"
         >
           <h2 className="font-serif text-4xl md:text-5xl mb-4">
-            Private Concierge
+            {t("Özel Konsiyerj", "Private Concierge")}
           </h2>
           <p className="text-mist text-base mb-10 max-w-md mx-auto">
-            Book your personal appointment in 30 seconds
+            {t(
+              "30 saniyede kişisel randevunuzu oluşturun",
+              "Book your personal appointment in 30 seconds"
+            )}
           </p>
           <Link href="/concierge">
             <Button variant="gold" size="lg">
-              Book Now
+              {t("Hemen Randevu Al", "Book Now")}
             </Button>
           </Link>
         </motion.div>

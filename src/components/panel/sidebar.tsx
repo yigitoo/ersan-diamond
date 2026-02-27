@@ -26,11 +26,13 @@ import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/shared/logo";
 import { Badge } from "@/components/ui/badge";
 import { Sheet } from "@/components/ui/sheet";
+import { useI18n } from "@/lib/i18n";
 
 /* ---------------------------------- types --------------------------------- */
 
 interface NavItem {
-  label: string;
+  labelTr: string;
+  labelEn: string;
   href: string;
   icon: LucideIcon;
   roles: string[];
@@ -54,16 +56,23 @@ interface SidebarProps {
 /* ---------------------------------- data ---------------------------------- */
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/panel/dashboard", icon: LayoutDashboard, roles: ["OWNER", "ADMIN", "SALES", "VIEWER"], group: "Main" },
-  { label: "Appointments", href: "/panel/appointments", icon: Calendar, roles: ["OWNER", "ADMIN", "SALES", "VIEWER"], group: "Main" },
-  { label: "Leads", href: "/panel/leads", icon: Users, roles: ["OWNER", "ADMIN", "SALES", "VIEWER"], group: "Main" },
-  { label: "Sales", href: "/panel/sales", icon: DollarSign, roles: ["OWNER", "ADMIN", "SALES"], group: "Sales" },
-  { label: "Inventory", href: "/panel/inventory", icon: Package, roles: ["OWNER", "ADMIN"], group: "Sales" },
-  { label: "Mail Center", href: "/panel/mail", icon: Mail, roles: ["OWNER", "ADMIN", "SALES"], group: "Communication" },
-  { label: "Calendar", href: "/panel/calendar", icon: CalendarDays, roles: ["OWNER", "ADMIN", "SALES"], group: "Communication" },
-  { label: "Team", href: "/panel/team", icon: UserCog, roles: ["OWNER"], group: "Admin" },
-  { label: "Audit Logs", href: "/panel/logs", icon: FileText, roles: ["OWNER", "ADMIN"], group: "Admin" },
+  { labelTr: "Kontrol Paneli", labelEn: "Dashboard", href: "/panel/dashboard", icon: LayoutDashboard, roles: ["OWNER", "ADMIN", "SALES", "VIEWER"], group: "Main" },
+  { labelTr: "Randevular", labelEn: "Appointments", href: "/panel/appointments", icon: Calendar, roles: ["OWNER", "ADMIN", "SALES", "VIEWER"], group: "Main" },
+  { labelTr: "Müşteri Adayları", labelEn: "Leads", href: "/panel/leads", icon: Users, roles: ["OWNER", "ADMIN", "SALES", "VIEWER"], group: "Main" },
+  { labelTr: "Satışlar", labelEn: "Sales", href: "/panel/sales", icon: DollarSign, roles: ["OWNER", "ADMIN", "SALES"], group: "Sales" },
+  { labelTr: "Envanter", labelEn: "Inventory", href: "/panel/inventory", icon: Package, roles: ["OWNER", "ADMIN"], group: "Sales" },
+  { labelTr: "Posta Merkezi", labelEn: "Mail Center", href: "/panel/mail", icon: Mail, roles: ["OWNER", "ADMIN", "SALES"], group: "Communication" },
+  { labelTr: "Takvim", labelEn: "Calendar", href: "/panel/calendar", icon: CalendarDays, roles: ["OWNER", "ADMIN", "SALES"], group: "Communication" },
+  { labelTr: "Ekip", labelEn: "Team", href: "/panel/team", icon: UserCog, roles: ["OWNER"], group: "Admin" },
+  { labelTr: "İşlem Kayıtları", labelEn: "Audit Logs", href: "/panel/logs", icon: FileText, roles: ["OWNER", "ADMIN"], group: "Admin" },
 ];
+
+const GROUP_LABELS: Record<string, { tr: string; en: string }> = {
+  Main: { tr: "Ana Sayfa", en: "Main" },
+  Sales: { tr: "Satış", en: "Sales" },
+  Communication: { tr: "İletişim", en: "Communication" },
+  Admin: { tr: "Yönetim", en: "Admin" },
+};
 
 /* --------------------------------- helpers -------------------------------- */
 
@@ -73,7 +82,7 @@ function getInitials(name?: string | null): string {
     .split(" ")
     .map((n) => n[0])
     .join("")
-    .toUpperCase()
+    .toLocaleUpperCase("tr")
     .slice(0, 2);
 }
 
@@ -104,6 +113,7 @@ function SidebarContent({
   onNavClick?: () => void;
 }) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const userRole = user.role || "VIEWER";
 
   const filteredItems = navItems.filter((item) => item.roles.includes(userRole));
@@ -125,7 +135,7 @@ function SidebarContent({
             "hidden lg:flex items-center justify-center w-7 h-7 rounded-sm text-mist hover:text-brand-white hover:bg-slate transition-colors",
             collapsed && "absolute -right-3 top-5 bg-charcoal border border-slate z-10"
           )}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? t("Kenar çubuğunu genişlet", "Expand sidebar") : t("Kenar çubuğunu daralt", "Collapse sidebar")}
         >
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
@@ -133,46 +143,50 @@ function SidebarContent({
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 no-scrollbar">
-        {groups.map((group) => (
-          <div key={group} className="mb-4">
-            {!collapsed && (
-              <p className="px-5 mb-2 text-[10px] font-medium tracking-[0.2em] uppercase text-mist/60">
-                {group}
-              </p>
-            )}
-            <ul className="space-y-0.5">
-              {filteredItems
-                .filter((item) => item.group === group)
-                .map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                  const Icon = item.icon;
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={onNavClick}
-                        className={cn(
-                          "flex items-center gap-3 px-5 py-2.5 text-sm transition-all duration-300 relative group",
-                          collapsed && "justify-center px-0",
-                          isActive
-                            ? "text-brand-white bg-slate/60 border-l-2 border-brand-gold"
-                            : "text-mist hover:text-brand-white hover:bg-slate/30 border-l-2 border-transparent"
-                        )}
-                      >
-                        <Icon size={18} className={cn("shrink-0", isActive && "text-brand-gold")} />
-                        {!collapsed && <span>{item.label}</span>}
-                        {collapsed && (
-                          <span className="absolute left-full ml-2 px-2 py-1 text-xs bg-slate text-brand-white rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
-                            {item.label}
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  );
-                })}
-            </ul>
-          </div>
-        ))}
+        {groups.map((group) => {
+          const groupLabel = GROUP_LABELS[group];
+          return (
+            <div key={group} className="mb-4">
+              {!collapsed && (
+                <p className="px-5 mb-2 text-[10px] font-medium tracking-[0.2em] uppercase text-mist/60">
+                  {groupLabel ? t(groupLabel.tr, groupLabel.en) : group}
+                </p>
+              )}
+              <ul className="space-y-0.5">
+                {filteredItems
+                  .filter((item) => item.group === group)
+                  .map((item) => {
+                    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                    const Icon = item.icon;
+                    const label = t(item.labelTr, item.labelEn);
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          onClick={onNavClick}
+                          className={cn(
+                            "flex items-center gap-3 px-5 py-2.5 text-sm transition-all duration-300 relative group",
+                            collapsed && "justify-center px-0",
+                            isActive
+                              ? "text-brand-white bg-slate/60 border-l-2 border-brand-gold"
+                              : "text-mist hover:text-brand-white hover:bg-slate/30 border-l-2 border-transparent"
+                          )}
+                        >
+                          <Icon size={18} className={cn("shrink-0", isActive && "text-brand-gold")} />
+                          {!collapsed && <span>{label}</span>}
+                          {collapsed && (
+                            <span className="absolute left-full ml-2 px-2 py-1 text-xs bg-slate text-brand-white rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                              {label}
+                            </span>
+                          )}
+                        </Link>
+                      </li>
+                    );
+                  })}
+              </ul>
+            </div>
+          );
+        })}
       </nav>
 
       {/* User Info + Logout */}
@@ -183,7 +197,7 @@ function SidebarContent({
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user.name || "User"}</p>
+              <p className="text-sm font-medium truncate">{user.name || t("Kullanıcı", "User")}</p>
               <Badge variant={getRoleBadgeVariant(userRole)} className="mt-0.5 text-[10px] px-1.5 py-0">
                 {userRole}
               </Badge>
@@ -198,7 +212,7 @@ function SidebarContent({
           )}
         >
           <LogOut size={16} />
-          {!collapsed && <span>Logout</span>}
+          {!collapsed && <span>{t("Çıkış", "Logout")}</span>}
         </button>
       </div>
     </div>
@@ -233,11 +247,12 @@ export function Sidebar({ user, collapsed, onToggle, mobileOpen, onMobileClose }
 /* ----------------------------- mobile trigger ----------------------------- */
 
 export function MobileMenuButton({ onClick }: { onClick: () => void }) {
+  const { t } = useI18n();
   return (
     <button
       onClick={onClick}
       className="lg:hidden flex items-center justify-center w-9 h-9 rounded-sm text-mist hover:text-brand-white hover:bg-slate transition-colors"
-      aria-label="Open menu"
+      aria-label={t("Menüyü aç", "Open menu")}
     >
       <Menu size={20} />
     </button>

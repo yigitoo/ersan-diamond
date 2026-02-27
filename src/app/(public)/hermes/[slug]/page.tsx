@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await Product.findOne({ slug, published: true }).lean();
   if (!product) return {};
   return {
-    title: `Herm\u00e8s ${product.model}`,
-    description: product.description || `Herm\u00e8s ${product.model}`,
+    title: `Hermès ${product.model}`,
+    description: product.description || `Hermès ${product.model}`,
   };
 }
 

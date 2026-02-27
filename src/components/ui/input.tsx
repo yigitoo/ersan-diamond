@@ -10,7 +10,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s/g, "-");
+    const inputId = id || label?.toLocaleLowerCase("tr").replace(/\s/g, "-");
     return (
       <div className="space-y-1.5">
         {label && (

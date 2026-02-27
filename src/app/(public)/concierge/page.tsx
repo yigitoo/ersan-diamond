@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useI18n } from "@/lib/i18n";
 import { fadeUp, slideReveal } from "@/lib/animations";
 import { SERVICE_TYPE_LABELS } from "@/lib/utils/constants";
 
@@ -33,32 +34,8 @@ interface ServiceOption {
 }
 
 // ---------------------------------------------------------------------------
-// Constants
+// Helper functions
 // ---------------------------------------------------------------------------
-const SERVICES: ServiceOption[] = [
-  {
-    type: "IN_STORE",
-    icon: <Store size={28} />,
-    title: "In-Store Visit",
-    description:
-      "Visit our showroom for a private, personalized viewing experience. Inspect pieces in hand with our expert team.",
-  },
-  {
-    type: "VIDEO_CALL",
-    icon: <Video size={28} />,
-    title: "Video Call",
-    description:
-      "Connect with our specialists remotely. We will showcase any piece in detail via live video.",
-  },
-  {
-    type: "SOURCING",
-    icon: <SearchCheck size={28} />,
-    title: "Sourcing Request",
-    description:
-      "Looking for a specific piece? Our global sourcing network can locate rare and sought-after items for you.",
-  },
-];
-
 function generateNext14Days(): Date[] {
   const days: Date[] = [];
   const today = new Date();
@@ -72,65 +49,15 @@ function generateNext14Days(): Date[] {
 
 const TIME_SLOTS = ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 
-function formatDateLabel(date: Date): { day: string; weekday: string; month: string } {
+function formatDateLabel(date: Date, locale: string): { day: string; weekday: string; month: string } {
   const day = date.getDate().toString();
-  const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
-  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const weekday = date.toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", { weekday: "short" });
+  const month = date.toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", { month: "short" });
   return { day, weekday, month };
 }
 
 function isSunday(date: Date) {
   return date.getDay() === 0;
-}
-
-// ---------------------------------------------------------------------------
-// Step indicator
-// ---------------------------------------------------------------------------
-function StepIndicator({ current }: { current: number }) {
-  const steps = ["Service", "Date & Time", "Your Details"];
-  return (
-    <div className="flex items-center justify-center gap-2 mb-12">
-      {steps.map((label, i) => {
-        const stepNum = i + 1;
-        const isActive = stepNum === current;
-        const isComplete = stepNum < current;
-        return (
-          <div key={label} className="flex items-center gap-2">
-            {i > 0 && (
-              <div
-                className={cn(
-                  "w-8 md:w-12 h-px",
-                  isComplete || isActive ? "bg-brand-white" : "bg-slate"
-                )}
-              />
-            )}
-            <div className="flex items-center gap-2">
-              <div
-                className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-500",
-                  isComplete
-                    ? "bg-brand-white text-brand-black"
-                    : isActive
-                      ? "border-2 border-brand-white text-brand-white"
-                      : "border border-slate text-mist"
-                )}
-              >
-                {isComplete ? <Check size={14} /> : stepNum}
-              </div>
-              <span
-                className={cn(
-                  "hidden md:block text-xs uppercase tracking-wider",
-                  isActive ? "text-brand-white" : "text-mist"
-                )}
-              >
-                {label}
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -146,6 +73,7 @@ const stepVariants = {
 // Page
 // ---------------------------------------------------------------------------
 export default function ConciergePage() {
+  const { t, locale } = useI18n();
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -165,6 +93,93 @@ export default function ConciergePage() {
   const canProceedStep1 = selectedService !== null;
   const canProceedStep2 = selectedDate !== null && selectedTime !== null;
   const canSubmit = name.trim().length >= 2 && (phone.trim().length >= 10 || email.includes("@"));
+
+  // ---------------------------------------------------------------------------
+  // Services (inside component for t() access)
+  // ---------------------------------------------------------------------------
+  const SERVICES: ServiceOption[] = [
+    {
+      type: "IN_STORE",
+      icon: <Store size={28} />,
+      title: t("Mağaza Ziyareti", "In-Store Visit"),
+      description: t(
+        "Özel ve kişisel bir izleme deneyimi için showroom'umuzu ziyaret edin. Uzman ekibimizle parçaları yakından inceleyin.",
+        "Visit our showroom for a private, personalized viewing experience. Inspect pieces in hand with our expert team."
+      ),
+    },
+    {
+      type: "VIDEO_CALL",
+      icon: <Video size={28} />,
+      title: t("Görüntülü Görüşme", "Video Call"),
+      description: t(
+        "Uzmanlarımızla uzaktan bağlanın. Herhangi bir parçayı canlı video ile detaylı olarak gösteririz.",
+        "Connect with our specialists remotely. We will showcase any piece in detail via live video."
+      ),
+    },
+    {
+      type: "SOURCING",
+      icon: <SearchCheck size={28} />,
+      title: t("Ürün Arama", "Sourcing Request"),
+      description: t(
+        "Belirli bir parça mı arıyorsunuz? Global ağımız sizin için nadir ve aranan ürünleri bulabilir.",
+        "Looking for a specific piece? Our global sourcing network can locate rare and sought-after items for you."
+      ),
+    },
+  ];
+
+  // ---------------------------------------------------------------------------
+  // Step indicator
+  // ---------------------------------------------------------------------------
+  function StepIndicator({ current }: { current: number }) {
+    const steps = [
+      t("Hizmet", "Service"),
+      t("Tarih & Saat", "Date & Time"),
+      t("Bilgileriniz", "Your Details"),
+    ];
+    return (
+      <div className="flex items-center justify-center gap-2 mb-12">
+        {steps.map((label, i) => {
+          const stepNum = i + 1;
+          const isActive = stepNum === current;
+          const isComplete = stepNum < current;
+          return (
+            <div key={label} className="flex items-center gap-2">
+              {i > 0 && (
+                <div
+                  className={cn(
+                    "w-8 md:w-12 h-px",
+                    isComplete || isActive ? "bg-brand-white" : "bg-slate"
+                  )}
+                />
+              )}
+              <div className="flex items-center gap-2">
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-500",
+                    isComplete
+                      ? "bg-brand-white text-brand-black"
+                      : isActive
+                        ? "border-2 border-brand-white text-brand-white"
+                        : "border border-slate text-mist"
+                  )}
+                >
+                  {isComplete ? <Check size={14} /> : stepNum}
+                </div>
+                <span
+                  className={cn(
+                    "hidden md:block text-xs uppercase tracking-wider",
+                    isActive ? "text-brand-white" : "text-mist"
+                  )}
+                >
+                  {label}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 
   function handleSubmit() {
     if (!canSubmit) return;
@@ -196,23 +211,29 @@ export default function ConciergePage() {
             </motion.div>
           </div>
           <h2 className="font-serif text-3xl md:text-4xl mb-4">
-            Appointment Request Received
+            {t("Randevu Talebiniz Alındı", "Appointment Request Received")}
           </h2>
           <p className="text-mist mb-2">
-            Thank you, {name}. We have received your {SERVICE_TYPE_LABELS[selectedService!]?.toLowerCase()} request.
+            {t(
+              `Teşekkürler, ${name}. ${SERVICE_TYPE_LABELS[selectedService!]?.toLowerCase()} talebinizi aldık.`,
+              `Thank you, ${name}. We have received your ${SERVICE_TYPE_LABELS[selectedService!]?.toLowerCase()} request.`
+            )}
           </p>
           <p className="text-mist mb-8">
-            We will confirm your appointment within 24 hours via {email ? "email" : "phone"}.
+            {t(
+              `Randevunuzu 24 saat içinde ${email ? "e-posta" : "telefon"} ile onaylayacağız.`,
+              `We will confirm your appointment within 24 hours via ${email ? "email" : "phone"}.`
+            )}
           </p>
           <div className="space-y-3">
             <Button variant="outline" size="lg" className="w-full">
               <CalendarDays size={16} className="mr-2" />
-              Add to Calendar
+              {t("Takvime Ekle", "Add to Calendar")}
             </Button>
             <Link href="/" className="block">
               <Button variant="ghost" size="lg" className="w-full">
                 <Home size={16} className="mr-2" />
-                Back to Home
+                {t("Ana Sayfaya Dön", "Back to Home")}
               </Button>
             </Link>
           </div>
@@ -231,9 +252,12 @@ export default function ConciergePage() {
           animate="visible"
           className="text-center mb-12"
         >
-          <h1 className="font-serif text-4xl md:text-5xl mb-4">Concierge</h1>
+          <h1 className="font-serif text-4xl md:text-5xl mb-4">{t("Konsiyerj", "Concierge")}</h1>
           <p className="text-mist text-sm tracking-wider">
-            Book a private appointment with our specialists
+            {t(
+              "Uzmanlarımızla özel bir randevu oluşturun",
+              "Book a private appointment with our specialists"
+            )}
           </p>
         </motion.div>
 
@@ -284,7 +308,7 @@ export default function ConciergePage() {
                   disabled={!canProceedStep1}
                   onClick={() => setStep(2)}
                 >
-                  Continue
+                  {t("Devam Et", "Continue")}
                   <ChevronRight size={16} className="ml-2" />
                 </Button>
               </div>
@@ -302,10 +326,10 @@ export default function ConciergePage() {
             >
               {/* Date picker */}
               <div className="mb-8">
-                <p className="text-xs uppercase tracking-wider text-mist mb-4">Select Date</p>
+                <p className="text-xs uppercase tracking-wider text-mist mb-4">{t("Tarih Seçin", "Select Date")}</p>
                 <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
                   {dates.map((date) => {
-                    const { day, weekday, month } = formatDateLabel(date);
+                    const { day, weekday, month } = formatDateLabel(date, locale);
                     const sunday = isSunday(date);
                     const isSelected =
                       selectedDate?.toDateString() === date.toDateString();
@@ -338,7 +362,7 @@ export default function ConciergePage() {
 
               {/* Time slots */}
               <div className="mb-8">
-                <p className="text-xs uppercase tracking-wider text-mist mb-4">Select Time</p>
+                <p className="text-xs uppercase tracking-wider text-mist mb-4">{t("Saat Seçin", "Select Time")}</p>
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                   {TIME_SLOTS.map((time) => {
                     const isSelected = selectedTime === time;
@@ -363,7 +387,7 @@ export default function ConciergePage() {
               <div className="flex items-center justify-between mt-8">
                 <Button variant="ghost" onClick={() => setStep(1)}>
                   <ChevronLeft size={16} className="mr-2" />
-                  Back
+                  {t("Geri", "Back")}
                 </Button>
                 <Button
                   variant="primary"
@@ -371,7 +395,7 @@ export default function ConciergePage() {
                   disabled={!canProceedStep2}
                   onClick={() => setStep(3)}
                 >
-                  Continue
+                  {t("Devam Et", "Continue")}
                   <ChevronRight size={16} className="ml-2" />
                 </Button>
               </div>
@@ -389,34 +413,34 @@ export default function ConciergePage() {
             >
               <div className="space-y-6 max-w-lg mx-auto">
                 <Input
-                  label="Full Name"
-                  placeholder="John Doe"
+                  label={t("Ad Soyad", "Full Name")}
+                  placeholder={t("Ahmet Yılmaz", "John Doe")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
                 <Input
-                  label="Phone"
+                  label={t("Telefon", "Phone")}
                   placeholder="+90 (5XX) XXX XX XX"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
                 <Input
-                  label="Email"
+                  label={t("E-posta", "Email")}
                   placeholder="you@example.com"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <Input
-                  label="Interested Product (optional)"
-                  placeholder="e.g. Rolex Daytona 116500LN"
+                  label={t("İlgilendiğiniz Ürün (isteğe bağlı)", "Interested Product (optional)")}
+                  placeholder={t("örn. Rolex Daytona 116500LN", "e.g. Rolex Daytona 116500LN")}
                   value={product}
                   onChange={(e) => setProduct(e.target.value)}
                 />
                 <Textarea
-                  label="Notes (optional)"
-                  placeholder="Any additional details or requests..."
+                  label={t("Notlar (isteğe bağlı)", "Notes (optional)")}
+                  placeholder={t("Ek detaylar veya istekleriniz...", "Any additional details or requests...")}
                   rows={4}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -426,7 +450,7 @@ export default function ConciergePage() {
               <div className="flex items-center justify-between mt-8 max-w-lg mx-auto">
                 <Button variant="ghost" onClick={() => setStep(2)}>
                   <ChevronLeft size={16} className="mr-2" />
-                  Back
+                  {t("Geri", "Back")}
                 </Button>
                 <Button
                   variant="primary"
@@ -435,7 +459,7 @@ export default function ConciergePage() {
                   loading={submitting}
                   onClick={handleSubmit}
                 >
-                  Submit Request
+                  {t("Talebi Gönder", "Submit Request")}
                 </Button>
               </div>
             </motion.div>

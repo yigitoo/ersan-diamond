@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
+import { useI18n } from "@/lib/i18n";
 import { CONDITION_LABELS } from "@/lib/utils/constants";
 import { fadeUp } from "@/lib/animations";
 
@@ -42,22 +43,10 @@ const sellFormSchema = z.object({
 
 type SellFormValues = z.infer<typeof sellFormSchema>;
 
-const PRODUCT_TYPE_OPTIONS = [
-  { value: "WATCH", label: "Watch" },
-  { value: "HERMES", label: "Herm\u00e8s" },
-];
-
 const CONDITION_OPTIONS = Object.entries(CONDITION_LABELS).map(([value, label]) => ({
   value,
   label,
 }));
-
-const BOX_PAPERS_OPTIONS = [
-  { value: "FULL_SET", label: "Full Set (Box & Papers)" },
-  { value: "BOX_ONLY", label: "Box Only" },
-  { value: "PAPERS_ONLY", label: "Papers Only" },
-  { value: "NONE", label: "None" },
-];
 
 const CURRENCY_OPTIONS = [
   { value: "EUR", label: "EUR" },
@@ -71,10 +60,23 @@ const CURRENCY_OPTIONS = [
 // Page
 // ---------------------------------------------------------------------------
 export default function SellPage() {
+  const { t } = useI18n();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
+
+  const PRODUCT_TYPE_OPTIONS = [
+    { value: "WATCH", label: t("Saat", "Watch") },
+    { value: "HERMES", label: "Hermès" },
+  ];
+
+  const BOX_PAPERS_OPTIONS = [
+    { value: "FULL_SET", label: t("Tam Set (Kutu & Belgeler)", "Full Set (Box & Papers)") },
+    { value: "BOX_ONLY", label: t("Sadece Kutu", "Box Only") },
+    { value: "PAPERS_ONLY", label: t("Sadece Belgeler", "Papers Only") },
+    { value: "NONE", label: t("Yok", "None") },
+  ];
 
   const {
     register,
@@ -140,18 +142,23 @@ export default function SellPage() {
               <Check size={36} />
             </motion.div>
           </div>
-          <h2 className="font-serif text-3xl md:text-4xl mb-4">Submission Received</h2>
+          <h2 className="font-serif text-3xl md:text-4xl mb-4">{t("Başvurunuz Alındı", "Submission Received")}</h2>
           <p className="text-mist mb-2">
-            Thank you for your submission. Our team will review your piece and
-            get back to you within 48 hours.
+            {t(
+              "Başvurunuz için teşekkürler. Ekibimiz parçanızı inceleyecek ve 48 saat içinde size dönecektir.",
+              "Thank you for your submission. Our team will review your piece and get back to you within 48 hours."
+            )}
           </p>
           <p className="text-mist mb-8">
-            We will contact you via the email address you provided.
+            {t(
+              "Belirttiğiniz e-posta adresi üzerinden sizinle iletişime geçeceğiz.",
+              "We will contact you via the email address you provided."
+            )}
           </p>
           <Link href="/" className="block">
             <Button variant="outline" size="lg" className="w-full">
               <Home size={16} className="mr-2" />
-              Back to Home
+              {t("Ana Sayfaya Dön", "Back to Home")}
             </Button>
           </Link>
         </motion.div>
@@ -169,7 +176,7 @@ export default function SellPage() {
           animate="visible"
           className="font-serif text-4xl md:text-5xl mb-4"
         >
-          Sell to Us
+          {t("Bize Satın", "Sell to Us")}
         </motion.h1>
         <motion.p
           variants={fadeUp}
@@ -178,7 +185,7 @@ export default function SellPage() {
           transition={{ delay: 0.15 }}
           className="text-mist text-sm tracking-wider"
         >
-          Consign or sell your luxury pieces
+          {t("Lüks parçalarınızı konsiye bırakın veya satın", "Consign or sell your luxury pieces")}
         </motion.p>
       </section>
 
@@ -196,52 +203,52 @@ export default function SellPage() {
         >
           {/* Product Info */}
           <div>
-            <h2 className="font-serif text-xl mb-6">Product Information</h2>
+            <h2 className="font-serif text-xl mb-6">{t("Ürün Bilgileri", "Product Information")}</h2>
             <div className="space-y-5">
               <Select
-                label="Product Type"
+                label={t("Ürün Tipi", "Product Type")}
                 options={PRODUCT_TYPE_OPTIONS}
-                placeholder="Select type"
+                placeholder={t("Tip seçin", "Select type")}
                 error={errors.productType?.message}
                 {...register("productType")}
               />
               <Input
-                label="Brand"
-                placeholder="e.g. Rolex, Herm\u00e8s"
+                label={t("Marka", "Brand")}
+                placeholder={t("örn. Rolex, Hermès", "e.g. Rolex, Hermès")}
                 error={errors.brand?.message}
                 {...register("brand")}
               />
               <Input
-                label="Model"
-                placeholder="e.g. Daytona, Birkin 25"
+                label={t("Model", "Model")}
+                placeholder={t("örn. Daytona, Birkin 25", "e.g. Daytona, Birkin 25")}
                 error={errors.model?.message}
                 {...register("model")}
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Input
-                  label="Reference (optional)"
-                  placeholder="e.g. 116500LN"
+                  label={t("Referans (isteğe bağlı)", "Reference (optional)")}
+                  placeholder={t("örn. 116500LN", "e.g. 116500LN")}
                   {...register("reference")}
                 />
                 <Input
-                  label="Year (optional)"
-                  placeholder="e.g. 2023"
+                  label={t("Yıl (isteğe bağlı)", "Year (optional)")}
+                  placeholder={t("örn. 2023", "e.g. 2023")}
                   type="text"
                   {...register("year")}
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Select
-                  label="Condition"
+                  label={t("Durum", "Condition")}
                   options={CONDITION_OPTIONS}
-                  placeholder="Select condition"
+                  placeholder={t("Durum seçin", "Select condition")}
                   error={errors.condition?.message}
                   {...register("condition")}
                 />
                 <Select
-                  label="Box & Papers"
+                  label={t("Kutu & Belgeler", "Box & Papers")}
                   options={BOX_PAPERS_OPTIONS}
-                  placeholder="Select"
+                  placeholder={t("Seçin", "Select")}
                   error={errors.boxPapers?.message}
                   {...register("boxPapers")}
                 />
@@ -249,21 +256,24 @@ export default function SellPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div className="sm:col-span-2">
                   <Input
-                    label="Asking Price (optional)"
-                    placeholder="e.g. 150,000"
+                    label={t("Talep Edilen Fiyat (isteğe bağlı)", "Asking Price (optional)")}
+                    placeholder={t("örn. 150,000", "e.g. 150,000")}
                     type="text"
                     {...register("askingPrice")}
                   />
                 </div>
                 <Select
-                  label="Currency"
+                  label={t("Para Birimi", "Currency")}
                   options={CURRENCY_OPTIONS}
                   {...register("currency")}
                 />
               </div>
               <Textarea
-                label="Description (optional)"
-                placeholder="Additional details about your piece: history, any modifications, notable characteristics..."
+                label={t("Açıklama (isteğe bağlı)", "Description (optional)")}
+                placeholder={t(
+                  "Parçanız hakkında ek bilgiler: geçmişi, değişiklikler, dikkat çeken özellikler...",
+                  "Additional details about your piece: history, any modifications, notable characteristics..."
+                )}
                 rows={4}
                 {...register("description")}
               />
@@ -272,8 +282,13 @@ export default function SellPage() {
 
           {/* Photos */}
           <div>
-            <h2 className="font-serif text-xl mb-6">Photos</h2>
-            <p className="text-xs text-mist mb-4">Upload up to 5 photos of your piece (front, back, sides, markings)</p>
+            <h2 className="font-serif text-xl mb-6">{t("Fotoğraflar", "Photos")}</h2>
+            <p className="text-xs text-mist mb-4">
+              {t(
+                "Parçanızın en fazla 5 fotoğrafını yükleyin (ön, arka, yanlar, işaret/damgalar)",
+                "Upload up to 5 photos of your piece (front, back, sides, markings)"
+              )}
+            </p>
 
             {/* Upload area */}
             <label
@@ -293,11 +308,11 @@ export default function SellPage() {
               <Upload size={32} className="mx-auto text-mist mb-3" />
               <p className="text-sm text-mist">
                 {photos.length >= 5
-                  ? "Maximum 5 photos reached"
-                  : "Drop photos here or click to upload"}
+                  ? t("Maksimum 5 fotoğraf yüklendi", "Maximum 5 photos reached")
+                  : t("Fotoğrafları sürükleyin veya yüklemek için tıklayın", "Drop photos here or click to upload")}
               </p>
               <p className="text-xs text-mist/50 mt-1">
-                {photos.length}/5 photos
+                {photos.length}/5 {t("fotoğraf", "photos")}
               </p>
             </label>
 
@@ -306,7 +321,7 @@ export default function SellPage() {
               <div className="flex gap-3 mt-4 overflow-x-auto no-scrollbar">
                 {photoPreviews.map((src, i) => (
                   <div key={i} className="relative w-20 h-20 flex-shrink-0 bg-slate rounded-sm overflow-hidden">
-                    <img src={src} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                    <img src={src} alt={`${t("Fotoğraf", "Photo")} ${i + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={() => removePhoto(i)}
@@ -322,24 +337,24 @@ export default function SellPage() {
 
           {/* Contact */}
           <div>
-            <h2 className="font-serif text-xl mb-6">Contact Information</h2>
+            <h2 className="font-serif text-xl mb-6">{t("İletişim Bilgileri", "Contact Information")}</h2>
             <div className="space-y-5">
               <Input
-                label="Full Name"
-                placeholder="John Doe"
+                label={t("Ad Soyad", "Full Name")}
+                placeholder={t("Ahmet Yılmaz", "John Doe")}
                 error={errors.name?.message}
                 {...register("name")}
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Input
-                  label="Email"
+                  label={t("E-posta", "Email")}
                   placeholder="you@example.com"
                   type="email"
                   error={errors.email?.message}
                   {...register("email")}
                 />
                 <Input
-                  label="Phone"
+                  label={t("Telefon", "Phone")}
                   placeholder="+90 (5XX) XXX XX XX"
                   type="tel"
                   error={errors.phone?.message}
@@ -358,10 +373,13 @@ export default function SellPage() {
               className="w-full"
               loading={submitting}
             >
-              Submit for Review
+              {t("İncelemeye Gönder", "Submit for Review")}
             </Button>
             <p className="text-xs text-mist text-center mt-4">
-              Your information is kept strictly confidential and will only be used for this evaluation.
+              {t(
+                "Bilgileriniz kesinlikle gizli tutulur ve yalnızca bu değerlendirme için kullanılır.",
+                "Your information is kept strictly confidential and will only be used for this evaluation."
+              )}
             </p>
           </div>
         </form>

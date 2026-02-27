@@ -24,6 +24,16 @@ export async function GET(
 
     if (!lead) return errorResponse("Lead bulunamadı", 404);
 
+    // SALES users can only view their assigned leads or unassigned NEW leads
+    if (user.role === "SALES") {
+      const isAssigned = (lead as any).assignedUserId?._id?.toString() === user.id
+        || (lead as any).assignedUserId?.toString() === user.id;
+      const isUnassignedNew = !(lead as any).assignedUserId && (lead as any).status === "NEW";
+      if (!isAssigned && !isUnassignedNew) {
+        return errorResponse("Yetkisiz erişim", 403);
+      }
+    }
+
     return successResponse(lead);
   } catch (error) {
     return errorResponse("Lead yüklenemedi", 500);

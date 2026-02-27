@@ -6,6 +6,7 @@ import { createLeadSchema } from "@/lib/validations/lead";
 import { successResponse, errorResponse, paginatedResponse, parseSearchParams } from "@/lib/utils/api-response";
 import { sendEmail } from "@/lib/email/smtp";
 import { sellToUsReceived, inventoryInquiryReceived } from "@/lib/email/templates/lead";
+import { autoAssignLead } from "@/lib/leads/auto-assign";
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,6 +17,16 @@ export async function GET(req: NextRequest) {
     const { page, limit, sort, order, search, skip } = parseSearchParams(req.nextUrl.searchParams);
 
     const filter: Record<string, unknown> = {};
+
+    // SALES users only see their assigned leads + unassigned NEW leads
+    if (user.role === "SALES") {
+      filter.$or = [
+        { assignedUserId: user.id },
+        { assignedUserId: { $exists: false }, status: "NEW" },
+        { assignedUserId: null, status: "NEW" },
+      ];
+    }
+
     const status = req.nextUrl.searchParams.get("status");
     if (status) filter.status = status;
 
@@ -23,11 +34,21 @@ export async function GET(req: NextRequest) {
     if (assignedUserId) filter.assignedUserId = assignedUserId;
 
     if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
-      ];
+      const searchFilter = {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+        ],
+      };
+      if (filter.$or) {
+        // Combine role-based $or with search $or using $and
+        const roleOr = filter.$or;
+        delete filter.$or;
+        filter.$and = [{ $or: roleOr }, searchFilter];
+      } else {
+        filter.$or = searchFilter.$or;
+      }
     }
 
     const [leads, total] = await Promise.all([
@@ -90,6 +111,16 @@ export async function POST(req: NextRequest) {
       }
     } catch (emailError) {
       console.error("[API] Lead email failed:", emailError);
+    }
+
+    // Auto-assign to sales rep with lowest workload
+    try {
+      const assignment = await autoAssignLead(lead._id.toString());
+      if (assignment) {
+        console.log(`[API] Lead ${lead._id} auto-assigned to ${assignment.assignedUserName}`);
+      }
+    } catch (assignError) {
+      console.error("[API] Auto-assign failed:", assignError);
     }
 
     return successResponse(lead, 201);

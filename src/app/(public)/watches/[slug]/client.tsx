@@ -16,8 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { useI18n } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/formatters";
-import { CONDITION_LABELS, WATCH_BRANDS } from "@/lib/utils/constants";
+import { CONDITION_LABELS, WATCH_BRANDS, BRAND_WHATSAPP } from "@/lib/utils/constants";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 import type { IProduct, WatchSpecs } from "@/types";
 
@@ -73,6 +74,7 @@ function Thumbnail({
 // Similar piece card
 // ---------------------------------------------------------------------------
 function SimilarCard({ product }: { product: IProduct }) {
+  const { t } = useI18n();
   return (
     <motion.div variants={staggerItem}>
       <Link href={`/watches/${product.slug}`} className="group block">
@@ -96,7 +98,7 @@ function SimilarCard({ product }: { product: IProduct }) {
           </h4>
           <p className="text-sm text-soft-white">
             {product.priceOnRequest
-              ? "Price on Request"
+              ? t("Fiyat Sorunuz", "Price on Request")
               : product.price
                 ? formatPrice(product.price, product.currency)
                 : ""}
@@ -111,6 +113,7 @@ function SimilarCard({ product }: { product: IProduct }) {
 // Main detail component
 // ---------------------------------------------------------------------------
 export function WatchDetailClient({ product }: { product: IProduct }) {
+  const { t } = useI18n();
   const specs = (product.specs || {}) as WatchSpecs;
   const [activeImage, setActiveImage] = useState(0);
 
@@ -118,10 +121,10 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
   const activeUrl = product.images[activeImage]?.url;
 
   const boxPapersLabel: Record<string, string> = {
-    FULL_SET: "Full Set (Box & Papers)",
-    BOX_ONLY: "Box Only",
-    PAPERS_ONLY: "Papers Only",
-    NONE: "None",
+    FULL_SET: t("Tam Set (Kutu & Belgeler)", "Full Set (Box & Papers)"),
+    BOX_ONLY: t("Sadece Kutu", "Box Only"),
+    PAPERS_ONLY: t("Sadece Belgeler", "Papers Only"),
+    NONE: t("Yok", "None"),
   };
 
   return (
@@ -133,7 +136,7 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
           className="inline-flex items-center gap-2 text-sm text-mist hover:text-brand-white transition-colors"
         >
           <ChevronLeft size={16} />
-          Back to Watches
+          {t("Saatlere Dön", "Back to Watches")}
         </Link>
       </div>
 
@@ -185,7 +188,7 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
               <h1 className="font-serif text-3xl md:text-4xl mb-2">{product.model}</h1>
               <p className="text-sm text-mist">
                 Ref. {product.reference}
-                {product.year ? ` \u00b7 ${product.year}` : ""}
+                {product.year ? ` · ${product.year}` : ""}
               </p>
             </div>
 
@@ -193,7 +196,7 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
             <div>
               {product.priceOnRequest ? (
                 <Button variant="outline" size="lg">
-                  Price on Request
+                  {t("Fiyat Sorunuz", "Price on Request")}
                 </Button>
               ) : product.price ? (
                 <p className="font-serif text-2xl">{formatPrice(product.price, product.currency)}</p>
@@ -213,27 +216,30 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
 
             {/* Specs table */}
             <div className="border-t border-slate/40 pt-2">
-              <SpecRow label="Case Size" value={specs.caseSize} />
-              <SpecRow label="Case Material" value={specs.caseMaterial} />
-              <SpecRow label="Dial" value={specs.dialColor} />
-              <SpecRow label="Bracelet" value={specs.bracelet} />
-              <SpecRow label="Movement" value={specs.movement} />
-              <SpecRow label="Caliber" value={specs.caliber} />
-              <SpecRow label="Water Resistance" value={specs.waterResistance} />
+              <SpecRow label={t("Kasa Boyutu", "Case Size")} value={specs.caseSize} />
+              <SpecRow label={t("Kasa Malzemesi", "Case Material")} value={specs.caseMaterial} />
+              <SpecRow label={t("Kadran", "Dial")} value={specs.dialColor} />
+              <SpecRow label={t("Kordon", "Bracelet")} value={specs.bracelet} />
+              <SpecRow label={t("Mekanizma", "Movement")} value={specs.movement} />
+              <SpecRow label={t("Kalibre", "Caliber")} value={specs.caliber} />
+              <SpecRow label={t("Su Geçirmezlik", "Water Resistance")} value={specs.waterResistance} />
               <SpecRow
-                label="Box & Papers"
+                label={t("Kutu & Belgeler", "Box & Papers")}
                 value={specs.boxPapers ? boxPapersLabel[specs.boxPapers] : undefined}
               />
-              <SpecRow label="Serial" value={specs.serial} />
+              <SpecRow label={t("Seri No", "Serial")} value={specs.serial} />
             </div>
 
             {/* Trust badge */}
             <div className="flex items-center gap-3 py-4 border border-slate/30 rounded-sm px-4 bg-charcoal/50">
               <Shield size={20} className="text-brand-gold flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium">Authenticity Guaranteed</p>
+                <p className="text-sm font-medium">{t("Orijinallik Garantisi", "Authenticity Guaranteed")}</p>
                 <p className="text-xs text-mist">
-                  Every piece undergoes our 5-step authentication process
+                  {t(
+                    "Her parça 5 adımlı orijinallik kontrolümüzden geçirilir",
+                    "Every piece undergoes our 5-step authentication process"
+                  )}
                 </p>
               </div>
             </div>
@@ -243,17 +249,17 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
               <Link href="/concierge" className="block">
                 <Button variant="primary" size="lg" className="w-full">
                   <CalendarDays size={16} className="mr-2" />
-                  Book Appointment
+                  {t("Randevu Al", "Book Appointment")}
                 </Button>
               </Link>
               <Link href="/concierge" className="block">
                 <Button variant="outline" size="lg" className="w-full">
                   <Video size={16} className="mr-2" />
-                  Request Video Call
+                  {t("Görüntülü Görüşme", "Request Video Call")}
                 </Button>
               </Link>
               <a
-                href="https://wa.me/902120000000"
+                href={BRAND_WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block"
@@ -268,14 +274,14 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
         </div>
       </div>
 
-      {/* Similar Pieces -- placeholder, would need API data in production */}
+      {/* Similar Pieces */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 mt-24">
-        <SectionHeading title="Similar Pieces" subtitle="You may also like" />
+        <SectionHeading title={t("Benzer Ürünler", "Similar Pieces")} subtitle={t("Bunları da beğenebilirsiniz", "You may also like")} />
         <div className="text-center py-12">
-          <p className="text-mist text-sm">More pieces from our collection coming soon.</p>
+          <p className="text-mist text-sm">{t("Koleksiyonumuzdan daha fazla ürün yakında.", "More pieces from our collection coming soon.")}</p>
           <Link href="/watches" className="inline-block mt-4">
             <Button variant="outline" size="sm">
-              Browse All Watches
+              {t("Tüm Saatlere Göz At", "Browse All Watches")}
             </Button>
           </Link>
         </div>

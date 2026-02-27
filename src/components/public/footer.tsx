@@ -1,44 +1,50 @@
+"use client";
+
 import Link from "next/link";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { Logo } from "@/components/shared/logo";
+import { useI18n } from "@/lib/i18n";
 import {
   BRAND_NAME,
   BRAND_EMAIL,
   BRAND_PHONE,
   BRAND_ADDRESS,
   BRAND_WORKING_HOURS,
+  BRAND_WHATSAPP,
+  BRAND_INSTAGRAM,
 } from "@/lib/utils/constants";
-
-/* ─── Link columns ─── */
-const COLUMNS = [
-  {
-    title: "Collection",
-    links: [
-      { label: "Watches", href: "/watches" },
-      { label: "Hermes", href: "/hermes" },
-      { label: "New Arrivals", href: "/watches?sort=newest" },
-    ],
-  },
-  {
-    title: "Services",
-    links: [
-      { label: "Concierge", href: "/concierge" },
-      { label: "Sell to Us", href: "/sell" },
-      { label: "Authentication", href: "/about#authentication" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", href: "/about" },
-      { label: "Contact", href: "/contact" },
-      { label: "Privacy Policy", href: "/privacy" },
-    ],
-  },
-];
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const { t } = useI18n();
+
+  /* ─── Link columns ─── */
+  const COLUMNS = [
+    {
+      title: t("Koleksiyon", "Collection"),
+      links: [
+        { label: t("Saatler", "Watches"), href: "/watches" },
+        { label: t("Hermès", "Hermès"), href: "/hermes" },
+        { label: t("Yeni Gelenler", "New Arrivals"), href: "/watches?sort=newest" },
+      ],
+    },
+    {
+      title: t("Hizmetler", "Services"),
+      links: [
+        { label: t("Konsiyerj", "Concierge"), href: "/concierge" },
+        { label: t("Bize Satın", "Sell to Us"), href: "/sell" },
+        { label: t("Orijinallik Kontrolü", "Authentication"), href: "/about#authentication" },
+      ],
+    },
+    {
+      title: t("Kurumsal", "Company"),
+      links: [
+        { label: t("Hakkımızda", "About"), href: "/about" },
+        { label: t("İletişim", "Contact"), href: "/contact" },
+        { label: t("Gizlilik Politikası", "Privacy Policy"), href: "/privacy" },
+      ],
+    },
+  ];
 
   return (
     <footer className="bg-brand-black border-t border-slate/40">
@@ -47,8 +53,10 @@ export function Footer() {
         <div className="flex flex-col items-start gap-4">
           <Logo variant="horizontal" width={140} height={55} link={false} />
           <p className="text-mist text-sm max-w-xs leading-relaxed">
-            Istanbul&apos;s premier destination for authenticated luxury
-            timepieces and Hermes. Only Original.
+            {t(
+              "İstanbul'un orijinallik onaylanmış lüks saatler ve Hermès için en prestijli adresi. Sadece Orijinal.",
+              "Istanbul's premier destination for authenticated luxury timepieces and Hermès. Only Original."
+            )}
           </p>
         </div>
       </div>
@@ -136,7 +144,7 @@ export function Footer() {
           {/* Socials */}
           <div className="flex items-center gap-4">
             <a
-              href="https://instagram.com"
+              href={BRAND_INSTAGRAM}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs uppercase tracking-[0.15em] text-mist hover:text-brand-white transition-colors duration-300"
@@ -145,7 +153,7 @@ export function Footer() {
             </a>
             <span className="w-px h-3 bg-slate/60" />
             <a
-              href="https://wa.me/"
+              href={BRAND_WHATSAPP}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs uppercase tracking-[0.15em] text-mist hover:text-brand-white transition-colors duration-300"
@@ -157,7 +165,7 @@ export function Footer() {
 
         {/* Copyright */}
         <p className="mt-8 text-xs text-mist/60">
-          &copy; {year} {BRAND_NAME}. All rights reserved.
+          &copy; {year} {BRAND_NAME}. {t("Tüm haklar saklıdır.", "All rights reserved.")}
         </p>
       </div>
     </footer>

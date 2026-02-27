@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useI18n } from "@/lib/i18n";
 import {
   BRAND_PHONE,
   BRAND_EMAIL,
@@ -25,39 +26,10 @@ import {
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 
 // ---------------------------------------------------------------------------
-// Contact info items
-// ---------------------------------------------------------------------------
-const CONTACT_ITEMS = [
-  {
-    icon: Phone,
-    label: "Phone",
-    value: BRAND_PHONE,
-    href: `tel:${BRAND_PHONE.replace(/\s/g, "")}`,
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    value: BRAND_EMAIL,
-    href: `mailto:${BRAND_EMAIL}`,
-  },
-  {
-    icon: MapPin,
-    label: "Address",
-    value: BRAND_ADDRESS,
-    href: undefined,
-  },
-  {
-    icon: Clock,
-    label: "Working Hours",
-    value: BRAND_WORKING_HOURS,
-    href: undefined,
-  },
-];
-
-// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 export default function ContactPage() {
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -94,6 +66,36 @@ export default function ContactPage() {
     }
   };
 
+  // ---------------------------------------------------------------------------
+  // Contact info items
+  // ---------------------------------------------------------------------------
+  const CONTACT_ITEMS = [
+    {
+      icon: Phone,
+      label: t("Telefon", "Phone"),
+      value: BRAND_PHONE,
+      href: `tel:${BRAND_PHONE.replace(/\s/g, "")}`,
+    },
+    {
+      icon: Mail,
+      label: t("E-posta", "Email"),
+      value: BRAND_EMAIL,
+      href: `mailto:${BRAND_EMAIL}`,
+    },
+    {
+      icon: MapPin,
+      label: t("Adres", "Address"),
+      value: BRAND_ADDRESS,
+      href: undefined,
+    },
+    {
+      icon: Clock,
+      label: t("Çalışma Saatleri", "Working Hours"),
+      value: BRAND_WORKING_HOURS,
+      href: undefined,
+    },
+  ];
+
   return (
     <div className="min-h-screen pt-32 pb-20">
       {/* Hero */}
@@ -104,7 +106,7 @@ export default function ContactPage() {
           animate="visible"
           className="font-serif text-4xl md:text-5xl mb-4"
         >
-          Contact
+          {t("İletişim", "Contact")}
         </motion.h1>
         <motion.p
           variants={fadeUp}
@@ -113,7 +115,7 @@ export default function ContactPage() {
           transition={{ delay: 0.15 }}
           className="text-mist text-sm tracking-wider"
         >
-          We would love to hear from you
+          {t("Sizden haber almak isteriz", "We would love to hear from you")}
         </motion.p>
       </section>
 
@@ -128,11 +130,12 @@ export default function ContactPage() {
             className="space-y-6"
           >
             <motion.div variants={staggerItem}>
-              <h2 className="font-serif text-2xl mb-6">Get in Touch</h2>
+              <h2 className="font-serif text-2xl mb-6">{t("Bize Ulaşın", "Get in Touch")}</h2>
               <p className="text-sm text-mist leading-relaxed mb-8">
-                Whether you have a question about a specific piece, want to learn more
-                about our services, or wish to schedule a private viewing, our team is
-                here to help.
+                {t(
+                  "Belirli bir parça hakkında sorunuz mu var, hizmetlerimiz hakkında daha fazla bilgi mi almak istiyorsunuz veya özel bir gösterim planlamak mı istiyorsunuz? Ekibimiz yardımcı olmak için burada.",
+                  "Whether you have a question about a specific piece, want to learn more about our services, or wish to schedule a private viewing, our team is here to help."
+                )}
               </p>
             </motion.div>
 
@@ -165,7 +168,7 @@ export default function ContactPage() {
               <Link href="/concierge">
                 <Button variant="primary" size="lg" className="w-full">
                   <CalendarDays size={16} className="mr-2" />
-                  Book Appointment
+                  {t("Randevu Al", "Book Appointment")}
                 </Button>
               </Link>
             </motion.div>
@@ -189,9 +192,12 @@ export default function ContactPage() {
                     <Check size={28} />
                   </motion.div>
                 </div>
-                <h3 className="font-serif text-2xl mb-3">Message Sent</h3>
+                <h3 className="font-serif text-2xl mb-3">{t("Mesajınız Gönderildi", "Message Sent")}</h3>
                 <p className="text-sm text-mist mb-6">
-                  Thank you for reaching out. We will get back to you as soon as possible.
+                  {t(
+                    "Bize ulaştığınız için teşekkürler. En kısa sürede size döneceğiz.",
+                    "Thank you for reaching out. We will get back to you as soon as possible."
+                  )}
                 </p>
                 <Button
                   variant="outline"
@@ -203,28 +209,28 @@ export default function ContactPage() {
                     setMessage("");
                   }}
                 >
-                  Send Another Message
+                  {t("Başka Mesaj Gönder", "Send Another Message")}
                 </Button>
               </div>
             ) : (
               <div className="bg-charcoal border border-slate/50 rounded-sm p-8 md:p-10 space-y-6">
-                <h2 className="font-serif text-2xl mb-2">Send a Message</h2>
+                <h2 className="font-serif text-2xl mb-2">{t("Mesaj Gönderin", "Send a Message")}</h2>
                 <Input
-                  label="Full Name"
-                  placeholder="John Doe"
+                  label={t("Ad Soyad", "Full Name")}
+                  placeholder={t("Ahmet Yılmaz", "John Doe")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <Input
-                    label="Email"
+                    label={t("E-posta", "Email")}
                     placeholder="you@example.com"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                   <Input
-                    label="Phone (optional)"
+                    label={t("Telefon (isteğe bağlı)", "Phone (optional)")}
                     placeholder="+90 (5XX) XXX XX XX"
                     type="tel"
                     value={phone}
@@ -232,8 +238,8 @@ export default function ContactPage() {
                   />
                 </div>
                 <Textarea
-                  label="Message"
-                  placeholder="Tell us how we can help..."
+                  label={t("Mesaj", "Message")}
+                  placeholder={t("Size nasıl yardımcı olabiliriz...", "Tell us how we can help...")}
                   rows={5}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -247,7 +253,7 @@ export default function ContactPage() {
                   disabled={!canSubmit}
                 >
                   <Send size={16} className="mr-2" />
-                  Send Message
+                  {t("Mesaj Gönder", "Send Message")}
                 </Button>
               </div>
             )}
@@ -266,7 +272,7 @@ export default function ContactPage() {
         >
           <div className="text-center">
             <MapPin size={32} className="mx-auto text-mist/30 mb-3" />
-            <p className="text-sm text-mist">Map</p>
+            <p className="text-sm text-mist">{t("Harita", "Map")}</p>
             <p className="text-xs text-mist/50 mt-1">{BRAND_ADDRESS}</p>
           </div>
         </motion.div>

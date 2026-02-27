@@ -11,6 +11,7 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { staggerContainer, staggerItem } from "@/lib/animations";
 import { useSwrFetch } from "@/lib/hooks";
+import { useI18n } from "@/lib/i18n";
 import { HERMES_MODELS, CONDITION_LABELS } from "@/lib/utils/constants";
 import { formatPrice } from "@/lib/utils/formatters";
 import { cn } from "@/lib/utils/cn";
@@ -43,6 +44,7 @@ const COLOR_OPTIONS = [
 ];
 
 export default function HermesPage() {
+  const { t } = useI18n();
   const [filterOpen, setFilterOpen] = useState(false);
   const [model, setModel] = useState("");
   const [material, setMaterial] = useState("");
@@ -62,9 +64,9 @@ export default function HermesPage() {
   const modelOptions = HERMES_MODELS.map((m) => ({ value: m, label: m }));
   const conditionOptions = Object.entries(CONDITION_LABELS).map(([v, l]) => ({ value: v, label: l }));
   const sortOptions = [
-    { value: "createdAt", label: "Newest" },
-    { value: "price_asc", label: "Price: Low to High" },
-    { value: "price_desc", label: "Price: High to Low" },
+    { value: "createdAt", label: t("En Yeni", "Newest") },
+    { value: "price_asc", label: t("Fiyat: Düşükten Yukarıya", "Price: Low to High") },
+    { value: "price_desc", label: t("Fiyat: Yüksekten Aşağıya", "Price: High to Low") },
   ];
 
   return (
@@ -72,18 +74,18 @@ export default function HermesPage() {
       {/* Header */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <SectionHeading
-          title="Herm\u00e8s"
-          subtitle="Authenticated luxury leather goods"
+          title="Hermès"
+          subtitle={t("Orijinallik onaylanmış lüks deri ürünler", "Authenticated luxury leather goods")}
           align="left"
         />
 
         {/* Toolbar */}
         <div className="flex items-center justify-between mb-8 gap-4">
           <div className="hidden lg:flex items-center gap-4 flex-1">
-            <Select options={modelOptions} placeholder="All Models" value={model} onChange={(e) => setModel(e.target.value)} className="w-44" />
-            <Select options={MATERIAL_OPTIONS} placeholder="All Materials" value={material} onChange={(e) => setMaterial(e.target.value)} className="w-44" />
-            <Select options={COLOR_OPTIONS} placeholder="All Colors" value={color} onChange={(e) => setColor(e.target.value)} className="w-44" />
-            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-52" />
+            <Select options={modelOptions} placeholder={t("Tüm Modeller", "All Models")} value={model} onChange={(e) => setModel(e.target.value)} className="w-44" />
+            <Select options={MATERIAL_OPTIONS} placeholder={t("Tüm Malzemeler", "All Materials")} value={material} onChange={(e) => setMaterial(e.target.value)} className="w-44" />
+            <Select options={COLOR_OPTIONS} placeholder={t("Tüm Renkler", "All Colors")} value={color} onChange={(e) => setColor(e.target.value)} className="w-44" />
+            <Input placeholder={t("Ara...", "Search...")} value={search} onChange={(e) => setSearch(e.target.value)} className="w-52" />
           </div>
           <div className="flex items-center gap-3">
             <Select options={sortOptions} value={sort} onChange={(e) => setSort(e.target.value)} className="w-48" />
@@ -92,7 +94,7 @@ export default function HermesPage() {
               className="lg:hidden flex items-center gap-2 text-sm text-mist hover:text-brand-white transition-colors"
             >
               <SlidersHorizontal size={16} />
-              Filters
+              {t("Filtreler", "Filters")}
             </button>
           </div>
         </div>
@@ -134,8 +136,8 @@ export default function HermesPage() {
                       {/* Hover overlay */}
                       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-brand-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                         <p className="text-xs text-mist">
-                          {specs?.material} &middot; {specs?.color}
-                          {specs?.hardware ? ` \u00b7 ${specs.hardware} HW` : ""}
+                          {specs?.material} · {specs?.color}
+                          {specs?.hardware ? ` · ${specs.hardware} HW` : ""}
                         </p>
                         <p className="text-xs text-mist">{CONDITION_LABELS[product.condition] || product.condition}</p>
                       </div>
@@ -146,7 +148,7 @@ export default function HermesPage() {
                         {product.model}{specs?.size ? ` ${specs.size}` : ""}
                       </h3>
                       <p className="text-sm text-soft-white">
-                        {product.priceOnRequest ? "Price on Request" : product.price ? formatPrice(product.price, product.currency) : ""}
+                        {product.priceOnRequest ? t("Fiyat Sorunuz", "Price on Request") : product.price ? formatPrice(product.price, product.currency) : ""}
                       </p>
                     </div>
                   </Link>
@@ -157,19 +159,19 @@ export default function HermesPage() {
         ) : (
           <div className="text-center py-20">
             <ShoppingBag size={48} className="mx-auto text-mist/30 mb-4" />
-            <p className="text-mist">No Herm&egrave;s pieces found matching your criteria.</p>
+            <p className="text-mist">{t("Kriterlerinize uygun Hermès ürünü bulunamadı.", "No Hermès pieces found matching your criteria.")}</p>
           </div>
         )}
       </div>
 
       {/* Mobile Filter Sheet */}
-      <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title="Filters">
+      <Sheet open={filterOpen} onClose={() => setFilterOpen(false)} title={t("Filtreler", "Filters")}>
         <div className="space-y-6">
-          <Select options={modelOptions} placeholder="All Models" label="Model" value={model} onChange={(e) => setModel(e.target.value)} />
-          <Select options={MATERIAL_OPTIONS} placeholder="All Materials" label="Material" value={material} onChange={(e) => setMaterial(e.target.value)} />
-          <Select options={COLOR_OPTIONS} placeholder="All Colors" label="Color" value={color} onChange={(e) => setColor(e.target.value)} />
-          <Input label="Search" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
-          <Button variant="primary" className="w-full" onClick={() => setFilterOpen(false)}>Apply Filters</Button>
+          <Select options={modelOptions} placeholder={t("Tüm Modeller", "All Models")} label={t("Model", "Model")} value={model} onChange={(e) => setModel(e.target.value)} />
+          <Select options={MATERIAL_OPTIONS} placeholder={t("Tüm Malzemeler", "All Materials")} label={t("Malzeme", "Material")} value={material} onChange={(e) => setMaterial(e.target.value)} />
+          <Select options={COLOR_OPTIONS} placeholder={t("Tüm Renkler", "All Colors")} label={t("Renk", "Color")} value={color} onChange={(e) => setColor(e.target.value)} />
+          <Input label={t("Ara", "Search")} placeholder={t("Ara...", "Search...")} value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Button variant="primary" className="w-full" onClick={() => setFilterOpen(false)}>{t("Filtreleri Uygula", "Apply Filters")}</Button>
         </div>
       </Sheet>
     </div>

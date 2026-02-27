@@ -10,7 +10,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, label, error, id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s/g, "-");
+    const inputId = id || label?.toLocaleLowerCase("tr").replace(/\s/g, "-");
     return (
       <div className="space-y-1.5">
         {label && (
