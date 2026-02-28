@@ -13,7 +13,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Pagination } from "@/components/shared/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/utils/formatters";
-import { SERVICE_TYPE_LABELS } from "@/lib/utils/constants";
+import { SERVICE_TYPE_LABELS, tl } from "@/lib/utils/constants";
 import { Eye, CheckCircle, XCircle, Clock, UserPlus } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
@@ -170,7 +170,7 @@ export default function AppointmentsPage() {
               {appointments.map((appt: any) => (
                 <TableRow key={appt._id} className="cursor-pointer hover:bg-charcoal/50" onClick={() => openDetail(appt._id)}>
                   <TableCell className="font-medium">{appt.customerName}</TableCell>
-                  <TableCell className="text-mist">{SERVICE_TYPE_LABELS[appt.serviceType] || appt.serviceType}</TableCell>
+                  <TableCell className="text-mist">{tl(t, SERVICE_TYPE_LABELS[appt.serviceType]) || appt.serviceType}</TableCell>
                   <TableCell>{formatDateTime(appt.datetimeStart)}</TableCell>
                   <TableCell><StatusBadge status={appt.status} type="appointment" /></TableCell>
                   <TableCell className="text-xs text-mist">{appt.assignedUserId?.name || <span className="text-mist/50">{t("Atanmamış", "Unassigned")}</span>}</TableCell>
@@ -208,7 +208,7 @@ export default function AppointmentsPage() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-mist">{t("Hizmet", "Service")}</span>
-                  <p>{SERVICE_TYPE_LABELS[detail.serviceType] || detail.serviceType}</p>
+                  <p>{tl(t, SERVICE_TYPE_LABELS[detail.serviceType]) || detail.serviceType}</p>
                 </div>
                 <div>
                   <span className="text-mist">{t("Tarih", "Date")}</span>

@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/connection";
 import User from "@/lib/db/models/user";
 import { rateLimit } from "@/lib/utils/rate-limit";
+import { logAuth } from "@/lib/audit/logger";
 
 // Rate limit: max 5 login attempts per email per 15-minute window
 const LOGIN_MAX_ATTEMPTS = 5;
@@ -35,14 +36,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           active: true,
         });
 
-        if (!user) return null;
+        if (!user) {
+          logAuth("failed_login", "unknown", "UNKNOWN").catch(() => {});
+          return null;
+        }
 
         const isValid = await bcrypt.compare(
           credentials.password as string,
           user.passwordHash
         );
 
-        if (!isValid) return null;
+        if (!isValid) {
+          logAuth("failed_login", user._id.toString(), user.role).catch(() => {});
+          return null;
+        }
 
         return {
           id: user._id.toString(),
@@ -77,6 +84,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         (session.user as any).signatureName = token.signatureName as string;
       }
       return session;
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      if (user?.id) {
+        logAuth("login", user.id, (user as any).role || "UNKNOWN").catch(() => {});
+      }
+    },
+    async signOut({ token }: any) {
+      if (token?.id) {
+        logAuth("logout", token.id as string, (token.role as string) || "UNKNOWN").catch(() => {});
+      }
     },
   },
   trustHost: true,

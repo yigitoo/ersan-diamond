@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { useI18n } from "@/lib/i18n";
-import { CONDITION_LABELS } from "@/lib/utils/constants";
+import { CONDITION_LABELS, tl } from "@/lib/utils/constants";
 import { fadeUp } from "@/lib/animations";
 
 // ---------------------------------------------------------------------------
@@ -43,10 +43,7 @@ const sellFormSchema = z.object({
 
 type SellFormValues = z.infer<typeof sellFormSchema>;
 
-const CONDITION_OPTIONS = Object.entries(CONDITION_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}));
+// CONDITION_OPTIONS will be built inside the component with t() for bilingual support
 
 const CURRENCY_OPTIONS = [
   { value: "EUR", label: "EUR" },
@@ -66,9 +63,15 @@ export default function SellPage() {
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
 
+  const CONDITION_OPTIONS = Object.entries(CONDITION_LABELS).map(([value, label]) => ({
+    value,
+    label: tl(t, label),
+  }));
+
   const PRODUCT_TYPE_OPTIONS = [
     { value: "WATCH", label: t("Saat", "Watch") },
     { value: "HERMES", label: "Hermès" },
+    { value: "JEWELRY", label: t("Mücevherat", "Jewelry") },
   ];
 
   const BOX_PAPERS_OPTIONS = [
@@ -114,13 +117,38 @@ export default function SellPage() {
     setPhotoPreviews((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function onSubmit(data: SellFormValues) {
+  async function onSubmit(data: SellFormValues) {
     setSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "SELL_TO_US",
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          productBrand: data.brand,
+          productModel: data.model,
+          productReference: data.reference,
+          productYear: data.year,
+          desiredPrice: data.askingPrice ? Number(data.askingPrice.replace(/[^0-9]/g, "")) : undefined,
+          currency: data.currency,
+          notes: data.description,
+          source: "WEBSITE",
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || t("Bir hata oluştu", "An error occurred"));
+        return;
+      }
       setSuccess(true);
-    }, 1500);
+    } catch {
+      alert(t("Bağlantı hatası", "Network error"));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   // Success state
@@ -185,7 +213,7 @@ export default function SellPage() {
           transition={{ delay: 0.15 }}
           className="text-mist text-sm tracking-wider"
         >
-          {t("Lüks parçalarınızı konsiye bırakın veya satın", "Consign or sell your luxury pieces")}
+          {t("Lüks parçalarınızı konsinye bırakın veya bize satın", "Consign or sell your luxury pieces")}
         </motion.p>
       </section>
 

@@ -14,7 +14,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Pagination } from "@/components/shared/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/utils/formatters";
-import { CONDITION_LABELS } from "@/lib/utils/constants";
+import { CONDITION_LABELS, tl } from "@/lib/utils/constants";
 import { cn } from "@/lib/utils/cn";
 import { Plus, Pencil, Trash2, Eye, EyeOff, ImagePlus } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
@@ -272,7 +272,7 @@ export default function InventoryPage() {
                     <br/><span className="text-xs text-mist">{product.reference}{product.year ? ` (${product.year})` : ""}</span>
                   </TableCell>
                   <TableCell className="text-xs text-mist">{product.category}</TableCell>
-                  <TableCell className="text-xs">{CONDITION_LABELS[product.condition] || product.condition}</TableCell>
+                  <TableCell className="text-xs">{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</TableCell>
                   <TableCell>{product.priceOnRequest ? t("SOR", "POR") : product.price ? formatPrice(product.price, product.currency) : "-"}</TableCell>
                   <TableCell><StatusBadge status={product.availability} type="availability" /></TableCell>
                   <TableCell>

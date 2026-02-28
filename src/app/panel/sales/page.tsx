@@ -13,7 +13,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { Pagination } from "@/components/shared/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice, formatDateTime } from "@/lib/utils/formatters";
-import { PAYMENT_METHOD_LABELS } from "@/lib/utils/constants";
+import { PAYMENT_METHOD_LABELS, tl } from "@/lib/utils/constants";
 import { Plus, Eye } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
@@ -195,7 +195,7 @@ export default function SalesPage() {
                     <br/><span className="text-xs text-mist">{sale.buyerEmail}</span>
                   </TableCell>
                   <TableCell className="font-medium">{formatPrice(sale.salePrice, sale.currency)}</TableCell>
-                  <TableCell className="text-xs text-mist">{PAYMENT_METHOD_LABELS[sale.paymentMethod] || sale.paymentMethod}</TableCell>
+                  <TableCell className="text-xs text-mist">{tl(t, PAYMENT_METHOD_LABELS[sale.paymentMethod]) || sale.paymentMethod}</TableCell>
                   <TableCell className="text-xs">{sale.salesRepId?.name || "-"}</TableCell>
                   <TableCell className="text-xs text-mist">{formatDateTime(sale.soldAt)}</TableCell>
                   <TableCell className="text-right">
@@ -319,7 +319,7 @@ export default function SalesPage() {
                 </div>
                 <div>
                   <span className="text-mist">{t("Ödeme", "Payment")}</span>
-                  <p>{PAYMENT_METHOD_LABELS[selectedSale.paymentMethod] || selectedSale.paymentMethod}</p>
+                  <p>{tl(t, PAYMENT_METHOD_LABELS[selectedSale.paymentMethod]) || selectedSale.paymentMethod}</p>
                 </div>
                 <div>
                   <span className="text-mist">{t("Tarih", "Date")}</span>

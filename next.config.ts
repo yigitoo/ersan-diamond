@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
             "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://pub-*.r2.dev",
+            "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://*.r2.dev",
             "font-src 'self' data:",
             "connect-src 'self' https://*.r2.cloudflarestorage.com",
             "frame-ancestors 'none'",

@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/lib/i18n";
 import { fadeUp, slideReveal } from "@/lib/animations";
-import { SERVICE_TYPE_LABELS } from "@/lib/utils/constants";
+import { SERVICE_TYPE_LABELS, tl } from "@/lib/utils/constants";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -103,7 +103,7 @@ export default function ConciergePage() {
       icon: <Store size={28} />,
       title: t("Mağaza Ziyareti", "In-Store Visit"),
       description: t(
-        "Özel ve kişisel bir izleme deneyimi için showroom'umuzu ziyaret edin. Uzman ekibimizle parçaları yakından inceleyin.",
+        "Özel ve kişisel bir deneyim için showroom'umuzu ziyaret edin. Uzman ekibimizle parçaları yakından inceleyin.",
         "Visit our showroom for a private, personalized viewing experience. Inspect pieces in hand with our expert team."
       ),
     },
@@ -181,14 +181,35 @@ export default function ConciergePage() {
     );
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!canSubmit) return;
     setSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: name,
+          customerPhone: phone,
+          customerEmail: email,
+          serviceType: selectedService,
+          date: selectedDate?.toISOString(),
+          time: selectedTime,
+          product,
+          notes,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || t("Bir hata oluştu", "An error occurred"));
+        return;
+      }
       setSuccess(true);
-    }, 1500);
+    } catch {
+      alert(t("Bağlantı hatası", "Network error"));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   // Success state
@@ -215,8 +236,8 @@ export default function ConciergePage() {
           </h2>
           <p className="text-mist mb-2">
             {t(
-              `Teşekkürler, ${name}. ${SERVICE_TYPE_LABELS[selectedService!]?.toLowerCase()} talebinizi aldık.`,
-              `Thank you, ${name}. We have received your ${SERVICE_TYPE_LABELS[selectedService!]?.toLowerCase()} request.`
+              `Teşekkürler, ${name}. ${tl(t, SERVICE_TYPE_LABELS[selectedService!])?.toLowerCase()} talebinizi aldık.`,
+              `Thank you, ${name}. We have received your ${SERVICE_TYPE_LABELS[selectedService!]?.en?.toLowerCase()} request.`
             )}
           </p>
           <p className="text-mist mb-8">

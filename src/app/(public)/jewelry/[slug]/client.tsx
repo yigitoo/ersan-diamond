@@ -9,7 +9,7 @@ import {
   Video,
   Phone,
   ChevronLeft,
-  ShoppingBag,
+  Gem,
   Check,
   X,
 } from "lucide-react";
@@ -23,7 +23,7 @@ import { formatPrice } from "@/lib/utils/formatters";
 import { CONDITION_LABELS, BRAND_WHATSAPP, tl } from "@/lib/utils/constants";
 import { WishlistButton } from "@/components/shared/wishlist-button";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
-import type { IProduct, HermesSpecs } from "@/types";
+import type { IProduct, JewelrySpecs } from "@/types";
 
 // ---------------------------------------------------------------------------
 // Spec row
@@ -38,26 +38,13 @@ function SpecRow({ label, value }: { label: string; value?: string | React.React
   );
 }
 
-function BooleanValue({ value }: { value: boolean }) {
-  const { t } = useI18n();
-  return value ? (
-    <span className="inline-flex items-center gap-1 text-green-400">
-      <Check size={14} /> {t("Evet", "Yes")}
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1 text-mist">
-      <X size={14} /> {t("Hayır", "No")}
-    </span>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Main detail component
 // ---------------------------------------------------------------------------
-export function HermesDetailClient({ product }: { product: IProduct }) {
+export function JewelryDetailClient({ product }: { product: IProduct }) {
   const { t } = useI18n();
   const [selectedImage, setSelectedImage] = useState(0);
-  const specs = (product.specs || {}) as HermesSpecs;
+  const specs = (product.specs || {}) as JewelrySpecs;
 
   const images = product.images.length > 0 ? product.images : [];
 
@@ -66,11 +53,11 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
       {/* Back link */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 mb-8">
         <Link
-          href="/hermes"
+          href="/jewelry"
           className="inline-flex items-center gap-2 text-sm text-mist hover:text-brand-white transition-colors"
         >
           <ChevronLeft size={16} />
-          {t("Hermès'e Dön", "Back to Hermès")}
+          {t("Mücevherata Dön", "Back to Jewelry")}
         </Link>
       </div>
 
@@ -89,7 +76,7 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <ShoppingBag size={64} className="text-mist/30" />
+                  <Gem size={64} className="text-mist/30" />
                 </div>
               )}
             </div>
@@ -119,7 +106,7 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
                         i === 0 ? "border-brand-white" : "border-slate/50"
                       )}
                     >
-                      <ShoppingBag size={20} className="text-mist/40" />
+                      <Gem size={20} className="text-mist/40" />
                     </div>
                   ))}
             </div>
@@ -137,12 +124,12 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
             <div>
               <p className="text-xs uppercase tracking-wider text-mist mb-2">{product.brand}</p>
               <h1 className="font-serif text-3xl md:text-4xl mb-2">
-                {product.model}{specs.size ? ` ${specs.size}` : ""}
+                {product.model}{specs.type ? ` - ${specs.type}` : ""}
               </h1>
               <p className="text-sm text-mist">
-                {specs.material}
-                {specs.color ? ` · ${specs.color}` : ""}
-                {specs.hardware ? ` · ${specs.hardware} ${t("Aksesuar", "Hardware")}` : ""}
+                {specs.metal}
+                {specs.gemstone ? ` · ${specs.gemstone}` : ""}
+                {specs.carat ? ` · ${specs.carat} ct` : ""}
               </p>
             </div>
 
@@ -171,29 +158,13 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
 
             {/* Specs table */}
             <div className="border-t border-slate/40 pt-2">
-              <SpecRow label={t("Model", "Model")} value={product.model} />
-              <SpecRow label={t("Boyut", "Size")} value={specs.size ? `${specs.size} cm` : undefined} />
-              <SpecRow label={t("Malzeme", "Material")} value={specs.material} />
-              <SpecRow label={t("Renk", "Color")} value={specs.color} />
-              <SpecRow label={t("Aksesuar Metali", "Hardware")} value={specs.hardware} />
-              <SpecRow label={t("Damga", "Stamp")} value={specs.stamp} />
-              <SpecRow label={t("Aksesuarlar", "Accessories")} value={specs.accessories} />
-              <SpecRow
-                label={t("Toz Torbası", "Dustbag")}
-                value={
-                  specs.dustbag !== undefined ? (
-                    <BooleanValue value={specs.dustbag} />
-                  ) : undefined
-                }
-              />
-              <SpecRow
-                label={t("Kutu", "Box")}
-                value={
-                  specs.box !== undefined ? (
-                    <BooleanValue value={specs.box} />
-                  ) : undefined
-                }
-              />
+              <SpecRow label={t("Tip", "Type")} value={specs.type} />
+              <SpecRow label={t("Metal", "Metal")} value={specs.metal} />
+              <SpecRow label={t("Taş", "Gemstone")} value={specs.gemstone} />
+              <SpecRow label={t("Karat", "Carat")} value={specs.carat ? `${specs.carat} ct` : undefined} />
+              <SpecRow label={t("Beden", "Size")} value={specs.size} />
+              <SpecRow label={t("Ağırlık", "Weight")} value={specs.weight} />
+              <SpecRow label={t("Sertifika", "Certification")} value={specs.certification} />
               <SpecRow label={t("Durum", "Condition")} value={tl(t, CONDITION_LABELS[product.condition]) || product.condition} />
             </div>
 
@@ -246,9 +217,9 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
         <SectionHeading title={t("Benzer Ürünler", "Similar Pieces")} subtitle={t("Bunları da beğenebilirsiniz", "You may also like")} />
         <div className="text-center py-12">
           <p className="text-mist text-sm">{t("Koleksiyonumuzdan daha fazla ürün yakında.", "More pieces from our collection coming soon.")}</p>
-          <Link href="/hermes" className="inline-block mt-4">
+          <Link href="/jewelry" className="inline-block mt-4">
             <Button variant="outline" size="sm">
-              {t("Tüm Hermès Ürünlerini Gör", "Browse All Hermès")}
+              {t("Tüm Mücevherleri Gör", "Browse All Jewelry")}
             </Button>
           </Link>
         </div>

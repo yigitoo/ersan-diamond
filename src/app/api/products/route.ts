@@ -8,7 +8,24 @@ export async function GET(req: NextRequest) {
     await connectDB();
     const { page, limit, sort, order, search, skip } = parseSearchParams(req.nextUrl.searchParams);
 
-    const filter: Record<string, unknown> = { published: true };
+    const filter: Record<string, unknown> = {};
+
+    // IDs filter (for wishlist)
+    const ids = req.nextUrl.searchParams.get("ids");
+    if (ids) {
+      const idList = ids.split(",").filter(Boolean);
+      if (idList.length > 0) {
+        filter._id = { $in: idList };
+        // Don't apply published filter for id lookups
+      }
+    } else {
+      filter.published = true;
+    }
+
+    // Published override
+    const published = req.nextUrl.searchParams.get("published");
+    if (published === "true") filter.published = true;
+    if (published === "false") filter.published = false;
 
     // Category filter
     const category = req.nextUrl.searchParams.get("category");

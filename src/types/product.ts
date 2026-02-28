@@ -1,4 +1,4 @@
-export type ProductCategory = "WATCH" | "HERMES";
+export type ProductCategory = "WATCH" | "HERMES" | "JEWELRY";
 export type ProductAvailability = "AVAILABLE" | "RESERVED" | "SOLD";
 export type ProductCondition = "UNWORN" | "EXCELLENT" | "VERY_GOOD" | "GOOD" | "FAIR";
 
@@ -31,6 +31,16 @@ export interface HermesSpecs {
   box?: boolean;
 }
 
+export interface JewelrySpecs {
+  type?: string;
+  metal?: string;
+  gemstone?: string;
+  carat?: string;
+  size?: string;
+  weight?: string;
+  certification?: string;
+}
+
 export interface IProduct {
   _id: string;
   category: ProductCategory;
@@ -45,7 +55,7 @@ export interface IProduct {
   availability: ProductAvailability;
   title: string;
   description: string;
-  specs: WatchSpecs | HermesSpecs;
+  specs: WatchSpecs | HermesSpecs | JewelrySpecs;
   images: ProductImage[];
   slug: string;
   featured: boolean;

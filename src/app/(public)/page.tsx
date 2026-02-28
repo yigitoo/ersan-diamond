@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   ChevronRight,
@@ -9,21 +10,42 @@ import {
   Award,
   Eye,
   Star,
+  Watch,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { useI18n } from "@/lib/i18n";
+import { useSwrFetch } from "@/lib/hooks";
+import { formatPrice } from "@/lib/utils/formatters";
 import {
   heroReveal,
   fadeUp,
   staggerContainer,
   staggerItem,
 } from "@/lib/animations";
+import type { IProduct, ProductCategory } from "@/types";
 
 /* ─── Page ─── */
 export default function HomePage() {
   const { t } = useI18n();
+
+  /* ─── Dynamic data ─── */
+  const { data: latestProducts } = useSwrFetch<IProduct[]>(
+    "/api/products?limit=8&sort=createdAt&published=true"
+  );
+
+  /* ─── Helpers ─── */
+  const categoryPath = (category: ProductCategory): string => {
+    switch (category) {
+      case "WATCH":
+        return "/watches";
+      case "HERMES":
+        return "/hermes";
+      case "JEWELRY":
+        return "/jewelry";
+    }
+  };
 
   /* ─── Data ─── */
   const CATEGORIES = [
@@ -38,15 +60,23 @@ export default function HomePage() {
     {
       title: t("Hermès", "Hermès"),
       description: t(
-        "Orijinallik onaylanmış ikonik deri ürünler",
+        "Orijinalliği onaylanmış ikonik deri ürünler",
         "Iconic leather goods, authenticated and pristine"
       ),
       href: "/hermes",
     },
     {
+      title: t("Mücevherat", "Jewelry"),
+      description: t(
+        "Özenle seçilmiş değerli taş ve mücevherat koleksiyonu",
+        "A curated collection of fine gemstones and jewelry"
+      ),
+      href: "/jewelry",
+    },
+    {
       title: t("Bize Satın", "Sell to Us"),
       description: t(
-        "Lüks parçalarınızı güvenle satın veya konsiye bırakın",
+        "Lüks parçalarınızı güvenle bize satın veya konsinye bırakın",
         "Consign or sell your luxury pieces with confidence"
       ),
       href: "/sell",
@@ -88,32 +118,31 @@ export default function HomePage() {
     },
   ];
 
-  const PLACEHOLDER_PRODUCTS = [
-    { brand: "Rolex", model: "Daytona Cosmograph", price: t("Fiyat Sorunuz", "Price on Request") },
-    { brand: "Patek Philippe", model: "Nautilus 5711/1A", price: t("Fiyat Sorunuz", "Price on Request") },
-    { brand: "Audemars Piguet", model: "Royal Oak 15500ST", price: t("Fiyat Sorunuz", "Price on Request") },
-    { brand: "Richard Mille", model: "RM 011 Felipe Massa", price: t("Fiyat Sorunuz", "Price on Request") },
-    { brand: "Rolex", model: 'Submariner "Hulk"', price: t("Fiyat Sorunuz", "Price on Request") },
-    { brand: "Patek Philippe", model: "Aquanaut 5167A", price: t("Fiyat Sorunuz", "Price on Request") },
-    { brand: "Vacheron Constantin", model: "Overseas Dual Time", price: t("Fiyat Sorunuz", "Price on Request") },
-    { brand: "A. Lange & Söhne", model: "Lange 1", price: t("Fiyat Sorunuz", "Price on Request") },
-  ];
-
   return (
     <>
       {/* ═══════════════════ HERO ═══════════════════ */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background gradient */}
+        {/* Background image */}
+        <Image
+          src="/imgs/hero-bg.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover -z-20 opacity-20"
+          sizes="100vw"
+        />
+
+        {/* Background gradient overlay — ensures text readability */}
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-charcoal via-brand-black to-brand-black"
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-black/70 via-brand-black/85 to-brand-black"
         />
 
         {/* Subtle gold light bleed */}
         <div
-          className="absolute inset-0 -z-10 opacity-[0.03]"
+          className="absolute inset-0 -z-10 opacity-[0.04]"
           style={{
             background:
-              "radial-gradient(circle at 50% 30%, #C9A84C 0%, transparent 60%)",
+              "radial-gradient(circle at 50% 40%, #C9A84C 0%, transparent 50%)",
           }}
         />
 
@@ -138,7 +167,7 @@ export default function HomePage() {
           {/* Subtitle */}
           <p className="text-mist text-base md:text-lg max-w-xl mx-auto mt-6 leading-relaxed">
             {t(
-              "İstanbul'un orijinallik onaylanmış lüks saatler ve Hermès için en prestijli adresi",
+              "Orijinallik onaylı lüks saatler ve Hermès'te İstanbul'un en güvenilir adresi",
               "Istanbul's premier destination for authenticated luxury timepieces and Hermès"
             )}
           </p>
@@ -264,42 +293,91 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <SectionHeading title={t("Son Gelenler", "Latest Arrivals")} />
 
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
-          >
-            {PLACEHOLDER_PRODUCTS.map((product, i) => (
-              <motion.div key={`${product.brand}-${i}`} variants={staggerItem}>
+          {latestProducts && latestProducts.length > 0 ? (
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+            >
+              {latestProducts.map((product) => (
+                <motion.div key={product._id} variants={staggerItem}>
+                  <Link
+                    href={`${categoryPath(product.category)}/${product.slug}`}
+                    className="group block"
+                  >
+                    <div
+                      className={cn(
+                        "bg-charcoal border border-slate/50 rounded overflow-hidden",
+                        "transition-all duration-700",
+                        "hover:border-soft-white/30"
+                      )}
+                    >
+                      {/* Product image */}
+                      <div className="aspect-square bg-slate/20 relative overflow-hidden">
+                        {product.images[0]?.url ? (
+                          <Image
+                            src={product.images[0].url}
+                            alt={product.images[0].alt || `${product.brand} ${product.model}`}
+                            fill
+                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            sizes="(max-width: 768px) 50vw, 25vw"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Watch size={32} strokeWidth={1} className="text-mist/20" />
+                          </div>
+                        )}
+                      </div>
+                      {/* Info */}
+                      <div className="p-4">
+                        <p className="text-[11px] uppercase tracking-[0.15em] text-mist mb-1">
+                          {product.brand}
+                        </p>
+                        <p className="font-serif text-base md:text-lg leading-tight mb-2 line-clamp-1">
+                          {product.model}
+                        </p>
+                        <p className="text-xs text-mist">
+                          {product.priceOnRequest
+                            ? t("Fiyat Sorunuz", "Price on Request")
+                            : product.price
+                              ? formatPrice(product.price, product.currency)
+                              : t("Fiyat Sorunuz", "Price on Request")}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            /* Empty / loading state */
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+            >
+              {Array.from({ length: 4 }).map((_, i) => (
                 <div
+                  key={i}
                   className={cn(
                     "bg-charcoal border border-slate/50 rounded overflow-hidden",
-                    "transition-all duration-700",
-                    "hover:border-soft-white/30"
+                    "animate-pulse"
                   )}
                 >
-                  {/* Placeholder image area */}
-                  <div className="aspect-square bg-slate/20 flex items-center justify-center">
-                    <span className="text-mist/30 text-xs uppercase tracking-[0.15em]">
-                      {t("Görsel", "Image")}
-                    </span>
-                  </div>
-                  {/* Info */}
-                  <div className="p-4">
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-mist mb-1">
-                      {product.brand}
-                    </p>
-                    <p className="font-serif text-base md:text-lg leading-tight mb-2 line-clamp-1">
-                      {product.model}
-                    </p>
-                    <p className="text-xs text-mist">{product.price}</p>
+                  <div className="aspect-square bg-slate/20" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-3 bg-slate/20 rounded w-1/3" />
+                    <div className="h-4 bg-slate/20 rounded w-2/3" />
+                    <div className="h-3 bg-slate/20 rounded w-1/4" />
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </motion.div>
+          )}
 
           {/* View all link */}
           <motion.div
@@ -313,7 +391,7 @@ export default function HomePage() {
               href="/watches"
               className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.15em] text-mist hover:text-brand-white transition-colors duration-500"
             >
-              {t("Tüm Saatleri Gör", "View All Timepieces")}
+              {t("Tümünü Gör", "View All")}
               <ArrowRight size={14} strokeWidth={1.5} />
             </Link>
           </motion.div>

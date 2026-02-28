@@ -1,4 +1,4 @@
-import { emailLayout, signatureBlock, personalGreeting } from "./base";
+import { emailLayout, signatureBlock, personalGreeting, getAppUrl } from "./base";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -97,8 +97,32 @@ export function appointmentCancelled(data: AppointmentEmailData): { subject: str
     <h2>Randevunuz İptal Edildi</h2>
     <p>Sayın ${data.customerName},</p>
     <p>Randevunuz iptal edilmiştir. Yeni bir randevu almak isterseniz web sitemizi ziyaret edebilirsiniz.</p>
-    <a href="https://ersandiamond.com/concierge" class="cta-btn">Yeni Randevu Al</a>
+    <a href="${getAppUrl()}/concierge" class="cta-btn">Yeni Randevu Al</a>
     ${signatureBlock(data.salesRepName, data.signatureTitle, data.phone)}
+  `);
+  return { subject, html };
+}
+
+export function newAppointmentNotifyOwner(data: {
+  customerName: string;
+  serviceType: string;
+  date: Date;
+  appointmentId: string;
+  customerPhone?: string;
+  customerEmail?: string;
+}): { subject: string; html: string } {
+  const subject = `Yeni Randevu: ${data.customerName} | ${serviceLabels[data.serviceType] || data.serviceType}`;
+  const html = emailLayout(`
+    <h2>Yeni Randevu Talebi</h2>
+    <p>Yeni bir randevu talebi oluşturuldu:</p>
+    <table class="details-table">
+      <tr><td>Müşteri</td><td>${data.customerName}</td></tr>
+      <tr><td>Hizmet</td><td>${serviceLabels[data.serviceType] || data.serviceType}</td></tr>
+      <tr><td>Tarih</td><td>${formatAppointmentDate(data.date)}</td></tr>
+      ${data.customerEmail ? `<tr><td>E-posta</td><td>${data.customerEmail}</td></tr>` : ""}
+      ${data.customerPhone ? `<tr><td>Telefon</td><td>${data.customerPhone}</td></tr>` : ""}
+    </table>
+    <a href="${getAppUrl()}/panel/appointments" class="cta-btn">Panelde Görüntüle</a>
   `);
   return { subject, html };
 }

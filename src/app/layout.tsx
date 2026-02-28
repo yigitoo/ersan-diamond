@@ -77,6 +77,9 @@ export const metadata: Metadata = {
       "İstanbul merkezli lüks saat ve Hermès ürünleri alım-satım. Sadece Orijinal. Orijinal garantili.",
     images: ["/imgs/logo-square.png"],
   },
+  verification: {
+    google: "IVD1Jk7XC-AP2rFLiPLreZIEai1vNpW6mlS8rCMB3HY",
+  },
   robots: {
     index: true,
     follow: true,

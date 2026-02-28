@@ -12,7 +12,7 @@ const productImageSchema = new Schema(
 
 const productSchema = new Schema<IProduct>(
   {
-    category: { type: String, enum: ["WATCH", "HERMES"], required: true },
+    category: { type: String, enum: ["WATCH", "HERMES", "JEWELRY"], required: true },
     brand: { type: String, required: true },
     model: { type: String, required: true },
     reference: { type: String, default: "" },

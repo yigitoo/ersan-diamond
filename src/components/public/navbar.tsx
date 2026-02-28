@@ -11,7 +11,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { LanguageToggle } from "@/components/shared/language-toggle";
 import { useI18n } from "@/lib/i18n";
 import { navSlide } from "@/lib/animations";
-import { WATCH_BRANDS, HERMES_MODELS, BRAND_WHATSAPP, BRAND_INSTAGRAM } from "@/lib/utils/constants";
+import { WATCH_BRANDS, HERMES_MODELS, JEWELRY_TYPES, BRAND_WHATSAPP, BRAND_INSTAGRAM } from "@/lib/utils/constants";
 
 /* ─── Component ─── */
 export function Navbar() {
@@ -25,6 +25,7 @@ export function Navbar() {
   const NAV_ITEMS = [
     { label: t("Saatler", "Watches"), href: "/watches", key: "Watches" },
     { label: t("Hermès", "Hermès"), href: "/hermes", key: "Hermes" },
+    { label: t("Mücevherat", "Jewelry"), href: "/jewelry", key: "Jewelry" },
     { label: t("Bize Satın", "Sell to Us"), href: "/sell", key: "Sell" },
     { label: t("Konsiyerj", "Concierge"), href: "/concierge", key: "Concierge" },
     { label: t("Hakkımızda", "About"), href: "/about", key: "About" },
@@ -49,6 +50,13 @@ export function Navbar() {
         href: `/hermes?model=${encodeURIComponent(m)}`,
       })),
     },
+    Jewelry: {
+      title: t("Mücevherat", "Jewelry"),
+      links: JEWELRY_TYPES.map((j) => ({
+        label: j,
+        href: `/jewelry?type=${encodeURIComponent(j)}`,
+      })),
+    },
   };
 
   /* Scroll listener */
@@ -67,7 +75,7 @@ export function Navbar() {
 
   /* Mega menu key lookup */
   const getMegaKey = (navKey: string) => {
-    if (navKey === "Watches" || navKey === "Hermes") return navKey;
+    if (navKey === "Watches" || navKey === "Hermes" || navKey === "Jewelry") return navKey;
     return null;
   };
 
@@ -78,7 +86,7 @@ export function Navbar() {
           "fixed top-0 left-0 right-0 z-50 transition-all duration-700",
           scrolled
             ? "bg-brand-black/95 glass border-b border-slate/40"
-            : "bg-transparent"
+            : "bg-gradient-to-b from-brand-black/70 via-brand-black/30 to-transparent"
         )}
       >
         <nav className="mx-auto max-w-7xl px-6 lg:px-8">

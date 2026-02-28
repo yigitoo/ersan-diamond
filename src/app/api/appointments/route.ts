@@ -3,11 +3,15 @@ import { connectDB } from "@/lib/db/connection";
 import { getSessionUser } from "@/lib/auth";
 import Appointment from "@/lib/db/models/appointment";
 import CalendarEvent from "@/lib/db/models/calendar-event";
+import User from "@/lib/db/models/user";
 import { createAppointmentSchema } from "@/lib/validations/appointment";
 import { successResponse, errorResponse, paginatedResponse, parseSearchParams } from "@/lib/utils/api-response";
 import { sendEmail } from "@/lib/email/smtp";
-import { appointmentReceived } from "@/lib/email/templates/appointment";
+import { sendSms } from "@/lib/sms/httpsms";
+import { smsTemplates } from "@/lib/sms/templates";
+import { appointmentReceived, newAppointmentNotifyOwner } from "@/lib/email/templates/appointment";
 import { SLOT_DURATION_MINUTES } from "@/lib/utils/constants";
+import { logCrud } from "@/lib/audit/logger";
 
 export async function GET(req: NextRequest) {
   try {
@@ -73,16 +77,30 @@ export async function POST(req: NextRequest) {
       status: "PENDING",
     });
 
-    // Create calendar event
-    await CalendarEvent.create({
+    // Audit log
+    logCrud("system", "PUBLIC", "create", "Appointment", appointment._id.toString(), { route: "/api/appointments" }).catch(() => {});
+
+    // Determine ownerUserId for calendar event
+    let calendarOwner = appointment.assignedUserId;
+    if (!calendarOwner) {
+      const owner = await User.findOne({ role: "OWNER", active: true }).select("_id").lean();
+      calendarOwner = owner?._id;
+    }
+
+    // Create calendar event with ownerUserId
+    const calendarEvent = await CalendarEvent.create({
       appointmentId: appointment._id,
+      ownerUserId: calendarOwner,
       title: `${data.customerName} - ${data.serviceType}`,
       start: datetimeStart,
       end: datetimeEnd,
       type: "APPOINTMENT",
     });
 
-    // Send confirmation email (fire and forget)
+    // Write back calendarEventId to appointment
+    await Appointment.findByIdAndUpdate(appointment._id, { calendarEventId: calendarEvent._id });
+
+    // Send confirmation email + SMS (fire and forget)
     try {
       const emailData = appointmentReceived({
         customerName: data.customerName,
@@ -96,8 +114,41 @@ export async function POST(req: NextRequest) {
         subject: emailData.subject,
         html: emailData.html,
       });
+
+      if (data.customerPhone) {
+        const { formatDateTime } = await import("@/lib/utils/formatters");
+        await sendSms({
+          to: data.customerPhone,
+          content: smsTemplates.appointmentReceived(data.customerName, formatDateTime(datetimeStart)),
+        });
+      }
     } catch (emailError) {
-      console.error("[API] Appointment email failed:", emailError);
+      console.error("[API] Appointment notification failed:", emailError);
+    }
+
+    // Notify owner (Ersan bey)
+    try {
+      const ownerUser = await User.findOne({ role: "OWNER", active: true }).select("email phoneInternal").lean();
+      if (ownerUser) {
+        const ownerEmail = newAppointmentNotifyOwner({
+          customerName: data.customerName,
+          serviceType: data.serviceType,
+          date: datetimeStart,
+          appointmentId: appointment._id.toString(),
+          customerPhone: data.customerPhone,
+          customerEmail: data.customerEmail,
+        });
+        if ((ownerUser as any).email) {
+          await sendEmail({ to: (ownerUser as any).email, subject: ownerEmail.subject, html: ownerEmail.html });
+        }
+        const adminPhone = process.env.ADMIN_PHONE || (ownerUser as any).phoneInternal;
+        if (adminPhone) {
+          const { formatDateTime } = await import("@/lib/utils/formatters");
+          await sendSms({ to: adminPhone, content: smsTemplates.newAppointmentOwner(data.customerName, formatDateTime(datetimeStart)) });
+        }
+      }
+    } catch (ownerNotifError) {
+      console.error("[API] Owner appointment notification failed:", ownerNotifError);
     }
 
     return successResponse(appointment, 201);

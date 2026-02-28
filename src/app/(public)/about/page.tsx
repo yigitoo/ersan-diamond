@@ -68,7 +68,7 @@ export default function AboutPage() {
       icon: <Award size={24} />,
       title: t("Kayıt & Sertifikasyon", "Record & Certification"),
       description: t(
-        "Orijinallik onaylanmış her parça, koleksiyonumuza eklenmeden önce detaylı durum raporu ve orijinallik mühürümüzle belgelendirilir.",
+        "Orijinalliği onaylanmış her parça, koleksiyonumuza eklenmeden önce detaylı durum raporu ve orijinallik mühürümüzle belgelendirilir.",
         "Each authenticated piece receives a detailed condition report and our seal of authenticity before being listed in our collection."
       ),
     },
@@ -79,7 +79,7 @@ export default function AboutPage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 lg:px-8 text-center mb-24">
         <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl mb-6">
-          {t("Hakkımızda", "About")} {BRAND_NAME}
+          {t(`${BRAND_NAME} Hakkında`, `About ${BRAND_NAME}`)}
         </h1>
         <p className="text-mist text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
           {t(

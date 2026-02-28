@@ -2,10 +2,12 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db/connection";
 import { Appointment, User } from "@/lib/db/models";
 import { sendTemplatedEmail } from "@/lib/email/smtp";
+import { sendSms } from "@/lib/sms/httpsms";
+import { smsTemplates } from "@/lib/sms/templates";
 import { EMAIL_TEMPLATES } from "@/lib/email/templates";
 import { successResponse, errorResponse } from "@/lib/utils/api-response";
 import { formatDate, formatTime } from "@/lib/utils/formatters";
-import { SERVICE_TYPE_LABELS } from "@/lib/utils/constants";
+import { SERVICE_TYPE_LABELS, enLabel } from "@/lib/utils/constants";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -47,9 +49,17 @@ export async function GET(req: NextRequest) {
           phoneInternal: rep?.phoneInternal || "",
           date: formatDate(appt.datetimeStart),
           time: formatTime(appt.datetimeStart),
-          serviceType: SERVICE_TYPE_LABELS[appt.serviceType] || appt.serviceType,
+          serviceType: enLabel(SERVICE_TYPE_LABELS[appt.serviceType]) || appt.serviceType,
         }
       );
+
+      // SMS reminder
+      if (appt.customerPhone) {
+        await sendSms({
+          to: appt.customerPhone,
+          content: smsTemplates.reminder24h(formatTime(appt.datetimeStart)),
+        }).catch((err) => console.error("[Cron] 24h SMS failed:", err));
+      }
 
       await Appointment.findByIdAndUpdate(appt._id, { reminderSent24h: true });
       sent24h++;
@@ -77,9 +87,17 @@ export async function GET(req: NextRequest) {
           signatureTitle: "Concierge",
           phoneInternal: "",
           time: formatTime(appt.datetimeStart),
-          serviceType: SERVICE_TYPE_LABELS[appt.serviceType] || appt.serviceType,
+          serviceType: enLabel(SERVICE_TYPE_LABELS[appt.serviceType]) || appt.serviceType,
         }
       );
+
+      // SMS reminder
+      if (appt.customerPhone) {
+        await sendSms({
+          to: appt.customerPhone,
+          content: smsTemplates.reminder2h(formatTime(appt.datetimeStart)),
+        }).catch((err) => console.error("[Cron] 2h SMS failed:", err));
+      }
 
       await Appointment.findByIdAndUpdate(appt._id, { reminderSent2h: true });
       sent2h++;

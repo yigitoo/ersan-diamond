@@ -21,7 +21,7 @@ export function Logo({ variant = "horizontal", className, width, height, link = 
       alt="Ersan Diamond"
       width={width || defaultWidth}
       height={height || defaultHeight}
-      className={cn("object-contain mix-blend-screen invert", className)}
+      className={cn("object-contain invert rounded-2xl", className)}
       priority
     />
   );

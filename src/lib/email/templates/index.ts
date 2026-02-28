@@ -54,7 +54,7 @@ export const EMAIL_TEMPLATES: Record<string, { subject: string; html: string }> 
       <p>Merhaba, ben {salesRepName}. Ersan Diamond Concierge ekibinden yazıyorum.</p>
       <p>{date} tarihli randevunuz iptal edilmiştir.</p>
       <p>Yeni bir randevu oluşturmak isterseniz:</p>
-      <a href="https://ersandiamond.com/concierge" class="cta">Yeni Randevu Al</a>
+      <a href="/concierge" class="cta">Yeni Randevu Al</a>
     `),
   },
 

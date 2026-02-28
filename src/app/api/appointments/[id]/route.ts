@@ -9,7 +9,10 @@ import { updateAppointmentSchema } from "@/lib/validations/appointment";
 import { successResponse, errorResponse } from "@/lib/utils/api-response";
 import { logCrud } from "@/lib/audit";
 import { sendEmail } from "@/lib/email/smtp";
+import { sendSms } from "@/lib/sms/httpsms";
+import { smsTemplates } from "@/lib/sms/templates";
 import { appointmentConfirmed, appointmentCancelled, appointmentRescheduled } from "@/lib/email/templates/appointment";
+import { formatDateTime } from "@/lib/utils/formatters";
 
 export async function GET(
   _req: NextRequest,
@@ -91,9 +94,25 @@ export async function PATCH(
             subject: template.subject,
             html: template.html,
           });
+
+          // Send SMS
+          if (updated!.customerPhone) {
+            let smsContent: string | undefined;
+            const dateStr = formatDateTime(updated!.datetimeStart);
+            if (parsed.data.status === "CONFIRMED") {
+              smsContent = smsTemplates.appointmentConfirmed(updated!.customerName, dateStr);
+            } else if (parsed.data.status === "CANCELLED") {
+              smsContent = smsTemplates.appointmentCancelled(updated!.customerName);
+            } else if (parsed.data.status === "RESCHEDULED" && emailData.newDate) {
+              smsContent = smsTemplates.appointmentRescheduled(updated!.customerName, formatDateTime(emailData.newDate));
+            }
+            if (smsContent) {
+              await sendSms({ to: updated!.customerPhone, content: smsContent });
+            }
+          }
         }
       } catch (emailErr) {
-        console.error("[API] Appointment status email failed:", emailErr);
+        console.error("[API] Appointment status notification failed:", emailErr);
       }
     }
 

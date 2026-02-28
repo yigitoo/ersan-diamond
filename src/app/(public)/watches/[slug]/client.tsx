@@ -18,7 +18,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { useI18n } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/formatters";
-import { CONDITION_LABELS, WATCH_BRANDS, BRAND_WHATSAPP } from "@/lib/utils/constants";
+import { CONDITION_LABELS, WATCH_BRANDS, BRAND_WHATSAPP, tl } from "@/lib/utils/constants";
+import { WishlistButton } from "@/components/shared/wishlist-button";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 import type { IProduct, WatchSpecs } from "@/types";
 
@@ -26,12 +27,13 @@ import type { IProduct, WatchSpecs } from "@/types";
 // Spec row component
 // ---------------------------------------------------------------------------
 function SpecRow({ label, value }: { label: string; value?: string | boolean }) {
+  const { t } = useI18n();
   if (value === undefined || value === null || value === "") return null;
   return (
     <div className="flex items-center justify-between py-3 border-b border-slate/40">
       <span className="text-xs uppercase tracking-wider text-mist">{label}</span>
       <span className="text-sm text-brand-white">
-        {typeof value === "boolean" ? (value ? "Yes" : "No") : value}
+        {typeof value === "boolean" ? (value ? t("Evet", "Yes") : t("Hayır", "No")) : value}
       </span>
     </div>
   );
@@ -206,7 +208,8 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
             {/* Availability */}
             <div className="flex items-center gap-3">
               <StatusBadge status={product.availability} type="availability" />
-              <Badge>{CONDITION_LABELS[product.condition] || product.condition}</Badge>
+              <Badge>{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</Badge>
+              <WishlistButton productId={product._id} />
             </div>
 
             {/* Description */}

@@ -133,7 +133,7 @@ export default function ContactPage() {
               <h2 className="font-serif text-2xl mb-6">{t("Bize Ulaşın", "Get in Touch")}</h2>
               <p className="text-sm text-mist leading-relaxed mb-8">
                 {t(
-                  "Belirli bir parça hakkında sorunuz mu var, hizmetlerimiz hakkında daha fazla bilgi mi almak istiyorsunuz veya özel bir gösterim planlamak mı istiyorsunuz? Ekibimiz yardımcı olmak için burada.",
+                  "Belirli bir parça hakkında sorunuz mu var, hizmetlerimiz hakkında daha fazla bilgi mi almak istiyorsunuz veya özel bir gösterim planlamak mı istiyorsunuz? Ekibimiz size yardımcı olmak için burada.",
                   "Whether you have a question about a specific piece, want to learn more about our services, or wish to schedule a private viewing, our team is here to help."
                 )}
               </p>

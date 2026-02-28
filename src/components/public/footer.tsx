@@ -25,6 +25,7 @@ export function Footer() {
       links: [
         { label: t("Saatler", "Watches"), href: "/watches" },
         { label: t("Hermès", "Hermès"), href: "/hermes" },
+        { label: t("Mücevherat", "Jewelry"), href: "/jewelry" },
         { label: t("Yeni Gelenler", "New Arrivals"), href: "/watches?sort=newest" },
       ],
     },
@@ -54,7 +55,7 @@ export function Footer() {
           <Logo variant="horizontal" width={140} height={55} link={false} />
           <p className="text-mist text-sm max-w-xs leading-relaxed">
             {t(
-              "İstanbul'un orijinallik onaylanmış lüks saatler ve Hermès için en prestijli adresi. Sadece Orijinal.",
+              "Orijinallik onaylı lüks saatler ve Hermès'te İstanbul'un en güvenilir adresi. Sadece Orijinal.",
               "Istanbul's premier destination for authenticated luxury timepieces and Hermès. Only Original."
             )}
           </p>

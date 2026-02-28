@@ -14,7 +14,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Pagination } from "@/components/shared/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelative, formatPrice } from "@/lib/utils/formatters";
-import { LEAD_STATUS_CONFIG } from "@/lib/utils/constants";
+import { LEAD_STATUS_CONFIG, tl } from "@/lib/utils/constants";
 import { cn } from "@/lib/utils/cn";
 import { Eye, UserPlus, MessageSquare, Zap } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -278,7 +278,7 @@ export default function LeadsPage() {
                         "disabled:cursor-not-allowed"
                       )}
                     >
-                      {config.label}
+                      {tl(t, config.label)}
                     </button>
                   );
                 })}

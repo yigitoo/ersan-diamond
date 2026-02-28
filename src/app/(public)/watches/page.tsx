@@ -11,8 +11,9 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { staggerContainer, staggerItem } from "@/lib/animations";
 import { useSwrFetch } from "@/lib/hooks";
+import { WishlistButton } from "@/components/shared/wishlist-button";
 import { useI18n } from "@/lib/i18n";
-import { WATCH_BRANDS, CONDITION_LABELS } from "@/lib/utils/constants";
+import { WATCH_BRANDS, CONDITION_LABELS, tl } from "@/lib/utils/constants";
 import { formatPrice } from "@/lib/utils/formatters";
 import { cn } from "@/lib/utils/cn";
 import Link from "next/link";
@@ -35,11 +36,11 @@ export default function WatchesPage() {
   const { data: products, isLoading } = useSwrFetch<IProduct[]>(`/api/products?${params.toString()}`);
 
   const brandOptions = WATCH_BRANDS.map((b) => ({ value: b, label: b }));
-  const conditionOptions = Object.entries(CONDITION_LABELS).map(([v, l]) => ({ value: v, label: l }));
+  const conditionOptions = Object.entries(CONDITION_LABELS).map(([v, l]) => ({ value: v, label: tl(t, l) }));
   const sortOptions = [
     { value: "createdAt", label: t("En Yeni", "Newest") },
-    { value: "price_asc", label: t("Fiyat: Düşükten Yukarıya", "Price: Low to High") },
-    { value: "price_desc", label: t("Fiyat: Yüksekten Aşağıya", "Price: High to Low") },
+    { value: "price_asc", label: t("Fiyat: Düşükten Yükseğe", "Price: Low to High") },
+    { value: "price_desc", label: t("Fiyat: Yüksekten Düşüğe", "Price: High to Low") },
     { value: "year", label: t("Yıl", "Year") },
   ];
 
@@ -105,10 +106,15 @@ export default function WatchesPage() {
                     <div className="absolute top-3 left-3">
                       <StatusBadge status={product.availability} type="availability" />
                     </div>
+                    <div className="absolute top-3 right-3">
+                      <WishlistButton productId={product._id} size={16} />
+                    </div>
                     {/* Hover overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-brand-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <p className="text-xs text-mist">{product.reference} · {product.year}</p>
-                      <p className="text-xs text-mist">{CONDITION_LABELS[product.condition] || product.condition}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="bg-white border border-white/80 rounded px-3 py-2 shadow-lg">
+                        <p className="text-xs text-brand-black">{product.reference} · {product.year}</p>
+                        <p className="text-xs text-brand-black/70">{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</p>
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-1">

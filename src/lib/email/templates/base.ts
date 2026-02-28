@@ -1,4 +1,8 @@
-const LOGO_URL = "https://ersandiamond.com/imgs/logo-horizontal.png";
+export function getAppUrl() {
+  return process.env.NEXT_PUBLIC_APP_URL || "https://ersandiamond.com";
+}
+
+const LOGO_URL = "https://pub-2f86ee5ec40043559538f242150ae7b6.r2.dev/logo-horizontal.png";
 
 export function wrapTemplate(content: string): string {
   return emailLayout(content);
@@ -38,7 +42,7 @@ export function emailLayout(content: string): string {
     </div>
     <div class="footer">
       Ersan Diamond | İstanbul<br/>
-      ersandiamond.com | Only Original
+      Ersan Diamond | Only Original
     </div>
   </div>
 </body>

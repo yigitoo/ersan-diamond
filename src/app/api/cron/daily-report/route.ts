@@ -6,7 +6,7 @@ import { sendEmail } from "@/lib/email/smtp";
 import { EMAIL_TEMPLATES } from "@/lib/email/templates";
 import { successResponse, errorResponse } from "@/lib/utils/api-response";
 import { formatDate, formatTime, formatPrice } from "@/lib/utils/formatters";
-import { SERVICE_TYPE_LABELS } from "@/lib/utils/constants";
+import { SERVICE_TYPE_LABELS, enLabel } from "@/lib/utils/constants";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
       })),
       appointments: appointments.map((a: any) => ({
         customerName: a.customerName,
-        serviceType: SERVICE_TYPE_LABELS[a.serviceType] || a.serviceType,
+        serviceType: enLabel(SERVICE_TYPE_LABELS[a.serviceType]) || a.serviceType,
         status: a.status,
         time: formatTime(a.datetimeStart),
       })),

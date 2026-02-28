@@ -1,9 +1,14 @@
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db/connection";
 import { Sale, Product } from "@/lib/db/models";
+import User from "@/lib/db/models/user";
 import { successResponse, errorResponse, paginatedResponse, parseSearchParams } from "@/lib/utils/api-response";
 import { getSessionUser } from "@/lib/auth/session";
 import { logCrud } from "@/lib/audit";
+import { sendEmail } from "@/lib/email/smtp";
+import { sendSms } from "@/lib/sms/httpsms";
+import { smsTemplates } from "@/lib/sms/templates";
+import { saleReceipt } from "@/lib/email/templates/sale";
 
 export async function GET(req: NextRequest) {
   try {
@@ -60,6 +65,40 @@ export async function POST(req: NextRequest) {
     await logCrud(user.id, user.role, "create", "Sale", sale._id.toString(), {
       after: { productId: body.productId, salePrice: body.salePrice, buyerName: body.buyerName },
     });
+
+    // Send sale receipt email to buyer
+    if (body.buyerEmail) {
+      try {
+        const product = await Product.findById(body.productId).select("title").lean();
+        const salesRep = await User.findById(user.id).select("signatureName signatureTitle phoneInternal").lean();
+        const rep = salesRep as any;
+        const receiptEmail = saleReceipt({
+          buyerName: body.buyerName,
+          productTitle: (product as any)?.title || "Ürün",
+          salePrice: body.salePrice,
+          currency: body.currency || "EUR",
+          salesRepName: rep?.signatureName || user.name || "Ersan Diamond",
+          signatureTitle: rep?.signatureTitle,
+          phone: rep?.phoneInternal,
+          soldAt: new Date(),
+        });
+        await sendEmail({
+          to: body.buyerEmail,
+          subject: receiptEmail.subject,
+          html: receiptEmail.html,
+        });
+
+        // SMS to buyer
+        if (body.buyerPhone) {
+          await sendSms({
+            to: body.buyerPhone,
+            content: smsTemplates.saleReceipt(body.buyerName),
+          });
+        }
+      } catch (emailErr) {
+        console.error("[API] Sale receipt notification failed:", emailErr);
+      }
+    }
 
     return successResponse(sale, 201);
   } catch (error) {

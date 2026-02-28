@@ -38,6 +38,8 @@ export default function LogsPage() {
     { value: "Appointment", label: t("Randevu", "Appointment") },
     { value: "Sale", label: t("Satış", "Sale") },
     { value: "User", label: t("Kullanıcı", "User") },
+    { value: "CalendarEvent", label: t("Takvim", "Calendar Event") },
+    { value: "EmailThread", label: t("E-posta Dizisi", "Email Thread") },
   ];
 
   return (
@@ -68,7 +70,7 @@ export default function LogsPage() {
               {logs.map((log: any) => (
                 <TableRow key={log._id}>
                   <TableCell className="text-xs text-mist whitespace-nowrap">{formatDateTime(log.createdAt)}</TableCell>
-                  <TableCell className="text-xs">{log.actorRole}<br/><span className="text-mist">{log.actorUserId?.slice(-6)}</span></TableCell>
+                  <TableCell className="text-xs">{log.actorRole}<br/><span className="text-mist">{typeof log.actorUserId === "object" ? (log.actorUserId?.name || log.actorUserId?.email) : log.actorUserId?.slice?.(-6) || "-"}</span></TableCell>
                   <TableCell><span className="text-xs bg-charcoal px-2 py-0.5 rounded">{log.actionType}</span></TableCell>
                   <TableCell className="text-xs">{log.entityType}<br/><span className="text-mist">{log.entityId?.slice(-6)}</span></TableCell>
                   <TableCell className="text-xs text-mist max-w-48 truncate">{log.route || "-"}</TableCell>

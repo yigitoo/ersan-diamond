@@ -7,7 +7,7 @@ const imageSchema = z.object({
 });
 
 export const createProductSchema = z.object({
-  category: z.enum(["WATCH", "HERMES"]),
+  category: z.enum(["WATCH", "HERMES", "JEWELRY"]),
   brand: z.string().min(1, "Marka zorunlu"),
   model: z.string().min(1, "Model zorunlu"),
   reference: z.string().optional().default(""),
