@@ -85,8 +85,8 @@ export function Navbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-700",
           scrolled
-            ? "bg-brand-black/95 glass border-b border-slate/40"
-            : "bg-gradient-to-b from-brand-black/70 via-brand-black/30 to-transparent"
+            ? "bg-black border-b border-slate/40"
+            : "bg-black"
         )}
       >
         <nav className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -117,8 +117,8 @@ export function Navbar() {
                       className={cn(
                         "px-4 py-2 text-[13px] tracking-[0.12em] uppercase transition-colors duration-500",
                         isActive
-                          ? "text-brand-white"
-                          : "text-soft-white/70 hover:text-brand-white"
+                          ? "text-white"
+                          : "text-white/70 hover:text-white"
                       )}
                     >
                       {item.label}
@@ -169,10 +169,10 @@ export function Navbar() {
 
             {/* ── Right: Icons ── */}
             <div className="flex items-center gap-1">
-              <LanguageToggle className="mr-2 hidden sm:flex" />
+              <LanguageToggle className="mr-2" />
               <Link
                 href="/wishlist"
-                className="p-2.5 text-soft-white/70 hover:text-brand-white transition-colors duration-500"
+                className="p-2.5 text-white hover:text-brand-gold transition-colors duration-500"
                 aria-label={t("Favoriler", "Wishlist")}
               >
                 <Heart size={18} strokeWidth={1.5} />
@@ -180,7 +180,7 @@ export function Navbar() {
 
               {/* Mobile hamburger */}
               <button
-                className="lg:hidden p-2.5 text-soft-white/70 hover:text-brand-white transition-colors duration-500 ml-1"
+                className="lg:hidden p-2.5 text-white hover:text-brand-gold transition-colors duration-500 ml-1"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open menu"
               >
@@ -199,8 +199,8 @@ export function Navbar() {
       >
         <div className="flex flex-col h-full">
           {/* Language toggle in mobile */}
-          <div className="mb-4">
-            <LanguageToggle />
+          <div className="mb-4" onClick={(e) => e.stopPropagation()}>
+            <LanguageToggle className="text-base gap-2 py-2" />
           </div>
 
           {/* Menu items */}

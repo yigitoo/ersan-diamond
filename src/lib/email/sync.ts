@@ -1,10 +1,22 @@
 import { connectDB } from "@/lib/db/connection";
-import { EmailThread, Email } from "@/lib/db/models";
+import { EmailThread, Email, AppSetting } from "@/lib/db/models";
 import { fetchNewEmails } from "./imap";
 import { matchThread } from "./thread-matcher";
 
-// Store last sync UID in-memory (in production, use a DB setting)
-let lastSyncUid = 1;
+const LAST_UID_KEY = "imap_last_uid";
+
+async function getLastSyncUid(): Promise<number> {
+  const setting = await AppSetting.findOne({ key: LAST_UID_KEY });
+  return setting ? parseInt(setting.value, 10) : 1;
+}
+
+async function saveLastSyncUid(uid: number): Promise<void> {
+  await AppSetting.findOneAndUpdate(
+    { key: LAST_UID_KEY },
+    { value: String(uid) },
+    { upsert: true }
+  );
+}
 
 export async function syncInbox(): Promise<{ synced: number; errors: number }> {
   let synced = 0;
@@ -12,6 +24,7 @@ export async function syncInbox(): Promise<{ synced: number; errors: number }> {
 
   try {
     await connectDB();
+    let lastSyncUid = await getLastSyncUid();
     const newEmails = await fetchNewEmails(lastSyncUid);
 
     for (const raw of newEmails) {
@@ -40,9 +53,11 @@ export async function syncInbox(): Promise<{ synced: number; errors: number }> {
         await EmailThread.findByIdAndUpdate(thread._id, {
           lastMessageAt: raw.date,
           $inc: { messageCount: 1 },
+          unread: true,
         });
 
         lastSyncUid = Math.max(lastSyncUid, raw.uid);
+        await saveLastSyncUid(lastSyncUid);
         synced++;
       } catch (err) {
         console.error("[Sync] Error processing email:", err);

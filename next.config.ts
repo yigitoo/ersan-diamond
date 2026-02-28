@@ -37,6 +37,7 @@ const nextConfig: NextConfig = {
             "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://*.r2.dev",
             "font-src 'self' data:",
             "connect-src 'self' https://*.r2.cloudflarestorage.com",
+            "frame-src 'self' https://www.google.com https://maps.google.com",
             "frame-ancestors 'none'",
             "base-uri 'self'",
             "form-action 'self'",

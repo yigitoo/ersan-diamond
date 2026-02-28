@@ -12,6 +12,8 @@ export type EmailTemplateId =
   | "daily-report"
   | "sale-receipt";
 
+export type ThreadStatus = "OPEN" | "ARCHIVED" | "CLOSED";
+
 export interface IEmailThread {
   _id: string;
   customerEmail: string;
@@ -20,6 +22,8 @@ export interface IEmailThread {
   appointmentId?: string;
   lastMessageAt: Date;
   messageCount: number;
+  status: ThreadStatus;
+  unread: boolean;
   createdAt: Date;
 }
 

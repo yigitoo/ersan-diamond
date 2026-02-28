@@ -128,14 +128,10 @@ export default function HomePage() {
           alt=""
           fill
           priority
-          className="object-cover -z-20 opacity-20"
+          className="object-cover -z-20 opacity-80"
           sizes="100vw"
         />
 
-        {/* Background gradient overlay — ensures text readability */}
-        <div
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-black/70 via-brand-black/85 to-brand-black"
-        />
 
         {/* Subtle gold light bleed */}
         <div
@@ -158,16 +154,16 @@ export default function HomePage() {
           </p>
 
           {/* Main heading */}
-          <h1 className="font-serif text-5xl md:text-7xl font-normal leading-[1.08] tracking-tight">
+          <h1 className="font-serif text-5xl md:text-7xl font-normal leading-[1.08] tracking-tight text-white">
             {t("Nadirlik ve Orijinalliğin", "Where Rarity Meets")}
             <br />
             {t("Buluştuğu Yer", "Authenticity")}
           </h1>
 
           {/* Subtitle */}
-          <p className="text-mist text-base md:text-lg max-w-xl mx-auto mt-6 leading-relaxed">
+          <p className="md:mt-10 text-white font-bold text-base md:text-lg max-w-xl mx-auto mt-6 leading-relaxed">
             {t(
-              "Orijinallik onaylı lüks saatler ve Hermès'te İstanbul'un en güvenilir adresi",
+              "İstanbul'un en güvenilir adresi",
               "Istanbul's premier destination for authenticated luxury timepieces and Hermès"
             )}
           </p>
@@ -180,7 +176,7 @@ export default function HomePage() {
               </Button>
             </Link>
             <Link href="/watches">
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" className="text-brand-gold hover:border-brand-gold hover:bg-brand-gold hover:text-white">
                 {t("Koleksiyonu Keşfet", "Explore Collection")}
               </Button>
             </Link>
@@ -218,7 +214,7 @@ export default function HomePage() {
             viewport={{ once: true, margin: "-100px" }}
             className="grid md:grid-cols-3 gap-6"
           >
-            {CATEGORIES.map((cat) => (
+            {CATEGORIES.slice(0,-1).map((cat) => (
               <motion.div key={cat.title} variants={staggerItem}>
                 <Link href={cat.href} className="group block">
                   <div

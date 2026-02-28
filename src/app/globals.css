@@ -3,6 +3,9 @@
 /* ============================================
    ERSAN DIAMOND — Luxury Light Design System
    ============================================ */
+button {
+  cursor: pointer;
+}
 
 @theme inline {
   /* Colors — Light Luxury Palette */

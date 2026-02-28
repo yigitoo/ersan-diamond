@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/ersan-diamond";
-const R2 = "https://pub-2f86ee5ec40043559538f242150ae7b6.r2.dev/products";
+const R2 = "/api/r2/products";
 
 // ---------------------------------------------------------------------------
 // Helpers

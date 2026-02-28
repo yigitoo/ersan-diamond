@@ -161,6 +161,7 @@ export default function LeadsPage() {
                 <TableHead>{t("İletişim", "Contact")}</TableHead>
                 <TableHead>{t("Durum", "Status")}</TableHead>
                 <TableHead>{t("Atanan", "Assigned")}</TableHead>
+                <TableHead>{t("Ürün", "Product")}</TableHead>
                 <TableHead>{t("Kaynak", "Source")}</TableHead>
                 <TableHead>{t("Oluşturulma", "Created")}</TableHead>
                 <TableHead className="text-right">{t("İşlemler", "Actions")}</TableHead>
@@ -174,6 +175,7 @@ export default function LeadsPage() {
                   <TableCell className="text-xs text-mist">{lead.email}<br/>{lead.phone}</TableCell>
                   <TableCell><StatusBadge status={lead.status} type="lead" /></TableCell>
                   <TableCell className="text-xs text-mist">{lead.assignedUserId?.name || <span className="text-mist/50">{t("Atanmamış", "Unassigned")}</span>}</TableCell>
+                  <TableCell className="text-xs text-mist">{lead.relatedProductId ? `${lead.relatedProductId.brand} ${lead.relatedProductId.model}` : "-"}</TableCell>
                   <TableCell className="text-xs text-mist">{lead.source}</TableCell>
                   <TableCell className="text-xs text-mist">{formatRelative(lead.createdAt)}</TableCell>
                   <TableCell className="text-right">
@@ -243,6 +245,17 @@ export default function LeadsPage() {
                   {detail.productReference && <div><span className="text-mist">{t("Referans", "Reference")}</span><p>{detail.productReference}</p></div>}
                   {detail.productYear && <div><span className="text-mist">{t("Yıl", "Year")}</span><p>{detail.productYear}</p></div>}
                   {detail.desiredPrice && <div><span className="text-mist">{t("İstenen Fiyat", "Desired Price")}</span><p>{formatPrice(detail.desiredPrice, detail.currency)}</p></div>}
+                </div>
+              </div>
+            )}
+
+            {/* Related Product */}
+            {detail.relatedProductId && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-medium tracking-wider uppercase text-mist">{t("İlgili Ürün", "Related Product")}</h3>
+                <div className="p-3 border border-brand-gold/20 bg-brand-gold/5 rounded-sm">
+                  <p className="text-sm font-medium">{detail.relatedProductId.brand} {detail.relatedProductId.model}</p>
+                  <p className="text-xs text-mist mt-1">{detail.relatedProductId.title}</p>
                 </div>
               </div>
             )}

@@ -136,13 +136,13 @@ export default function JewelryPage() {
                       </div>
                       {/* Hover overlay */}
                       <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <div className="bg-white border border-white/80 rounded px-3 py-2 shadow-lg">
-                          <p className="text-xs text-brand-black">
+                        <div className="bg-black/80 backdrop-blur-sm border border-white/20 rounded px-3 py-2">
+                          <p className="text-xs text-white font-medium">
                             {specs?.metal}
                             {specs?.gemstone ? ` · ${specs.gemstone}` : ""}
                             {specs?.carat ? ` · ${specs.carat} ct` : ""}
                           </p>
-                          <p className="text-xs text-brand-black/70">{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</p>
+                          <p className="text-xs text-white/70">{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</p>
                         </div>
                       </div>
                     </div>

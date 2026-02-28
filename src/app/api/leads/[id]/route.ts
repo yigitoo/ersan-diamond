@@ -19,7 +19,7 @@ export async function GET(
     const { id } = await params;
     const lead = await Lead.findById(id)
       .populate("assignedUserId", "name email")
-      .populate("relatedProductId", "brand model reference")
+      .populate("relatedProductId", "title brand model slug category")
       .lean();
 
     if (!lead) return errorResponse("Lead bulunamadı", 404);

@@ -124,14 +124,19 @@ export function Footer() {
               />
               {BRAND_EMAIL}
             </a>
-            <span className="flex items-center gap-2">
+            <a
+              href="https://maps.google.com/?q=İstanbul,+Türkiye"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-brand-white transition-colors duration-300"
+            >
               <MapPin
                 size={14}
                 strokeWidth={1.5}
                 className="text-brand-gold/70"
               />
               {BRAND_ADDRESS}
-            </span>
+            </a>
             <span className="flex items-center gap-2">
               <Clock
                 size={14}

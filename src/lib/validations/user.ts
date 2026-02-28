@@ -12,6 +12,8 @@ export const createUserSchema = z.object({
 
 export const updateUserSchema = z.object({
   name: z.string().min(2).optional(),
+  email: z.string().email("Geçerli bir email adresi girin").optional(),
+  password: z.string().min(8, "Şifre en az 8 karakter olmalı").optional(),
   role: z.enum(["OWNER", "ADMIN", "SALES", "VIEWER"]).optional(),
   active: z.boolean().optional(),
   signatureName: z.string().optional(),

@@ -7,3 +7,4 @@ export { default as EmailThread } from "./email-thread";
 export { default as Email } from "./email";
 export { default as CalendarEvent } from "./calendar-event";
 export { default as AuditLog } from "./audit-log";
+export { default as AppSetting } from "./app-setting";

@@ -22,6 +22,7 @@ import { useI18n } from "@/lib/i18n";
 import { formatPrice } from "@/lib/utils/formatters";
 import { CONDITION_LABELS, BRAND_WHATSAPP, tl } from "@/lib/utils/constants";
 import { WishlistButton } from "@/components/shared/wishlist-button";
+import { InterestForm } from "@/components/shared/interest-form";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 import type { IProduct, JewelrySpecs } from "@/types";
 
@@ -183,31 +184,35 @@ export function JewelryDetailClient({ product }: { product: IProduct }) {
             </div>
 
             {/* CTA buttons */}
-            <div className="space-y-3 pt-2">
-              <Link href="/concierge" className="block">
-                <Button variant="primary" size="lg" className="w-full">
-                  <CalendarDays size={16} className="mr-2" />
-                  {t("Randevu Al", "Book Appointment")}
-                </Button>
-              </Link>
-              <Link href="/concierge" className="block">
-                <Button variant="outline" size="lg" className="w-full">
-                  <Video size={16} className="mr-2" />
-                  {t("Görüntülü Görüşme", "Request Video Call")}
-                </Button>
-              </Link>
-              <a
-                href={BRAND_WHATSAPP}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <Button variant="outline" size="lg" className="w-full">
-                  <Phone size={16} className="mr-2" />
-                  WhatsApp
-                </Button>
-              </a>
-            </div>
+            {product.availability === "SOLD" || product.availability === "RESERVED" ? (
+              <InterestForm productId={product._id} productTitle={product.title} />
+            ) : (
+              <div className="space-y-3 pt-2">
+                <Link href="/concierge" className="block">
+                  <Button variant="primary" size="lg" className="w-full">
+                    <CalendarDays size={16} className="mr-2" />
+                    {t("Randevu Al", "Book Appointment")}
+                  </Button>
+                </Link>
+                <Link href="/concierge" className="block">
+                  <Button variant="outline" size="lg" className="w-full">
+                    <Video size={16} className="mr-2" />
+                    {t("Görüntülü Görüşme", "Request Video Call")}
+                  </Button>
+                </Link>
+                <a
+                  href={BRAND_WHATSAPP}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <Button variant="outline" size="lg" className="w-full">
+                    <Phone size={16} className="mr-2" />
+                    WhatsApp
+                  </Button>
+                </a>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

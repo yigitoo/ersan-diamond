@@ -61,6 +61,7 @@ export async function GET(req: NextRequest) {
         .skip(skip)
         .limit(limit)
         .populate("assignedUserId", "name email")
+        .populate("relatedProductId", "title brand model slug category")
         .lean(),
       Lead.countDocuments(filter),
     ]);

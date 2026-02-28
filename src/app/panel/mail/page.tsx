@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSwrPaginated, useSwrFetch } from "@/lib/hooks";
 import { useSWRConfig } from "swr";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Sheet } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/shared/pagination";
 import { formatRelative, formatDateTime } from "@/lib/utils/formatters";
 import { cn } from "@/lib/utils/cn";
-import { Mail, Send, Search, Reply, User } from "lucide-react";
+import { Mail, Send, Search, Reply, User, Archive, ArchiveRestore, Eye, EyeOff, XCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 export default function MailPage() {
@@ -20,6 +21,7 @@ export default function MailPage() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
 
   // Compose dialog
   const [composeOpen, setComposeOpen] = useState(false);
@@ -35,18 +37,40 @@ export default function MailPage() {
   const [replyText, setReplyText] = useState("");
   const [replySending, setReplySending] = useState(false);
 
+  // Action loading
+  const [actionLoading, setActionLoading] = useState(false);
+
   const { data, isLoading } = useSwrPaginated("/api/mail", { page, limit: 20, search: search || undefined });
-  const threads = (data as any)?.data || [];
+  const allThreads = (data as any)?.data || [];
   const meta = (data as any)?.meta;
 
+  // Client-side filtering: hide ARCHIVED/CLOSED unless showArchived is on
+  const threads = showArchived
+    ? allThreads
+    : allThreads.filter((thread: any) => !thread.status || thread.status === "OPEN");
+
   // Fetch thread detail
-  const { data: threadDetail } = useSwrFetch<any>(selectedThreadId ? `/api/mail/threads/${selectedThreadId}` : null);
+  const { data: threadDetail, mutate: mutateThread } = useSwrFetch<any>(selectedThreadId ? `/api/mail/threads/${selectedThreadId}` : null);
   const threadEmails = threadDetail?.emails || [];
   const threadInfo = threadDetail?.thread;
 
   const refreshData = useCallback(() => {
     mutate((key: string) => typeof key === "string" && key.startsWith("/api/mail"), undefined, { revalidate: true });
   }, [mutate]);
+
+  // Auto mark as read when opening a thread
+  useEffect(() => {
+    if (threadInfo && threadInfo.unread) {
+      fetch(`/api/mail/threads/${threadInfo._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "markRead" }),
+      }).then(() => {
+        mutateThread();
+        refreshData();
+      });
+    }
+  }, [threadInfo?._id, threadInfo?.unread, mutateThread, refreshData]);
 
   const openThread = (threadId: string) => {
     setSelectedThreadId(threadId);
@@ -58,6 +82,26 @@ export default function MailPage() {
     setSheetOpen(false);
     setSelectedThreadId(null);
     setReplyText("");
+  };
+
+  const handleThreadAction = async (action: string) => {
+    if (!threadInfo) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/mail/threads/${threadInfo._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (res.ok) {
+        mutateThread();
+        refreshData();
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const updateCompose = (field: string, value: string) => {
@@ -125,13 +169,19 @@ export default function MailPage() {
         return;
       }
       setReplyText("");
-      mutate(`/api/mail/threads/${selectedThreadId}`);
+      mutateThread();
       refreshData();
     } catch {
       alert(t("Bağlantı hatası", "Network error"));
     } finally {
       setReplySending(false);
     }
+  };
+
+  const getStatusBadge = (status: string) => {
+    if (status === "ARCHIVED") return <Badge variant="default">{t("Arşiv", "Archived")}</Badge>;
+    if (status === "CLOSED") return <Badge variant="error">{t("Kapalı", "Closed")}</Badge>;
+    return null;
   };
 
   return (
@@ -143,14 +193,25 @@ export default function MailPage() {
         </Button>
       </div>
 
-      <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-mist" />
-        <input
-          placeholder={t("Konuşmaları ara...", "Search threads...")}
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="w-full bg-charcoal border border-slate rounded-sm pl-10 pr-4 py-3 text-sm text-brand-white placeholder:text-mist/50 focus:outline-none focus:border-brand-white transition-colors"
-        />
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-mist" />
+          <input
+            placeholder={t("Konuşmaları ara...", "Search threads...")}
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="w-full bg-charcoal border border-slate rounded-sm pl-10 pr-4 py-3 text-sm text-brand-white placeholder:text-mist/50 focus:outline-none focus:border-brand-white transition-colors"
+          />
+        </div>
+        <label className="flex items-center gap-2 text-sm text-mist cursor-pointer select-none shrink-0">
+          <input
+            type="checkbox"
+            checked={showArchived}
+            onChange={(e) => setShowArchived(e.target.checked)}
+            className="accent-brand-gold"
+          />
+          {t("Arşivlenmişleri Göster", "Show Archived")}
+        </label>
       </div>
 
       {isLoading ? (
@@ -165,15 +226,22 @@ export default function MailPage() {
           {threads.map((thread: any) => (
             <div
               key={thread._id}
-              className="flex items-center justify-between p-4 border border-slate/30 rounded-sm hover:bg-charcoal/50 transition-colors cursor-pointer"
+              className={cn(
+                "flex items-center justify-between p-4 border border-slate/30 rounded-sm hover:bg-charcoal/50 transition-colors cursor-pointer",
+                thread.unread && "border-l-2 border-l-brand-gold"
+              )}
               onClick={() => openThread(thread._id)}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="text-sm font-medium truncate">{thread.customerEmail}</p>
+                  {thread.unread && (
+                    <span className="w-2 h-2 rounded-full bg-brand-gold shrink-0" />
+                  )}
+                  <p className={cn("text-sm truncate", thread.unread ? "font-semibold" : "font-medium")}>{thread.customerEmail}</p>
                   <span className="text-xs text-mist bg-charcoal px-2 py-0.5 rounded-full shrink-0">{thread.messageCount}</span>
+                  {thread.status && getStatusBadge(thread.status)}
                 </div>
-                <p className="text-xs text-mist truncate">{thread.subject}</p>
+                <p className={cn("text-xs truncate", thread.unread ? "text-brand-white/80" : "text-mist")}>{thread.subject}</p>
               </div>
               <span className="text-xs text-mist shrink-0 ml-4">{formatRelative(thread.lastMessageAt)}</span>
             </div>
@@ -227,6 +295,62 @@ export default function MailPage() {
               <p className="text-sm font-medium">{threadInfo?.customerEmail}</p>
               <p className="text-xs text-mist">{threadInfo?.subject}</p>
               <p className="text-xs text-mist">{threadInfo?.messageCount} {t("mesaj", "message(s)")}</p>
+            </div>
+
+            {/* Thread actions */}
+            <div className="flex gap-2 flex-wrap items-center">
+              {threadInfo?.status === "OPEN" || !threadInfo?.status ? (
+                <button
+                  onClick={() => handleThreadAction("archive")}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-slate rounded-sm text-mist hover:text-brand-white hover:border-brand-white/30 transition-colors disabled:opacity-50"
+                >
+                  <Archive size={13} />
+                  {t("Arşivle", "Archive")}
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleThreadAction("reopen")}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-slate rounded-sm text-mist hover:text-brand-white hover:border-brand-white/30 transition-colors disabled:opacity-50"
+                >
+                  <ArchiveRestore size={13} />
+                  {t("Yeniden Aç", "Reopen")}
+                </button>
+              )}
+
+              {threadInfo?.status !== "CLOSED" && (
+                <button
+                  onClick={() => handleThreadAction("close")}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-slate rounded-sm text-mist hover:text-brand-white hover:border-brand-white/30 transition-colors disabled:opacity-50"
+                >
+                  <XCircle size={13} />
+                  {t("Kapat", "Close")}
+                </button>
+              )}
+
+              {threadInfo?.unread ? (
+                <button
+                  onClick={() => handleThreadAction("markRead")}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-slate rounded-sm text-mist hover:text-brand-white hover:border-brand-white/30 transition-colors disabled:opacity-50"
+                >
+                  <Eye size={13} />
+                  {t("Okundu", "Mark Read")}
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleThreadAction("markUnread")}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-slate rounded-sm text-mist hover:text-brand-white hover:border-brand-white/30 transition-colors disabled:opacity-50"
+                >
+                  <EyeOff size={13} />
+                  {t("Okunmadı", "Mark Unread")}
+                </button>
+              )}
+
+              {threadInfo?.status && getStatusBadge(threadInfo.status)}
             </div>
 
             {/* Messages */}

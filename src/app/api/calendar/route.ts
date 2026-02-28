@@ -47,6 +47,40 @@ export async function GET(req: NextRequest) {
   }
 }
 
+export async function DELETE(req: NextRequest) {
+  try {
+    const user = await getSessionUser();
+    if (!user || !hasPermission(user.role, "calendar:manage")) {
+      return errorResponse("Unauthorized", 403);
+    }
+
+    const id = req.nextUrl.searchParams.get("id");
+    if (!id) {
+      return errorResponse("id parametresi gerekli", 400);
+    }
+
+    await connectDB();
+
+    const event = await CalendarEvent.findById(id);
+    if (!event) {
+      return errorResponse("Etkinlik bulunamadı", 404);
+    }
+
+    if (event.type === "APPOINTMENT") {
+      return errorResponse("Randevu etkinlikleri silinemez", 400);
+    }
+
+    await CalendarEvent.findByIdAndDelete(id);
+
+    await logCrud(user.id, user.role, "delete", "CalendarEvent", id);
+
+    return successResponse({ deleted: true });
+  } catch (error) {
+    console.error("[API] Calendar delete error:", error);
+    return errorResponse("Etkinlik silinemedi", 500);
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getSessionUser();

@@ -26,8 +26,8 @@ export function WishlistButton({ productId, className, size = 18 }: WishlistButt
       className={cn(
         "p-2 rounded-full transition-all duration-300",
         inWishlist
-          ? "text-red-400 bg-red-500/20"
-          : "text-mist/60 hover:text-brand-white bg-brand-black/40 hover:bg-brand-black/60",
+          ? "text-red-400 bg-red-500/20 backdrop-blur-sm"
+          : "text-white/80 hover:text-white bg-black/50 hover:bg-black/70 backdrop-blur-sm",
         className
       )}
       aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}

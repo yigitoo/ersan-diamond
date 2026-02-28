@@ -1,0 +1,7 @@
+name = "ersan-diamond-images"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "ersan-diamond-assets"
