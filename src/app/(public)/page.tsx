@@ -317,12 +317,11 @@ export default function HomePage() {
                       {/* Product image */}
                       <div className="aspect-square bg-slate/20 relative overflow-hidden">
                         {product.images[0]?.url ? (
-                          <Image
+                          <img
                             src={product.images[0].url}
                             alt={product.images[0].alt || `${product.brand} ${product.model}`}
-                            fill
-                            className="object-cover transition-transform duration-700 group-hover:scale-105"
-                            sizes="(max-width: 768px) 50vw, 25vw"
+                            loading="lazy"
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">
