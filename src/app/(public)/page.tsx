@@ -149,7 +149,7 @@ export default function HomePage() {
           className="text-center px-6 max-w-3xl"
         >
           {/* Pre-heading */}
-          <p className="text-xs tracking-[0.3em] uppercase text-mist mb-6">
+          <p className="text-xs tracking-[0.3em] uppercase text-white font-bold mb-6">
             ERSAN DIAMOND
           </p>
 

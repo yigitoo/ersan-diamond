@@ -97,7 +97,7 @@ export function Navbar() {
             </div>
 
             {/* ── Center: Desktop links ── */}
-            <ul className="hidden lg:flex items-center gap-1">
+            <ul className="hidden md:flex items-center gap-1">
               {NAV_ITEMS.map((item) => {
                 const megaKey = getMegaKey(item.key);
                 const hasMega = megaKey !== null;
@@ -180,7 +180,7 @@ export function Navbar() {
 
               {/* Mobile hamburger */}
               <button
-                className="lg:hidden p-2.5 text-white hover:text-brand-gold transition-colors duration-500 ml-1"
+                className="md:hidden p-2.5 text-white hover:text-brand-gold transition-colors duration-500 ml-1"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open menu"
               >
