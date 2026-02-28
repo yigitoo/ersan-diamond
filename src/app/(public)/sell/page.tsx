@@ -131,10 +131,11 @@ export default function SellPage() {
           productBrand: data.brand,
           productModel: data.model,
           productReference: data.reference,
-          productYear: data.year,
+          productYear: data.year ? Number(data.year) : undefined,
+          productCondition: data.condition,
           desiredPrice: data.askingPrice ? Number(data.askingPrice.replace(/[^0-9]/g, "")) : undefined,
           currency: data.currency,
-          notes: data.description,
+          notes: [data.description, data.boxPapers ? `Box & Papers: ${data.boxPapers}` : ""].filter(Boolean).join("\n"),
           source: "WEBSITE",
         }),
       });
