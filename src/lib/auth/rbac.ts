@@ -23,6 +23,12 @@ type Permission =
   | "calendar:view"
   | "calendar:manage"
   | "calendar:view_all"
+  | "logistics:view"
+  | "logistics:manage"
+  | "logistics:view_all"
+  | "courier:view"
+  | "courier:update_status"
+  | "courier:update_location"
   | "logs:view"
   | "reports:view"
   | "settings:manage";
@@ -37,6 +43,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "team:view", "team:manage",
     "mail:view", "mail:send", "mail:view_all",
     "calendar:view", "calendar:manage", "calendar:view_all",
+    "logistics:view", "logistics:manage", "logistics:view_all",
+    "courier:view", "courier:update_status", "courier:update_location",
     "logs:view",
     "reports:view",
     "settings:manage",
@@ -50,6 +58,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "team:view",
     "mail:view", "mail:send", "mail:view_all",
     "calendar:view", "calendar:manage", "calendar:view_all",
+    "logistics:view", "logistics:manage", "logistics:view_all",
+    "courier:view", "courier:update_status", "courier:update_location",
     "logs:view",
     "reports:view",
   ],
@@ -59,6 +69,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "leads:view", "leads:manage",
     "sales:view", "sales:create",
     "inventory:view",
+    "logistics:view",
+    "courier:view", "courier:update_status", "courier:update_location",
     "mail:view", "mail:send",
     "calendar:view",
   ],

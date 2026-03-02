@@ -66,7 +66,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
         break;
     }
 
-    const thread = await EmailThread.findByIdAndUpdate(id, update, { new: true }).lean();
+    const thread = await EmailThread.findByIdAndUpdate(id, update, { returnDocument: "after" }).lean();
     if (!thread) return errorResponse("Thread not found", 404);
 
     return successResponse(thread);

@@ -62,7 +62,7 @@ export async function PATCH(
     const before = await Lead.findById(id).lean();
     if (!before) return errorResponse("Lead bulunamadı", 404);
 
-    const updated = await Lead.findByIdAndUpdate(id, parsed.data, { new: true }).lean();
+    const updated = await Lead.findByIdAndUpdate(id, parsed.data, { returnDocument: "after" }).lean();
 
     await logCrud(user.id, user.role, "update", "Lead", id, {
       before: { status: before.status } as Record<string, unknown>,

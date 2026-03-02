@@ -48,7 +48,7 @@ export async function PUT(
     const before = await Product.findById(id).lean();
     if (!before) return errorResponse("Ürün bulunamadı", 404);
 
-    const updated = await Product.findByIdAndUpdate(id, parsed.data, { new: true }).lean();
+    const updated = await Product.findByIdAndUpdate(id, parsed.data, { returnDocument: "after" }).lean();
 
     await logCrud(user.id, user.role, "update", "Product", id, {
       before: { price: before.price, availability: before.availability, published: before.published } as Record<string, unknown>,

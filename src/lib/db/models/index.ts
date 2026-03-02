@@ -8,3 +8,5 @@ export { default as Email } from "./email";
 export { default as CalendarEvent } from "./calendar-event";
 export { default as AuditLog } from "./audit-log";
 export { default as AppSetting } from "./app-setting";
+export { default as Delivery } from "./delivery";
+export { default as Otp } from "./otp";

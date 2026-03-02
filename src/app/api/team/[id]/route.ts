@@ -66,7 +66,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
       active: existingUser.active,
     };
 
-    const updatedUser = await User.findByIdAndUpdate(id, updateFields, { new: true })
+    const updatedUser = await User.findByIdAndUpdate(id, updateFields, { returnDocument: "after" })
       .select("-passwordHash")
       .lean();
 

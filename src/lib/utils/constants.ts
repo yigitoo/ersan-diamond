@@ -115,6 +115,36 @@ export const PAYMENT_METHOD_LABELS: Record<string, BiLabel> = {
   OTHER: { tr: "Diğer", en: "Other" },
 };
 
+// Delivery status config
+export const DELIVERY_STATUS_CONFIG: Record<string, { label: BiLabel; color: string }> = {
+  PENDING:    { label: { tr: "Beklemede", en: "Pending" }, color: "bg-yellow-500/20 text-yellow-400" },
+  ASSIGNED:   { label: { tr: "Atandı", en: "Assigned" }, color: "bg-blue-500/20 text-blue-400" },
+  PICKED_UP:  { label: { tr: "Teslim Alındı", en: "Picked Up" }, color: "bg-indigo-500/20 text-indigo-400" },
+  IN_TRANSIT: { label: { tr: "Yolda", en: "In Transit" }, color: "bg-purple-500/20 text-purple-400" },
+  DELIVERED:  { label: { tr: "Teslim Edildi", en: "Delivered" }, color: "bg-green-500/20 text-green-400" },
+  CANCELLED:  { label: { tr: "İptal Edildi", en: "Cancelled" }, color: "bg-red-500/20 text-red-400" },
+};
+
+export const DELIVERY_PRIORITY_CONFIG: Record<string, { label: BiLabel; color: string }> = {
+  NORMAL: { label: { tr: "Normal", en: "Normal" }, color: "bg-slate text-soft-white" },
+  HIGH:   { label: { tr: "Yüksek", en: "High" }, color: "bg-orange-500/20 text-orange-400" },
+  URGENT: { label: { tr: "Acil", en: "Urgent" }, color: "bg-red-500/20 text-red-400" },
+};
+
+export const DELIVERY_TIME_SLOT_LABELS: Record<string, BiLabel> = {
+  MORNING:   { tr: "Sabah (09:00-12:00)", en: "Morning (09:00-12:00)" },
+  AFTERNOON: { tr: "Öğleden Sonra (12:00-17:00)", en: "Afternoon (12:00-17:00)" },
+  EVENING:   { tr: "Akşam (17:00-20:00)", en: "Evening (17:00-20:00)" },
+  FLEXIBLE:  { tr: "Esnek", en: "Flexible" },
+};
+
+export const DEFAULT_PICKUP_ADDRESS = {
+  label: "Ersan Diamond Showroom",
+  street: "",
+  city: "İstanbul",
+  country: "Türkiye",
+};
+
 // Pagination
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;

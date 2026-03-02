@@ -15,6 +15,8 @@ const NAV_LABELS: Record<string, { tr: string; en: string }> = {
   "/panel/sales": { tr: "Satışlar", en: "Sales" },
   "/panel/inventory": { tr: "Envanter", en: "Inventory" },
   "/panel/team": { tr: "Ekip", en: "Team" },
+  "/panel/logistics": { tr: "Lojistik", en: "Logistics" },
+  "/panel/courier": { tr: "Kurye Paneli", en: "Courier Panel" },
   "/panel/mail": { tr: "Posta Merkezi", en: "Mail Center" },
   "/panel/calendar": { tr: "Takvim", en: "Calendar" },
   "/panel/logs": { tr: "İşlem Kayıtları", en: "Audit Logs" },

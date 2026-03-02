@@ -63,13 +63,13 @@ async function seed() {
   const ownerHash = await bcrypt.hash("ErsanDiamond2024!", 12);
   const owner = await db.collection("users").insertOne({
     name: "Ersan Bey",
-    email: "ersan@ersandiamond.com",
+    email: "gumusyigit101@gmail.com",
     passwordHash: ownerHash,
     role: "OWNER",
     active: true,
     signatureName: "Ersan",
     signatureTitle: "Founder & CEO",
-    phoneInternal: "+90 532 000 0000",
+    phoneInternal: "+905523548503",
     createdAt: new Date(),
     updatedAt: new Date(),
   });
@@ -78,13 +78,13 @@ async function seed() {
   const adminHash = await bcrypt.hash("Admin2024!", 12);
   const admin = await db.collection("users").insertOne({
     name: "Ayşe Hanım",
-    email: "ayse@ersandiamond.com",
+    email: "gumusyigit101+admin@gmail.com",
     passwordHash: adminHash,
     role: "ADMIN",
     active: true,
     signatureName: "Ayşe",
     signatureTitle: "Concierge Manager",
-    phoneInternal: "+90 533 000 0000",
+    phoneInternal: "+905523548503",
     createdAt: new Date(),
     updatedAt: new Date(),
   });
@@ -93,13 +93,13 @@ async function seed() {
   const salesHash = await bcrypt.hash("Sales2024!", 12);
   const sales = await db.collection("users").insertOne({
     name: "Yuşa Bey",
-    email: "yusa@ersandiamond.com",
+    email: "gumusyigit101+sales@gmail.com",
     passwordHash: salesHash,
     role: "SALES",
     active: true,
     signatureName: "Yuşa",
     signatureTitle: "Senior Sales Consultant",
-    phoneInternal: "+90 534 000 0000",
+    phoneInternal: "+905523548503",
     createdAt: new Date(),
     updatedAt: new Date(),
   });
@@ -2226,9 +2226,9 @@ async function seed() {
   console.log(`  Appointments: ${appointments.length}`);
   console.log("");
   console.log("Login credentials:");
-  console.log("  OWNER: ersan@ersandiamond.com / ErsanDiamond2024!");
-  console.log("  ADMIN: ayse@ersandiamond.com / Admin2024!");
-  console.log("  SALES: yusa@ersandiamond.com / Sales2024!");
+  console.log("  OWNER: gumusyigit101@gmail.com / ErsanDiamond2024!");
+  console.log("  ADMIN: gumusyigit101+admin@gmail.com / Admin2024!");
+  console.log("  SALES: gumusyigit101+sales@gmail.com / Sales2024!");
   console.log("");
 
   await mongoose.disconnect();

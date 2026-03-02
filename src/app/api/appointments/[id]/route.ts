@@ -58,7 +58,7 @@ export async function PATCH(
     const before = await Appointment.findById(id).lean();
     if (!before) return errorResponse("Randevu bulunamadı", 404);
 
-    const updated = await Appointment.findByIdAndUpdate(id, parsed.data, { new: true }).lean();
+    const updated = await Appointment.findByIdAndUpdate(id, parsed.data, { returnDocument: "after" }).lean();
 
     await logCrud(user.id, user.role, "update", "Appointment", id, {
       before: { status: before.status } as Record<string, unknown>,

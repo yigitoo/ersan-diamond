@@ -88,8 +88,10 @@ export default function MailPage() {
   const openThread = (threadId: string) => {
     setSelectedThreadId(threadId);
     setReplyText("");
-    // On mobile/tablet, open sheet. On desktop, inline selection handles it.
-    setMobileSheetOpen(true);
+    // Only open sheet on mobile/tablet — desktop uses inline panel
+    if (window.innerWidth < 1024) {
+      setMobileSheetOpen(true);
+    }
   };
 
   const closeThread = () => {

@@ -1,13 +1,13 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { APPOINTMENT_STATUS_CONFIG, LEAD_STATUS_CONFIG, AVAILABILITY_LABELS, tl } from "@/lib/utils/constants";
+import { APPOINTMENT_STATUS_CONFIG, LEAD_STATUS_CONFIG, AVAILABILITY_LABELS, DELIVERY_STATUS_CONFIG, DELIVERY_PRIORITY_CONFIG, tl } from "@/lib/utils/constants";
 import { cn } from "@/lib/utils/cn";
 import { useI18n } from "@/lib/i18n";
 
 interface StatusBadgeProps {
   status: string;
-  type: "appointment" | "lead" | "availability";
+  type: "appointment" | "lead" | "availability" | "delivery" | "deliveryPriority";
   className?: string;
 }
 
@@ -24,6 +24,18 @@ export function StatusBadge({ status, type, className }: StatusBadgeProps) {
     }
   } else if (type === "lead") {
     const config = LEAD_STATUS_CONFIG[status];
+    if (config) {
+      label = tl(t, config.label);
+      color = config.color;
+    }
+  } else if (type === "delivery") {
+    const config = DELIVERY_STATUS_CONFIG[status];
+    if (config) {
+      label = tl(t, config.label);
+      color = config.color;
+    }
+  } else if (type === "deliveryPriority") {
+    const config = DELIVERY_PRIORITY_CONFIG[status];
     if (config) {
       label = tl(t, config.label);
       color = config.color;

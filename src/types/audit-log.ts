@@ -21,7 +21,8 @@ export type AuditEntityType =
   | "User"
   | "EmailThread"
   | "Email"
-  | "CalendarEvent";
+  | "CalendarEvent"
+  | "Delivery";
 
 export interface IAuditLog {
   _id: string;
