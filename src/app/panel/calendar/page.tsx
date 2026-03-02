@@ -101,14 +101,14 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("Takvim", "Calendar")}</h2>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <Button variant="outline" size="sm" onClick={() => setAddDialogOpen(true)}>
             <Plus size={16} className="mr-1.5" />
             {t("Etkinlik Ekle", "Add Event")}
           </Button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-center">
             <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2 text-mist hover:text-brand-white transition-colors">
               <ChevronLeft size={18} />
             </button>
@@ -127,7 +127,7 @@ export default function CalendarPage() {
       {/* Day headers */}
       <div className="grid grid-cols-7 gap-1">
         {dayNames.map((day) => (
-          <div key={day} className="text-center text-xs text-mist py-2 font-medium">{day}</div>
+          <div key={day} className="text-center text-[10px] md:text-xs text-mist py-1 md:py-2 font-medium">{day}</div>
         ))}
 
         {/* Padding */}
@@ -143,14 +143,24 @@ export default function CalendarPage() {
               key={dayKey}
               onClick={() => setSelectedDay(day)}
               className={cn(
-                "min-h-24 border border-slate/30 rounded-sm p-2 cursor-pointer transition-colors",
+                "min-h-10 md:min-h-24 border border-slate/30 rounded-sm p-1 md:p-2 cursor-pointer transition-colors",
                 isToday(day) && "border-brand-gold/50 bg-brand-gold/5",
                 isSelected && "border-brand-white/60 bg-brand-white/5",
                 !isSameMonth(day, currentMonth) && "opacity-30"
               )}
             >
-              <span className={cn("text-xs", isToday(day) ? "text-brand-gold font-bold" : "text-mist")}>{format(day, "d")}</span>
-              <div className="mt-1 space-y-0.5">
+              <span className={cn("text-[10px] md:text-xs", isToday(day) ? "text-brand-gold font-bold" : "text-mist")}>{format(day, "d")}</span>
+              {/* Mobile: dots only */}
+              {dayEvents.length > 0 && (
+                <div className="flex gap-0.5 mt-0.5 md:hidden flex-wrap">
+                  {dayEvents.slice(0, 4).map((event: any, i: number) => {
+                    const dotColor = event.type === "APPOINTMENT" ? "bg-brand-gold" : event.type === "BLOCKED" ? "bg-red-400" : "bg-blue-400";
+                    return <div key={event._id || i} className={cn("w-1.5 h-1.5 rounded-full", dotColor)} />;
+                  })}
+                </div>
+              )}
+              {/* Desktop: text labels */}
+              <div className="mt-1 space-y-0.5 hidden md:block">
                 {dayEvents.slice(0, 3).map((event: any, i: number) => (
                   <div
                     key={event._id || i}
@@ -172,7 +182,7 @@ export default function CalendarPage() {
 
       {/* Selected day events list */}
       {selectedDay && (
-        <div className="border border-slate/30 rounded-sm p-4 space-y-3">
+        <div className="border border-slate/30 rounded-sm p-3 md:p-4 space-y-3">
           <h3 className="font-serif text-lg text-brand-white">
             {locale === "tr"
               ? format(selectedDay, "d MMMM yyyy, EEEE", { locale: tr })

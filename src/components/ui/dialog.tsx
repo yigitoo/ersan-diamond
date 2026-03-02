@@ -41,8 +41,8 @@ export function Dialog({ open, onClose, children, className, title }: DialogProp
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
               "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
-              "w-full max-w-lg bg-charcoal border border-slate rounded-sm p-6",
-              "max-h-[85vh] overflow-y-auto",
+              "w-[calc(100%-1.5rem)] sm:w-full max-w-lg bg-charcoal border border-slate rounded-sm p-4 sm:p-6",
+              "max-h-[90vh] sm:max-h-[85vh] overflow-y-auto",
               className
             )}
           >

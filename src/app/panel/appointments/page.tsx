@@ -145,9 +145,9 @@ export default function AppointmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("Randevular", "Appointments")}</h2>
-        <Select options={statusOptions} placeholder={t("Tüm Durumlar", "All Statuses")} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="w-48" />
+        <Select options={statusOptions} placeholder={t("Tüm Durumlar", "All Statuses")} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="w-full sm:w-48" />
       </div>
 
       {isLoading ? (
@@ -161,8 +161,8 @@ export default function AppointmentsPage() {
                 <TableHead>{t("Hizmet", "Service")}</TableHead>
                 <TableHead>{t("Tarih ve Saat", "Date & Time")}</TableHead>
                 <TableHead>{t("Durum", "Status")}</TableHead>
-                <TableHead>{t("Temsilci", "Rep")}</TableHead>
-                <TableHead>{t("İletişim", "Contact")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Temsilci", "Rep")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("İletişim", "Contact")}</TableHead>
                 <TableHead className="text-right">{t("İşlemler", "Actions")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -173,8 +173,8 @@ export default function AppointmentsPage() {
                   <TableCell className="text-mist">{tl(t, SERVICE_TYPE_LABELS[appt.serviceType]) || appt.serviceType}</TableCell>
                   <TableCell>{formatDateTime(appt.datetimeStart)}</TableCell>
                   <TableCell><StatusBadge status={appt.status} type="appointment" /></TableCell>
-                  <TableCell className="text-xs text-mist">{appt.assignedUserId?.name || <span className="text-mist/50">{t("Atanmamış", "Unassigned")}</span>}</TableCell>
-                  <TableCell className="text-xs text-mist">{appt.customerEmail}<br/>{appt.customerPhone}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{appt.assignedUserId?.name || <span className="text-mist/50">{t("Atanmamış", "Unassigned")}</span>}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{appt.customerEmail}<br/>{appt.customerPhone}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); openDetail(appt._id); }}>
                       <Eye size={14} />
@@ -205,7 +205,7 @@ export default function AppointmentsPage() {
             {/* Appointment Info */}
             <div className="space-y-3">
               <h3 className="text-xs font-medium tracking-wider uppercase text-mist">{t("Detaylar", "Details")}</h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-mist">{t("Hizmet", "Service")}</span>
                   <p>{tl(t, SERVICE_TYPE_LABELS[detail.serviceType]) || detail.serviceType}</p>

@@ -141,11 +141,11 @@ export default function LeadsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("Müşteri Adayları", "Leads")}</h2>
-        <div className="flex items-center gap-3">
-          <Input placeholder={t("Ara...", "Search...")} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-48" />
-          <Select options={statusOptions} placeholder={t("Tüm Durumlar", "All Statuses")} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="w-40" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <Input placeholder={t("Ara...", "Search...")} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-full sm:w-48" />
+          <Select options={statusOptions} placeholder={t("Tüm Durumlar", "All Statuses")} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="w-full sm:w-40" />
         </div>
       </div>
 
@@ -157,13 +157,13 @@ export default function LeadsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t("Ad Soyad", "Name")}</TableHead>
-                <TableHead>{t("Tür", "Type")}</TableHead>
-                <TableHead>{t("İletişim", "Contact")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Tür", "Type")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("İletişim", "Contact")}</TableHead>
                 <TableHead>{t("Durum", "Status")}</TableHead>
-                <TableHead>{t("Atanan", "Assigned")}</TableHead>
-                <TableHead>{t("Ürün", "Product")}</TableHead>
-                <TableHead>{t("Kaynak", "Source")}</TableHead>
-                <TableHead>{t("Oluşturulma", "Created")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Atanan", "Assigned")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Ürün", "Product")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Kaynak", "Source")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Oluşturulma", "Created")}</TableHead>
                 <TableHead className="text-right">{t("İşlemler", "Actions")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -171,13 +171,13 @@ export default function LeadsPage() {
               {leads.map((lead: any) => (
                 <TableRow key={lead._id} className="cursor-pointer hover:bg-charcoal/50" onClick={() => openDetail(lead._id)}>
                   <TableCell className="font-medium">{lead.name}</TableCell>
-                  <TableCell className="text-mist text-xs">{lead.type}</TableCell>
-                  <TableCell className="text-xs text-mist">{lead.email}<br/>{lead.phone}</TableCell>
+                  <TableCell className="text-mist text-xs hidden md:table-cell">{lead.type}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{lead.email}<br/>{lead.phone}</TableCell>
                   <TableCell><StatusBadge status={lead.status} type="lead" /></TableCell>
-                  <TableCell className="text-xs text-mist">{lead.assignedUserId?.name || <span className="text-mist/50">{t("Atanmamış", "Unassigned")}</span>}</TableCell>
-                  <TableCell className="text-xs text-mist">{lead.relatedProductId ? `${lead.relatedProductId.brand} ${lead.relatedProductId.model}` : "-"}</TableCell>
-                  <TableCell className="text-xs text-mist">{lead.source}</TableCell>
-                  <TableCell className="text-xs text-mist">{formatRelative(lead.createdAt)}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{lead.assignedUserId?.name || <span className="text-mist/50">{t("Atanmamış", "Unassigned")}</span>}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{lead.relatedProductId ? `${lead.relatedProductId.brand} ${lead.relatedProductId.model}` : "-"}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{lead.source}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{formatRelative(lead.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); openDetail(lead._id); }}>
                       <Eye size={14} />
@@ -208,7 +208,7 @@ export default function LeadsPage() {
             {/* Lead Info */}
             <div className="space-y-3">
               <h3 className="text-xs font-medium tracking-wider uppercase text-mist">{t("Müşteri Adayı Bilgisi", "Lead Info")}</h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-mist">{t("Tür", "Type")}</span>
                   <p>{detail.type}</p>
@@ -239,7 +239,7 @@ export default function LeadsPage() {
             {(detail.productBrand || detail.productModel) && (
               <div className="space-y-3">
                 <h3 className="text-xs font-medium tracking-wider uppercase text-mist">{t("Ürün Detayları", "Product Details")}</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {detail.productBrand && <div><span className="text-mist">{t("Marka", "Brand")}</span><p>{detail.productBrand}</p></div>}
                   {detail.productModel && <div><span className="text-mist">{t("Model", "Model")}</span><p>{detail.productModel}</p></div>}
                   {detail.productReference && <div><span className="text-mist">{t("Referans", "Reference")}</span><p>{detail.productReference}</p></div>}

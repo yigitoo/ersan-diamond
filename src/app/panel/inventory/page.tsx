@@ -229,15 +229,15 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("Envanter", "Inventory")}</h2>
         <Button variant="primary" size="sm" onClick={openAddDialog}><Plus size={16} className="mr-1" /> {t("Ürün Ekle", "Add Product")}</Button>
       </div>
 
       <div className="flex items-center gap-3 flex-wrap">
-        <Input placeholder={t("Ara...", "Search...")} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-48" />
-        <Select options={[{ value: "WATCH", label: t("Saatler", "Watches") }, { value: "HERMES", label: "Hermes" }]} placeholder={t("Tüm Kategoriler", "All Categories")} value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }} className="w-40" />
-        <Select options={[{ value: "AVAILABLE", label: t("Mevcut", "Available") }, { value: "RESERVED", label: t("Rezerve", "Reserved") }, { value: "SOLD", label: t("Satıldı", "Sold") }]} placeholder={t("Tüm Durumlar", "All Status")} value={availability} onChange={(e) => { setAvailability(e.target.value); setPage(1); }} className="w-40" />
+        <Input placeholder={t("Ara...", "Search...")} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-full sm:w-48" />
+        <Select options={[{ value: "WATCH", label: t("Saatler", "Watches") }, { value: "HERMES", label: "Hermes" }]} placeholder={t("Tüm Kategoriler", "All Categories")} value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }} className="w-full sm:w-40" />
+        <Select options={[{ value: "AVAILABLE", label: t("Mevcut", "Available") }, { value: "RESERVED", label: t("Rezerve", "Reserved") }, { value: "SOLD", label: t("Satıldı", "Sold") }]} placeholder={t("Tüm Durumlar", "All Status")} value={availability} onChange={(e) => { setAvailability(e.target.value); setPage(1); }} className="w-full sm:w-40" />
       </div>
 
       {isLoading ? (
@@ -249,11 +249,11 @@ export default function InventoryPage() {
               <TableRow>
                 <TableHead>{t("Görsel", "Image")}</TableHead>
                 <TableHead>{t("Ürün", "Product")}</TableHead>
-                <TableHead>{t("Kategori", "Category")}</TableHead>
-                <TableHead>{t("Durum", "Condition")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Kategori", "Category")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Durum", "Condition")}</TableHead>
                 <TableHead>{t("Fiyat", "Price")}</TableHead>
                 <TableHead>{t("Stok Durumu", "Status")}</TableHead>
-                <TableHead>{t("Yayın", "Published")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Yayın", "Published")}</TableHead>
                 <TableHead className="text-right">{t("İşlemler", "Actions")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -271,11 +271,11 @@ export default function InventoryPage() {
                     <span className="font-medium">{product.brand} {product.model}</span>
                     <br/><span className="text-xs text-mist">{product.reference}{product.year ? ` (${product.year})` : ""}</span>
                   </TableCell>
-                  <TableCell className="text-xs text-mist">{product.category}</TableCell>
-                  <TableCell className="text-xs">{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{product.category}</TableCell>
+                  <TableCell className="text-xs hidden md:table-cell">{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</TableCell>
                   <TableCell>{product.priceOnRequest ? t("SOR", "POR") : product.price ? formatPrice(product.price, product.currency) : "-"}</TableCell>
                   <TableCell><StatusBadge status={product.availability} type="availability" /></TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <button
                       onClick={() => togglePublish(product)}
                       className={cn(
@@ -307,14 +307,14 @@ export default function InventoryPage() {
       {/* Add/Edit Product Dialog */}
       <Sheet open={dialogOpen} onClose={() => setDialogOpen(false)} title={editingId ? t("Ürün Düzenle", "Edit Product") : t("Ürün Ekle", "Add Product")}>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Select label={t("Kategori", "Category")} options={CATEGORY_OPTIONS} value={form.category} onChange={(e) => updateForm("category", e.target.value)} />
             <Select label={t("Durum", "Condition")} options={CONDITION_OPTIONS} value={form.condition} onChange={(e) => updateForm("condition", e.target.value)} />
           </div>
 
           <Input label={t("Marka", "Brand")} value={form.brand} onChange={(e) => updateForm("brand", e.target.value)} error={formErrors.brand} placeholder={t("ör. Rolex", "e.g. Rolex")} />
           <Input label={t("Model", "Model")} value={form.model} onChange={(e) => updateForm("model", e.target.value)} error={formErrors.model} placeholder={t("ör. Submariner", "e.g. Submariner")} />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label={t("Referans", "Reference")} value={form.reference} onChange={(e) => updateForm("reference", e.target.value)} placeholder={t("ör. 126610LN", "e.g. 126610LN")} />
             <Input label={t("Yıl", "Year")} type="number" value={form.year} onChange={(e) => updateForm("year", e.target.value)} placeholder={t("ör. 2024", "e.g. 2024")} />
           </div>
@@ -324,7 +324,7 @@ export default function InventoryPage() {
 
           {/* Price */}
           <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Input
                 label={t("Fiyat", "Price")}
                 type="number"

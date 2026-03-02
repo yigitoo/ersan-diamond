@@ -162,7 +162,7 @@ export default function SalesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("Satışlar", "Sales")}</h2>
         <Button variant="primary" size="sm" onClick={openRecordSale}><Plus size={16} className="mr-1" /> {t("Satış Kaydet", "Record Sale")}</Button>
       </div>
@@ -177,9 +177,9 @@ export default function SalesPage() {
                 <TableHead>{t("Ürün", "Product")}</TableHead>
                 <TableHead>{t("Alıcı", "Buyer")}</TableHead>
                 <TableHead>{t("Fiyat", "Price")}</TableHead>
-                <TableHead>{t("Ödeme", "Payment")}</TableHead>
-                <TableHead>{t("Temsilci", "Rep")}</TableHead>
-                <TableHead>{t("Tarih", "Date")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Ödeme", "Payment")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Temsilci", "Rep")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Tarih", "Date")}</TableHead>
                 <TableHead className="text-right">{t("İşlemler", "Actions")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -195,9 +195,9 @@ export default function SalesPage() {
                     <br/><span className="text-xs text-mist">{sale.buyerEmail}</span>
                   </TableCell>
                   <TableCell className="font-medium">{formatPrice(sale.salePrice, sale.currency)}</TableCell>
-                  <TableCell className="text-xs text-mist">{tl(t, PAYMENT_METHOD_LABELS[sale.paymentMethod]) || sale.paymentMethod}</TableCell>
-                  <TableCell className="text-xs">{sale.salesRepId?.name || "-"}</TableCell>
-                  <TableCell className="text-xs text-mist">{formatDateTime(sale.soldAt)}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{tl(t, PAYMENT_METHOD_LABELS[sale.paymentMethod]) || sale.paymentMethod}</TableCell>
+                  <TableCell className="text-xs hidden md:table-cell">{sale.salesRepId?.name || "-"}</TableCell>
+                  <TableCell className="text-xs text-mist hidden md:table-cell">{formatDateTime(sale.soldAt)}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedSale(sale); setSheetOpen(true); }}>
                       <Eye size={14} />
@@ -256,18 +256,18 @@ export default function SalesPage() {
           </div>
 
           {/* Buyer Info */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label={t("Alıcı Adı", "Buyer Name")} value={form.buyerName} onChange={(e) => updateForm("buyerName", e.target.value)} error={formErrors.buyerName} />
             <Input label={t("Alıcı E-posta", "Buyer Email")} type="email" value={form.buyerEmail} onChange={(e) => updateForm("buyerEmail", e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label={t("Alıcı Telefon", "Buyer Phone")} value={form.buyerPhone} onChange={(e) => updateForm("buyerPhone", e.target.value)} />
             <Input label={t("Şehir", "City")} value={form.buyerCity} onChange={(e) => updateForm("buyerCity", e.target.value)} />
           </div>
           <Input label={t("Ülke", "Country")} value={form.buyerCountry} onChange={(e) => updateForm("buyerCountry", e.target.value)} />
 
           {/* Price & Payment */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <Input label={t("Satış Fiyatı", "Sale Price")} type="number" value={form.salePrice} onChange={(e) => updateForm("salePrice", e.target.value)} error={formErrors.salePrice} />
             <Select label={t("Para Birimi", "Currency")} options={CURRENCY_OPTIONS} value={form.currency} onChange={(e) => updateForm("currency", e.target.value)} />
             <Select label={t("Ödeme Yöntemi", "Payment Method")} options={PAYMENT_OPTIONS} value={form.paymentMethod} onChange={(e) => updateForm("paymentMethod", e.target.value)} />
@@ -312,7 +312,7 @@ export default function SalesPage() {
 
             <div className="space-y-3">
               <h3 className="text-xs font-medium tracking-wider uppercase text-mist">{t("İşlem", "Transaction")}</h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-mist">{t("Fiyat", "Price")}</span>
                   <p className="font-medium text-lg">{formatPrice(selectedSale.salePrice, selectedSale.currency)}</p>

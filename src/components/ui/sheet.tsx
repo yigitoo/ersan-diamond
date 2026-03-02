@@ -45,13 +45,13 @@ export function Sheet({ open, onClose, children, side = "right", className, titl
               className
             )}
           >
-            <div className="flex items-center justify-between p-6 border-b border-slate">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate">
               {title && <h2 className="font-serif text-lg">{title}</h2>}
               <button onClick={onClose} className="text-mist hover:text-brand-white transition-colors ml-auto">
                 <X size={20} />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto h-[calc(100%-73px)]">
+            <div className="p-4 sm:p-6 overflow-y-auto h-[calc(100%-57px)] sm:h-[calc(100%-73px)]">
               {children}
             </div>
           </motion.div>

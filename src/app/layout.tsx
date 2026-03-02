@@ -32,6 +32,7 @@ export const metadata: Metadata = {
     "Ersan Diamond Istanbul",
     "Ersan Diamond Luxury",
     "Ersan Gülmez",
+    "mamül",
     "lüks saat",
     "Rolex",
     "Patek Philippe",

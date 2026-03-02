@@ -214,7 +214,7 @@ export default function TeamPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("Ekip", "Team")}</h2>
         {isOwner && (
           <Button variant="primary" size="sm" onClick={openAdd}>
@@ -233,8 +233,8 @@ export default function TeamPage() {
               <TableHead>{t("E-posta", "Email")}</TableHead>
               <TableHead>{t("Rol", "Role")}</TableHead>
               <TableHead>{t("Durum", "Status")}</TableHead>
-              <TableHead>{t("İmza", "Signature")}</TableHead>
-              <TableHead>{t("Telefon", "Phone")}</TableHead>
+              <TableHead className="hidden md:table-cell">{t("İmza", "Signature")}</TableHead>
+              <TableHead className="hidden md:table-cell">{t("Telefon", "Phone")}</TableHead>
               {isOwner && <TableHead className="text-right">{t("İşlemler", "Actions")}</TableHead>}
             </TableRow>
           </TableHeader>
@@ -253,8 +253,8 @@ export default function TeamPage() {
                     ? <span className="text-green-400 text-xs">{t("Aktif", "Active")}</span>
                     : <span className="text-red-400 text-xs">{t("Pasif", "Inactive")}</span>}
                 </TableCell>
-                <TableCell className="text-xs text-mist">{user.signatureName || "-"}</TableCell>
-                <TableCell className="text-xs text-mist">{user.phoneInternal || "-"}</TableCell>
+                <TableCell className="text-xs text-mist hidden md:table-cell">{user.signatureName || "-"}</TableCell>
+                <TableCell className="text-xs text-mist hidden md:table-cell">{user.phoneInternal || "-"}</TableCell>
                 {isOwner && (
                   <TableCell className="text-right">
                     {user.role !== "OWNER" && (

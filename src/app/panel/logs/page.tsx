@@ -44,11 +44,11 @@ export default function LogsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("İşlem Kayıtları", "Audit Logs")}</h2>
-        <div className="flex items-center gap-3">
-          <Select options={actionTypes} placeholder={t("Tüm İşlemler", "All Actions")} value={actionType} onChange={(e) => { setActionType(e.target.value); setPage(1); }} className="w-40" />
-          <Select options={entityTypes} placeholder={t("Tüm Varlıklar", "All Entities")} value={entityType} onChange={(e) => { setEntityType(e.target.value); setPage(1); }} className="w-40" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <Select options={actionTypes} placeholder={t("Tüm İşlemler", "All Actions")} value={actionType} onChange={(e) => { setActionType(e.target.value); setPage(1); }} className="w-full sm:w-40" />
+          <Select options={entityTypes} placeholder={t("Tüm Varlıklar", "All Entities")} value={entityType} onChange={(e) => { setEntityType(e.target.value); setPage(1); }} className="w-full sm:w-40" />
         </div>
       </div>
 
@@ -63,7 +63,7 @@ export default function LogsPage() {
                 <TableHead>{t("Kullanıcı", "Actor")}</TableHead>
                 <TableHead>{t("İşlem", "Action")}</TableHead>
                 <TableHead>{t("Varlık", "Entity")}</TableHead>
-                <TableHead>{t("Detaylar", "Details")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("Detaylar", "Details")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -73,7 +73,7 @@ export default function LogsPage() {
                   <TableCell className="text-xs">{log.actorRole}<br/><span className="text-mist">{typeof log.actorUserId === "object" ? (log.actorUserId?.name || log.actorUserId?.email) : log.actorUserId?.slice?.(-6) || "-"}</span></TableCell>
                   <TableCell><span className="text-xs bg-charcoal px-2 py-0.5 rounded">{log.actionType}</span></TableCell>
                   <TableCell className="text-xs">{log.entityType}<br/><span className="text-mist">{log.entityId?.slice(-6)}</span></TableCell>
-                  <TableCell className="text-xs text-mist max-w-48 truncate">{log.route || "-"}</TableCell>
+                  <TableCell className="text-xs text-mist max-w-48 truncate hidden md:table-cell">{log.route || "-"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
