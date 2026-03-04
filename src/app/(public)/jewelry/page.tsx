@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Sheet } from "@/components/ui/sheet";
-import { SectionHeading } from "@/components/shared/section-heading";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { staggerContainer, staggerItem } from "@/lib/animations";
 import { useSwrFetch } from "@/lib/hooks";
@@ -67,18 +66,26 @@ export default function JewelryPage() {
     { value: "price_desc", label: t("Fiyat: Yüksekten Düşüğe", "Price: High to Low") },
   ];
 
+  const productCount = products?.length ?? 0;
+
   return (
     <div className="pt-28 pb-20">
-      {/* Header */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <SectionHeading
-          title={t("Mücevherat", "Jewelry")}
-          subtitle={t("Seçkin mücevherat koleksiyonumuz", "Our distinguished jewelry collection")}
-          align="left"
-        />
+        {/* Category Banner */}
+        <div className="mb-10 border-b border-slate/40 pb-8">
+          <p className="eyebrow mb-3">{t("Koleksiyon", "Collection")}</p>
+          <div className="flex items-end justify-between gap-4">
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl">{t("Mücevherat", "Jewelry")}</h1>
+            {!isLoading && (
+              <p className="text-mist text-sm mb-1">
+                {productCount} {t("ürün", productCount === 1 ? "piece" : "pieces")}
+              </p>
+            )}
+          </div>
+        </div>
 
         {/* Toolbar */}
-        <div className="flex items-center justify-between mb-8 gap-4">
+        <div className="flex items-center justify-between border-b border-slate/30 mb-8 py-5 gap-4">
           <div className="hidden lg:flex items-center gap-4 flex-1">
             <Select options={typeOptions} placeholder={t("Tüm Tipler", "All Types")} value={type} onChange={(e) => setType(e.target.value)} className="w-44" />
             <Select options={METAL_OPTIONS} placeholder={t("Tüm Metaller", "All Metals")} value={metal} onChange={(e) => setMetal(e.target.value)} className="w-44" />
@@ -89,7 +96,7 @@ export default function JewelryPage() {
             <Select options={sortOptions} value={sort} onChange={(e) => setSort(e.target.value)} className="w-48" />
             <button
               onClick={() => setFilterOpen(true)}
-              className="lg:hidden flex items-center gap-2 text-sm text-mist hover:text-brand-white transition-colors"
+              className="lg:hidden flex items-center gap-2 text-sm text-mist hover:text-brand-white transition-colors min-h-[44px]"
             >
               <SlidersHorizontal size={16} />
               {t("Filtreler", "Filters")}
@@ -99,9 +106,9 @@ export default function JewelryPage() {
 
         {/* Product Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 xl:gap-8">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-[3/4] bg-charcoal animate-pulse rounded-sm" />
+              <div key={i} className="aspect-[3/4] skeleton-shimmer rounded-sm" />
             ))}
           </div>
         ) : products && products.length > 0 ? (
@@ -109,7 +116,7 @@ export default function JewelryPage() {
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 xl:gap-8"
           >
             {products.map((product) => {
               const specs = product.specs as JewelrySpecs;
@@ -134,9 +141,9 @@ export default function JewelryPage() {
                       <div className="absolute top-3 right-3">
                         <WishlistButton productId={product._id} size={16} />
                       </div>
-                      {/* Hover overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <div className="bg-black/80 backdrop-blur-sm border border-white/20 rounded px-3 py-2">
+                      {/* Hover overlay — gradient */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <div className="mt-auto">
                           <p className="text-xs text-white font-medium">
                             {specs?.metal}
                             {specs?.gemstone ? ` · ${specs.gemstone}` : ""}
@@ -145,6 +152,8 @@ export default function JewelryPage() {
                           <p className="text-xs text-white/70">{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</p>
                         </div>
                       </div>
+                      {/* Gold accent line */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs text-mist tracking-wider uppercase">{product.brand}</p>
@@ -162,8 +171,17 @@ export default function JewelryPage() {
           </motion.div>
         ) : (
           <div className="text-center py-20">
-            <Gem size={48} className="mx-auto text-mist/30 mb-4" />
-            <p className="text-mist">{t("Kriterlerinize uygun mücevher bulunamadı.", "No jewelry pieces found matching your criteria.")}</p>
+            <div className="w-20 h-20 rounded-full border border-slate/50 flex items-center justify-center mx-auto mb-6">
+              <Gem size={32} className="text-mist/30" />
+            </div>
+            <h3 className="font-serif text-2xl mb-3">{t("Sonuç Bulunamadı", "No Results Found")}</h3>
+            <p className="text-mist text-sm mb-6">{t("Kriterlerinize uygun mücevher bulunamadı.", "No jewelry pieces found matching your criteria.")}</p>
+            <Button
+              variant="outline"
+              onClick={() => { setType(""); setMetal(""); setGemstone(""); setSearch(""); }}
+            >
+              {t("Filtreleri Temizle", "Clear Filters")}
+            </Button>
           </div>
         )}
       </div>

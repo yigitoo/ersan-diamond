@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Shield,
   Search,
@@ -16,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { useI18n } from "@/lib/i18n";
 import { BRAND_NAME } from "@/lib/utils/constants";
+import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 
 // ---------------------------------------------------------------------------
 // Page
@@ -75,28 +77,38 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen pt-32 pb-20">
+    <div className="min-h-screen pt-40 pb-28">
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 lg:px-8 text-center mb-24">
-        <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl mb-6">
-          {t(`${BRAND_NAME} Hakkında`, `About ${BRAND_NAME}`)}
-        </h1>
-        <p className="text-mist text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-          {t(
-            `İstanbul'da kurulan ${BRAND_NAME}, dünyanın en iyi ikinci el lüks saatlerini ve Hermès parçalarını bir araya getirmeye adanmıştır. Derin piyasa uzmanlığı ile orijinallik ve gizliliğe sarsılmaz bir bağlılık birleştiriyoruz.`,
-            `Founded in Istanbul, ${BRAND_NAME} is dedicated to curating the world's finest pre-owned luxury watches and Hermès pieces. We combine deep market expertise with an unwavering commitment to authenticity and discretion.`
-          )}
-        </p>
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+        >
+          <p className="eyebrow--gold mb-4">{t("Hakkımızda", "About Us")}</p>
+          <div className="section-divider section-divider--center mb-6" />
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl mb-6">
+            {t(`${BRAND_NAME} Hakkında`, `About ${BRAND_NAME}`)}
+          </h1>
+          <p className="text-mist text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+            {t(
+              `İstanbul'da kurulan ${BRAND_NAME}, dünyanın en iyi ikinci el lüks saatlerini ve Hermès parçalarını bir araya getirmeye adanmıştır. Derin piyasa uzmanlığı ile orijinallik ve gizliliğe sarsılmaz bir bağlılık birleştiriyoruz.`,
+              `Founded in Istanbul, ${BRAND_NAME} is dedicated to curating the world's finest pre-owned luxury watches and Hermès pieces. We combine deep market expertise with an unwavering commitment to authenticity and discretion.`
+            )}
+          </p>
+        </motion.div>
       </section>
 
       {/* Only Original -- Authentication Process */}
       <section className="max-w-5xl mx-auto px-6 lg:px-8 mb-24">
         <SectionHeading
+          eyebrow={t("Sürecimiz", "Our Process")}
           title={t("Sadece Orijinal", "Only Original")}
           subtitle={t(
             "5 adımlı orijinallik kontrol sürecimiz, sunduğumuz her parçanın %100 orijinal olmasını sağlar",
             "Our 5-step authentication process ensures every piece we offer is 100% genuine"
           )}
+          accent
         />
 
         <div className="relative">
@@ -107,8 +119,12 @@ export default function AboutPage() {
             {AUTH_STEPS.map((item, i) => {
               const isLeft = i % 2 === 0;
               return (
-                <div
+                <motion.div
                   key={item.step}
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-50px" }}
                   className={`relative lg:grid lg:grid-cols-2 lg:gap-16 items-center`}
                 >
                   {/* Step number dot on timeline */}
@@ -138,7 +154,7 @@ export default function AboutPage() {
                       {item.description}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -146,12 +162,22 @@ export default function AboutPage() {
       </section>
 
       {/* How We Source */}
-      <section className="bg-charcoal/50 py-20 mb-24">
+      <section className="surface-paper py-20 mb-24">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
-          <SectionHeading title={t("Nasıl Tedarik Ediyoruz", "How We Source")} />
+          <SectionHeading
+            eyebrow={t("Tedarik", "Sourcing")}
+            title={t("Nasıl Tedarik Ediyoruz", "How We Source")}
+            accent
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-            <div className="text-center">
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12"
+          >
+            <motion.div variants={staggerItem} className="text-center">
               <div className="w-14 h-14 rounded-full bg-brand-black border border-slate flex items-center justify-center mx-auto mb-4">
                 <Users size={22} className="text-brand-gold" />
               </div>
@@ -162,8 +188,8 @@ export default function AboutPage() {
                   "We work with a carefully vetted global network of collectors, dealers, and authorized retailers to source the finest pieces."
                 )}
               </p>
-            </div>
-            <div className="text-center">
+            </motion.div>
+            <motion.div variants={staggerItem} className="text-center">
               <div className="w-14 h-14 rounded-full bg-brand-black border border-slate flex items-center justify-center mx-auto mb-4">
                 <Eye size={22} className="text-brand-gold" />
               </div>
@@ -174,8 +200,8 @@ export default function AboutPage() {
                   "Every piece is hand-selected by our specialists. We choose only the best examples in terms of condition, configuration, and provenance."
                 )}
               </p>
-            </div>
-            <div className="text-center">
+            </motion.div>
+            <motion.div variants={staggerItem} className="text-center">
               <div className="w-14 h-14 rounded-full bg-brand-black border border-slate flex items-center justify-center mx-auto mb-4">
                 <Shield size={22} className="text-brand-gold" />
               </div>
@@ -186,16 +212,20 @@ export default function AboutPage() {
                   "We reject any piece that does not pass our authentication process or meet our quality benchmarks. No exceptions."
                 )}
               </p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Privacy & Security */}
       <section className="max-w-4xl mx-auto px-6 lg:px-8 mb-24">
-        <SectionHeading title={t("Gizlilik & Güvenlik", "Privacy & Security")} />
+        <SectionHeading
+          eyebrow={t("Gizlilik", "Privacy")}
+          title={t("Gizlilik & Güvenlik", "Privacy & Security")}
+          accent
+        />
 
-        <div className="bg-charcoal border border-slate/50 rounded-sm p-8 md:p-12">
+        <div className="bg-charcoal border-l-2 border-brand-gold rounded-sm p-8 md:p-12">
           <div className="flex items-start gap-4 mb-6">
             <Lock size={24} className="text-brand-gold flex-shrink-0 mt-1" />
             <div>
@@ -242,7 +272,9 @@ export default function AboutPage() {
 
       {/* CTA */}
       <section className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-        <div className="bg-charcoal border border-slate/50 rounded-sm py-16 px-8">
+        <div className="border border-brand-gold/15 rounded-sm py-16 px-8">
+          <p className="eyebrow--gold mb-4">{t("Başlayın", "Get Started")}</p>
+          <div className="section-divider section-divider--center mb-6" />
           <h2 className="font-serif text-3xl md:text-4xl mb-4">
             {t("Farkı Yaşayın", "Experience the Difference")}
           </h2>

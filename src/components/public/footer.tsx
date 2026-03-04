@@ -48,9 +48,12 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-brand-black border-t border-slate/40">
+    <footer className="bg-brand-black">
+      {/* Gold gradient micro-line */}
+      <div className="h-px bg-gradient-to-r from-transparent via-brand-gold/40 to-transparent" />
+      <div className="border-t border-slate/40">
       {/* ── Top: Logo + tagline ── */}
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-16 pb-12">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-20 pb-14">
         <div className="flex flex-col items-start gap-4">
           <Logo variant="horizontal" width={140} height={55} link={false} />
           <p className="text-mist text-sm max-w-xs leading-relaxed">
@@ -173,6 +176,7 @@ export function Footer() {
         <p className="mt-8 text-xs text-mist/60">
           &copy; {year} {BRAND_NAME}. {t("Tüm haklar saklıdır.", "All rights reserved.")}
         </p>
+      </div>
       </div>
     </footer>
   );

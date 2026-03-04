@@ -7,11 +7,28 @@ import { cn } from "@/lib/utils/cn";
 interface SectionHeadingProps {
   title: string;
   subtitle?: string;
+  eyebrow?: string;
+  accent?: boolean;
+  size?: "sm" | "md" | "lg";
   align?: "left" | "center";
   className?: string;
 }
 
-export function SectionHeading({ title, subtitle, align = "center", className }: SectionHeadingProps) {
+const sizeClasses = {
+  sm: "text-2xl md:text-3xl",
+  md: "text-3xl md:text-4xl lg:text-5xl",
+  lg: "text-4xl md:text-5xl lg:text-6xl",
+};
+
+export function SectionHeading({
+  title,
+  subtitle,
+  eyebrow,
+  accent = false,
+  size = "md",
+  align = "center",
+  className,
+}: SectionHeadingProps) {
   return (
     <motion.div
       variants={fadeUp}
@@ -19,13 +36,23 @@ export function SectionHeading({ title, subtitle, align = "center", className }:
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
       className={cn(
-        "mb-12",
+        "mb-16",
         align === "center" && "text-center",
         className
       )}
     >
-      <h2 className="luxury-heading text-3xl md:text-4xl lg:text-5xl mb-4">{title}</h2>
-      {subtitle && <p className={cn("text-mist text-sm md:text-base max-w-2xl", align === "center" && "mx-auto")}>{subtitle}</p>}
+      {eyebrow && (
+        <p className={cn("eyebrow mb-4", align === "center" && "mx-auto")}>{eyebrow}</p>
+      )}
+      {accent && (
+        <div className={cn("section-divider mb-5", align === "center" && "section-divider--center")} />
+      )}
+      <h2 className={cn("luxury-heading mb-4", sizeClasses[size])}>{title}</h2>
+      {subtitle && (
+        <p className={cn("text-mist text-sm md:text-base max-w-2xl", align === "center" && "mx-auto")}>
+          {subtitle}
+        </p>
+      )}
     </motion.div>
   );
 }

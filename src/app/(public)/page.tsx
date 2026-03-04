@@ -6,10 +6,6 @@ import { motion } from "framer-motion";
 import {
   ChevronRight,
   ArrowRight,
-  Shield,
-  Award,
-  Eye,
-  Star,
   Watch,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -32,7 +28,7 @@ export default function HomePage() {
 
   /* ─── Dynamic data ─── */
   const { data: latestProducts } = useSwrFetch<IProduct[]>(
-    "/api/products?limit=8&sort=createdAt&published=true"
+    "/api/products?limit=6&sort=createdAt&published=true"
   );
 
   /* ─── Helpers ─── */
@@ -56,6 +52,7 @@ export default function HomePage() {
         "Curated timepieces from the world's finest maisons"
       ),
       href: "/watches",
+      featured: true,
     },
     {
       title: t("Hermès", "Hermès"),
@@ -73,19 +70,11 @@ export default function HomePage() {
       ),
       href: "/jewelry",
     },
-    {
-      title: t("Bize Satın", "Sell to Us"),
-      description: t(
-        "Lüks parçalarınızı güvenle bize satın veya konsinye bırakın",
-        "Consign or sell your luxury pieces with confidence"
-      ),
-      href: "/sell",
-    },
   ];
 
   const TRUST_ITEMS = [
     {
-      icon: Shield,
+      num: "01",
       title: t("Orijinallik Kontrolü", "Authentication"),
       description: t(
         "Sertifikalı uzmanlar tarafından çoklu doğrulama",
@@ -93,7 +82,7 @@ export default function HomePage() {
       ),
     },
     {
-      icon: Award,
+      num: "02",
       title: t("Köken", "Provenance"),
       description: t(
         "Tam geçmiş ve belgelendirme doğrulanmış",
@@ -101,7 +90,7 @@ export default function HomePage() {
       ),
     },
     {
-      icon: Eye,
+      num: "03",
       title: t("İnceleme", "Inspection"),
       description: t(
         "Mekanizma ve kasa büyüteç altında incelenir",
@@ -109,7 +98,7 @@ export default function HomePage() {
       ),
     },
     {
-      icon: Star,
+      num: "04",
       title: t("Garanti", "Guarantee"),
       description: t(
         "Her satın alımda tam orijinallik garantisi",
@@ -150,20 +139,23 @@ export default function HomePage() {
           animate="visible"
           className="text-center px-6 max-w-3xl"
         >
-          {/* Pre-heading */}
-          <p className="text-xs tracking-[0.3em] uppercase text-white font-bold mb-6">
-            ERSAN DIAMOND
+          {/* Heritage eyebrow */}
+          <p className="eyebrow text-white/70 mb-6">
+            {t("İstanbul · Lüks Saatler ve Hermès", "Istanbul · Luxury Watches & Hermès")}
           </p>
 
           {/* Main heading */}
-          <h1 className="font-serif text-5xl md:text-7xl font-normal leading-[1.08] tracking-tight text-white">
+          <h1 className="font-serif text-6xl md:text-8xl font-normal leading-[1.05] tracking-tight text-white">
             {t("Nadirlik ve Orijinalliğin", "Where Rarity Meets")}
             <br />
             {t("Buluştuğu Yer", "Authenticity")}
           </h1>
 
+          {/* Gold divider */}
+          <div className="section-divider section-divider--center my-8" />
+
           {/* Subtitle */}
-          <p className="md:mt-10 text-white font-bold text-base md:text-lg max-w-xl mx-auto mt-6 leading-relaxed">
+          <p className="font-light text-white/90 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
             {t(
               "Türkiye'nin en güvenilir adresi",
               "Türkiye's premier destination for authenticated luxury timepieces and Hermès"
@@ -173,7 +165,7 @@ export default function HomePage() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
             <Link href="/concierge">
-              <Button variant="gold" className="rounded-2xl" size="lg">
+              <Button variant="gold" className="rounded-sm" size="lg">
                 {t("Randevu Al", "Book Appointment")}
               </Button>
             </Link>
@@ -181,7 +173,7 @@ export default function HomePage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-2xl border-white/40 text-white hover:border-white hover:bg-white/10 transition-all duration-500"
+                className="rounded-sm border-white/40 text-white hover:border-white hover:bg-white/10 transition-all duration-500"
               >
                 {t("Koleksiyonu Keşfet", "Explore Collection")}
               </Button>
@@ -208,56 +200,117 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* ═══════════════════ CATEGORY TILES ═══════════════════ */}
-      <section className="py-24 px-6">
+      {/* ═══════════════════ CATEGORY TILES — Asymmetric ═══════════════════ */}
+      <section className="pt-28 pb-20 px-6">
         <div className="mx-auto max-w-7xl">
-          <SectionHeading title={t("Koleksiyon", "The Collection")} />
+          <SectionHeading
+            eyebrow={t("Koleksiyon", "The Collection")}
+            title={t("Koleksiyon", "The Collection")}
+            accent
+          />
 
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            className="grid md:grid-cols-3 gap-6"
+            className="grid lg:grid-cols-[2fr_1fr] gap-6"
           >
-            {CATEGORIES.slice(0,-1).map((cat) => (
-              <motion.div key={cat.title} variants={staggerItem}>
-                <Link href={cat.href} className="group block h-full">
-                  <div
-                    className={cn(
-                      "bg-charcoal border border-slate/50 rounded p-8 h-full flex flex-col",
-                      "transition-all duration-700",
-                      "hover:border-soft-white/30 hover:bg-charcoal/80"
-                    )}
-                  >
-                    <h3 className="font-serif text-2xl md:text-3xl mb-3">
-                      {cat.title}
-                    </h3>
-                    <p className="text-mist text-sm leading-relaxed mb-8 flex-1">
-                      {cat.description}
-                    </p>
-                    <ArrowRight
-                      size={18}
-                      strokeWidth={1.5}
-                      className="text-mist group-hover:text-brand-gold group-hover:translate-x-1 transition-all duration-500"
-                    />
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+            {/* Featured: Watches (large left card) */}
+            <motion.div variants={staggerItem}>
+              <Link href={CATEGORIES[0].href} className="group block h-full">
+                <div
+                  className={cn(
+                    "bg-charcoal border border-slate/50 rounded p-8 h-full flex flex-col justify-end min-h-[280px]",
+                    "transition-all duration-700",
+                    "hover:border-soft-white/30 hover:bg-charcoal/80"
+                  )}
+                >
+                  <h3 className="font-serif text-3xl md:text-4xl mb-3">
+                    {CATEGORIES[0].title}
+                  </h3>
+                  <p className="text-mist text-sm leading-relaxed mb-8 max-w-md">
+                    {CATEGORIES[0].description}
+                  </p>
+                  <ArrowRight
+                    size={18}
+                    strokeWidth={1.5}
+                    className="text-mist group-hover:text-brand-gold group-hover:translate-x-1 transition-all duration-500"
+                  />
+                </div>
+              </Link>
+            </motion.div>
+
+            {/* Right column: Hermès + Jewelry stacked */}
+            <div className="flex flex-col gap-6">
+              {CATEGORIES.slice(1).map((cat) => (
+                <motion.div key={cat.title} variants={staggerItem} className="flex-1">
+                  <Link href={cat.href} className="group block h-full">
+                    <div
+                      className={cn(
+                        "bg-charcoal border border-slate/50 rounded p-8 h-full flex flex-col",
+                        "transition-all duration-700",
+                        "hover:border-soft-white/30 hover:bg-charcoal/80"
+                      )}
+                    >
+                      <h3 className="font-serif text-2xl md:text-3xl mb-3">
+                        {cat.title}
+                      </h3>
+                      <p className="text-mist text-sm leading-relaxed mb-6 flex-1">
+                        {cat.description}
+                      </p>
+                      <ArrowRight
+                        size={18}
+                        strokeWidth={1.5}
+                        className="text-mist group-hover:text-brand-gold group-hover:translate-x-1 transition-all duration-500"
+                      />
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* ═══════════════════ TRUST BLOCK ═══════════════════ */}
-      <section className="py-24 bg-charcoal">
+      {/* ═══════════════════ HERITAGE STATEMENT ═══════════════════ */}
+      <section className="surface-warm border-y border-slate/40 py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="grid lg:grid-cols-[1fr_2fr] gap-12 lg:gap-16 items-start"
+          >
+            {/* Left */}
+            <div>
+              <p className="eyebrow--gold mb-4">{t("Felsefemiz", "Our Philosophy")}</p>
+              <div className="section-divider mb-5" />
+              <h2 className="luxury-heading text-3xl md:text-4xl">
+                {t("Sadece Orijinal", "Only Original")}
+              </h2>
+            </div>
+            {/* Right */}
+            <div>
+              <p className="luxury-quote">
+                {t(
+                  "Sunduğumuz her parça, uzman ekibimizin titiz 5 adımlı orijinallik kontrolünden geçer. Kalite ve güvenden asla ödün vermeyiz — çünkü gerçek lüks, sahiciliğin ta kendisidir.",
+                  "Every piece we offer undergoes our team's rigorous 5-step authentication process. We never compromise on quality or trust — because true luxury is authenticity itself."
+                )}
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══════════════════ TRUST BLOCK — Numbered ═══════════════════ */}
+      <section className="py-28 bg-charcoal">
         <div className="mx-auto max-w-7xl px-6">
           <SectionHeading
-            title={t("Sadece Orijinal", "Only Original")}
-            subtitle={t(
-              "Her parça titiz 5 adımlı sürecimizle orijinallik kontrolünden geçirilir",
-              "Every piece authenticated through our rigorous 5-step process"
-            )}
+            eyebrow={t("Sürecimiz", "Our Process")}
+            title={t("Güvenin 4 Adımı", "4 Steps of Trust")}
+            accent
           />
 
           <motion.div
@@ -273,13 +326,9 @@ export default function HomePage() {
                 variants={staggerItem}
                 className="text-center"
               >
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border border-brand-gold/20 mb-5">
-                  <item.icon
-                    size={20}
-                    strokeWidth={1.5}
-                    className="text-brand-gold"
-                  />
-                </div>
+                <span className="font-serif text-5xl text-brand-gold/20 block mb-4">
+                  {item.num}
+                </span>
                 <h3 className="font-serif text-lg mb-2">{item.title}</h3>
                 <p className="text-mist text-sm leading-relaxed">
                   {item.description}
@@ -291,9 +340,13 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════ LATEST DROPS ═══════════════════ */}
-      <section className="py-24 px-6">
+      <section className="pt-24 pb-32 px-6">
         <div className="mx-auto max-w-7xl">
-          <SectionHeading title={t("Son Gelenler", "Latest Arrivals")} />
+          <SectionHeading
+            eyebrow={t("Yeni Gelenler", "New Arrivals")}
+            title={t("Son Gelenler", "Latest Arrivals")}
+            accent
+          />
 
           {latestProducts && latestProducts.length > 0 ? (
             <motion.div
@@ -301,9 +354,9 @@ export default function HomePage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+              className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 xl:gap-8"
             >
-              {latestProducts.map((product) => (
+              {latestProducts.slice(0, 6).map((product) => (
                 <motion.div key={product._id} variants={staggerItem}>
                   <Link
                     href={`${categoryPath(product.category)}/${product.slug}`}
@@ -311,13 +364,13 @@ export default function HomePage() {
                   >
                     <div
                       className={cn(
-                        "bg-charcoal border border-slate/50 rounded overflow-hidden",
+                        "bg-charcoal border border-slate/50 rounded overflow-hidden relative",
                         "transition-all duration-700",
                         "hover:border-soft-white/30"
                       )}
                     >
                       {/* Product image */}
-                      <div className="aspect-square bg-slate/20 relative overflow-hidden">
+                      <div className="aspect-[3/4] bg-slate/20 relative overflow-hidden">
                         {product.images[0]?.url ? (
                           <img
                             src={product.images[0].url}
@@ -332,7 +385,7 @@ export default function HomePage() {
                         )}
                       </div>
                       {/* Info */}
-                      <div className="p-4">
+                      <div className="p-4 md:p-5">
                         <p className="text-[11px] uppercase tracking-[0.15em] text-mist mb-1">
                           {product.brand}
                         </p>
@@ -347,6 +400,8 @@ export default function HomePage() {
                               : t("Fiyat Sorunuz", "Price on Request")}
                         </p>
                       </div>
+                      {/* Gold accent line on hover */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                     </div>
                   </Link>
                 </motion.div>
@@ -359,17 +414,14 @@ export default function HomePage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+              className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
             >
-              {Array.from({ length: 4 }).map((_, i) => (
+              {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className={cn(
-                    "bg-charcoal border border-slate/50 rounded overflow-hidden",
-                    "animate-pulse"
-                  )}
+                  className="bg-charcoal border border-slate/50 rounded overflow-hidden"
                 >
-                  <div className="aspect-square bg-slate/20" />
+                  <div className="aspect-[3/4] skeleton-shimmer" />
                   <div className="p-4 space-y-2">
                     <div className="h-3 bg-slate/20 rounded w-1/3" />
                     <div className="h-4 bg-slate/20 rounded w-2/3" />
@@ -399,15 +451,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════════ CONCIERGE CTA ═══════════════════ */}
-      <section className="py-24 px-6">
+      {/* ═══════════════════ CONCIERGE CTA — Framed ═══════════════════ */}
+      <section className="surface-paper py-20 px-6">
         <motion.div
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="text-center"
+          className="max-w-3xl mx-auto text-center border border-brand-gold/15 rounded-sm py-16 px-8"
         >
+          <p className="eyebrow--gold mb-4">{t("Özel Hizmet", "Private Service")}</p>
+          <div className="section-divider section-divider--center mb-6" />
           <h2 className="font-serif text-4xl md:text-5xl mb-4">
             {t("Özel Konsiyerj", "Private Concierge")}
           </h2>
@@ -418,7 +472,7 @@ export default function HomePage() {
             )}
           </p>
           <Link href="/concierge">
-            <Button variant="gold" size="lg">
+            <Button variant="gold" size="lg" className="rounded-sm">
               {t("Hemen Randevu Al", "Book Now")}
             </Button>
           </Link>

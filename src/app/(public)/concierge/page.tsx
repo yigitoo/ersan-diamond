@@ -148,7 +148,7 @@ export default function ConciergePage() {
                 <div
                   className={cn(
                     "w-8 md:w-12 h-px",
-                    isComplete || isActive ? "bg-brand-white" : "bg-slate"
+                    isComplete || isActive ? "bg-brand-gold" : "bg-slate"
                   )}
                 />
               )}
@@ -157,9 +157,9 @@ export default function ConciergePage() {
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-500",
                     isComplete
-                      ? "bg-brand-white text-brand-black"
+                      ? "bg-brand-gold text-white"
                       : isActive
-                        ? "border-2 border-brand-white text-brand-white"
+                        ? "border-2 border-brand-gold text-brand-gold"
                         : "border border-slate text-mist"
                   )}
                 >
@@ -273,6 +273,8 @@ export default function ConciergePage() {
           animate="visible"
           className="text-center mb-12"
         >
+          <p className="eyebrow--gold mb-4">{t("Özel Hizmet", "Private Service")}</p>
+          <div className="section-divider section-divider--center mb-6" />
           <h1 className="font-serif text-4xl md:text-5xl mb-4">{t("Konsiyerj", "Concierge")}</h1>
           <p className="text-mist text-sm tracking-wider">
             {t(
@@ -304,7 +306,7 @@ export default function ConciergePage() {
                     className={cn(
                       "text-left p-6 bg-charcoal border rounded-sm transition-all duration-500",
                       selectedService === svc.type
-                        ? "border-brand-gold bg-charcoal/80"
+                        ? "border-brand-gold bg-charcoal/80 shadow-[inset_0_0_20px_rgba(184,150,12,0.08)]"
                         : "border-slate/50 hover:border-soft-white/30"
                     )}
                   >

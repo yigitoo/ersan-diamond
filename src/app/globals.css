@@ -21,6 +21,11 @@ button {
   --font-serif: var(--font-playfair);
   --font-sans: var(--font-inter);
 
+  /* Extended Palette */
+  --color-brand-gold-muted: #8A7009;
+  --color-surface-warm: #FAFAF8;
+  --color-surface-paper: #F2EFE8;
+
   /* Custom Timing */
   --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -206,4 +211,116 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ============================================
+   Luxury Utility Classes
+   ============================================ */
+
+/* Eyebrow — Patek-style small category label */
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-mist);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
+}
+
+.eyebrow--gold {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-brand-gold-muted);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
+}
+
+/* Section divider — thin gold ornament line */
+.section-divider {
+  display: block;
+  width: 40px;
+  height: 1px;
+  background-color: var(--color-brand-gold);
+  opacity: 0.5;
+}
+
+.section-divider--center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Luxury quote — serif italic for heritage statements */
+.luxury-quote {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.125rem, 1.5vw + 0.5rem, 1.5rem);
+  line-height: 1.6;
+  color: var(--color-soft-white);
+}
+
+/* Surface backgrounds for section alternation */
+.surface-warm {
+  background-color: var(--color-surface-warm);
+}
+
+.surface-paper {
+  background-color: var(--color-surface-paper);
+}
+
+/* Spec table for detail pages */
+.spec-table {
+  width: 100%;
+}
+
+.spec-table-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-slate) 40%, transparent);
+}
+
+.spec-table-row:last-child {
+  border-bottom: none;
+}
+
+/* Cursor zoom — for clickable images */
+.cursor-zoom {
+  cursor: zoom-in;
+}
+
+/* Lightbox backdrop */
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Skeleton shimmer — loading state */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-charcoal) 25%,
+    color-mix(in srgb, var(--color-slate) 30%, var(--color-charcoal)) 50%,
+    var(--color-charcoal) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Liquid glass — light mode fix */
+.liquid-glass--light {
+  background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6));
+  border: 1px solid rgba(185,150,12,0.15);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 4px 16px rgba(0,0,0,0.08);
 }

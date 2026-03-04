@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield,
   CalendarDays,
@@ -10,6 +10,7 @@ import {
   Phone,
   ChevronLeft,
   Watch,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,7 @@ function SpecRow({ label, value }: { label: string; value?: string | boolean }) 
   const { t } = useI18n();
   if (value === undefined || value === null || value === "") return null;
   return (
-    <div className="flex items-center justify-between py-3 border-b border-slate/40">
+    <div className="spec-table-row">
       <span className="text-xs uppercase tracking-wider text-mist">{label}</span>
       <span className="text-sm text-brand-white">
         {typeof value === "boolean" ? (value ? t("Evet", "Yes") : t("Hayır", "No")) : value}
@@ -70,6 +71,40 @@ function Thumbnail({
         </div>
       )}
     </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Lightbox
+// ---------------------------------------------------------------------------
+function Lightbox({ url, alt, onClose }: { url: string; alt: string; onClose: () => void }) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="lightbox-backdrop flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors z-10"
+        >
+          <X size={28} />
+        </button>
+        <motion.img
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          src={url}
+          alt={alt}
+          className="max-w-full max-h-[90vh] object-contain"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -119,6 +154,7 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
   const { t } = useI18n();
   const specs = (product.specs || {}) as WatchSpecs;
   const [activeImage, setActiveImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const images = product.images.length > 0 ? product.images : [null, null, null, null];
   const activeUrl = product.images[activeImage]?.url;
@@ -132,6 +168,11 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
 
   return (
     <div className="min-h-screen pt-28 pb-20">
+      {/* Lightbox */}
+      {lightboxOpen && activeUrl && (
+        <Lightbox url={activeUrl} alt={product.title} onClose={() => setLightboxOpen(false)} />
+      )}
+
       {/* Back link */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 mb-8">
         <Link
@@ -148,32 +189,37 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Left column: Images */}
           <motion.div variants={fadeUp} initial="hidden" animate="visible">
-            {/* Main image */}
-            <div className="aspect-square bg-charcoal border border-slate/50 rounded-sm overflow-hidden mb-4">
-              {activeUrl ? (
-                <img
-                  src={activeUrl}
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Watch size={64} className="text-mist/30" />
-                </div>
-              )}
-            </div>
+            <div className="flex flex-col-reverse lg:flex-row gap-4">
+              {/* Thumbnails — vertical on desktop */}
+              <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible no-scrollbar">
+                {images.slice(0, 4).map((img, i) => (
+                  <Thumbnail
+                    key={i}
+                    url={img?.url}
+                    alt={`${product.title} ${i + 1}`}
+                    active={activeImage === i}
+                    onClick={() => setActiveImage(i)}
+                  />
+                ))}
+              </div>
 
-            {/* Thumbnails */}
-            <div className="flex gap-3 overflow-x-auto no-scrollbar">
-              {images.slice(0, 4).map((img, i) => (
-                <Thumbnail
-                  key={i}
-                  url={img?.url}
-                  alt={`${product.title} ${i + 1}`}
-                  active={activeImage === i}
-                  onClick={() => setActiveImage(i)}
-                />
-              ))}
+              {/* Main image */}
+              <div
+                className="flex-1 aspect-[3/4] bg-charcoal border border-slate/50 rounded-sm overflow-hidden cursor-zoom"
+                onClick={() => activeUrl && setLightboxOpen(true)}
+              >
+                {activeUrl ? (
+                  <img
+                    src={activeUrl}
+                    alt={product.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Watch size={64} className="text-mist/30" />
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
 
@@ -202,7 +248,7 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
                   {t("Fiyat Sorunuz", "Price on Request")}
                 </Button>
               ) : product.price ? (
-                <p className="font-serif text-2xl">{formatPrice(product.price, product.currency)}</p>
+                <p className="font-serif text-3xl tracking-tight">{formatPrice(product.price, product.currency)}</p>
               ) : null}
             </div>
 
@@ -233,7 +279,7 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
             )}
 
             {/* Specs table */}
-            <div className="border-t border-slate/40 pt-2">
+            <div className="spec-table border-t border-slate/40 pt-2">
               <SpecRow label={t("Kasa Boyutu", "Case Size")} value={specs.caseSize} />
               <SpecRow label={t("Kasa Malzemesi", "Case Material")} value={specs.caseMaterial} />
               <SpecRow label={t("Kadran", "Dial")} value={specs.dialColor} />
@@ -248,8 +294,8 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
               <SpecRow label={t("Seri No", "Serial")} value={specs.serial} />
             </div>
 
-            {/* Trust badge */}
-            <div className="flex items-center gap-3 py-4 border border-slate/30 rounded-sm px-4 bg-charcoal/50">
+            {/* Trust badge — gold left border */}
+            <div className="flex items-center gap-3 py-4 border-l-2 border-brand-gold rounded-sm px-4 bg-charcoal/50">
               <Shield size={20} className="text-brand-gold flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium">{t("Orijinallik Garantisi", "Authenticity Guaranteed")}</p>
@@ -310,7 +356,7 @@ export function WatchDetailClient({ product }: { product: IProduct }) {
       </section>
 
       {/* Mobile sticky WhatsApp bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden p-3 bg-brand-black/90 backdrop-blur-sm border-t border-slate/30">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-brand-black/90 backdrop-blur-sm border-t border-slate/30">
         <a
           href={`https://wa.me/908505621313?text=${encodeURIComponent(`Merhaba, bu ürünle ilgileniyorum: ${product.brand} ${product.model}${product.reference ? ` (Ref. ${product.reference})` : ""} — ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
           target="_blank"

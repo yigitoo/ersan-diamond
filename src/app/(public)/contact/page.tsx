@@ -100,23 +100,20 @@ export default function ContactPage() {
     <div className="min-h-screen pt-32 pb-20">
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 lg:px-8 text-center mb-16">
-        <motion.h1
+        <motion.div
           variants={fadeUp}
           initial="hidden"
           animate="visible"
-          className="font-serif text-4xl md:text-5xl mb-4"
         >
-          {t("İletişim", "Contact")}
-        </motion.h1>
-        <motion.p
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.15 }}
-          className="text-mist text-sm tracking-wider"
-        >
-          {t("Sizden haber almak isteriz", "We would love to hear from you")}
-        </motion.p>
+          <p className="eyebrow--gold mb-4">{t("İletişim", "Contact")}</p>
+          <div className="section-divider section-divider--center mb-6" />
+          <h1 className="font-serif text-4xl md:text-5xl mb-4">
+            {t("İletişim", "Contact")}
+          </h1>
+          <p className="text-mist text-sm tracking-wider">
+            {t("Sizden haber almak isteriz", "We would love to hear from you")}
+          </p>
+        </motion.div>
       </section>
 
       {/* Main content: 2-column */}
@@ -141,10 +138,8 @@ export default function ContactPage() {
 
             {CONTACT_ITEMS.map((item) => (
               <motion.div key={item.label} variants={staggerItem}>
-                <div className="flex items-start gap-4 bg-charcoal border border-slate/50 rounded-sm p-5 transition-all duration-500 hover:border-soft-white/20">
-                  <div className="w-10 h-10 rounded-full border border-slate flex items-center justify-center shrink-0">
-                    <item.icon size={18} className="text-brand-gold" />
-                  </div>
+                <div className="flex items-start gap-4 py-5 border-b border-slate/40 transition-colors duration-300">
+                  <item.icon size={20} className="text-brand-gold shrink-0 mt-0.5" />
                   <div>
                     <p className="text-xs uppercase tracking-wider text-mist mb-1">
                       {item.label}

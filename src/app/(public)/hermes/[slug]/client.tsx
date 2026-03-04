@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield,
   CalendarDays,
@@ -32,7 +32,7 @@ import type { IProduct, HermesSpecs } from "@/types";
 function SpecRow({ label, value }: { label: string; value?: string | React.ReactNode }) {
   if (value === undefined || value === null || value === "") return null;
   return (
-    <div className="flex items-center justify-between py-3 border-b border-slate/40">
+    <div className="spec-table-row">
       <span className="text-xs uppercase tracking-wider text-mist">{label}</span>
       <span className="text-sm text-brand-white">{value}</span>
     </div>
@@ -53,17 +53,58 @@ function BooleanValue({ value }: { value: boolean }) {
 }
 
 // ---------------------------------------------------------------------------
+// Lightbox
+// ---------------------------------------------------------------------------
+function Lightbox({ url, alt, onClose }: { url: string; alt: string; onClose: () => void }) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="lightbox-backdrop flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors z-10"
+        >
+          <X size={28} />
+        </button>
+        <motion.img
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          src={url}
+          alt={alt}
+          className="max-w-full max-h-[90vh] object-contain"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main detail component
 // ---------------------------------------------------------------------------
 export function HermesDetailClient({ product }: { product: IProduct }) {
   const { t } = useI18n();
   const [selectedImage, setSelectedImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const specs = (product.specs || {}) as HermesSpecs;
 
   const images = product.images.length > 0 ? product.images : [];
+  const activeUrl = images[selectedImage]?.url;
 
   return (
     <div className="min-h-screen pt-28 pb-20">
+      {/* Lightbox */}
+      {lightboxOpen && activeUrl && (
+        <Lightbox url={activeUrl} alt={product.title} onClose={() => setLightboxOpen(false)} />
+      )}
+
       {/* Back link */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 mb-8">
         <Link
@@ -80,49 +121,54 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Left: Images */}
           <motion.div variants={fadeUp} initial="hidden" animate="visible">
-            {/* Main image */}
-            <div className="aspect-square bg-charcoal border border-slate/50 rounded-sm overflow-hidden mb-4">
-              {images[selectedImage] ? (
-                <img
-                  src={images[selectedImage].url}
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <ShoppingBag size={64} className="text-mist/30" />
-                </div>
-              )}
-            </div>
+            <div className="flex flex-col-reverse lg:flex-row gap-4">
+              {/* Thumbnails -- vertical on desktop */}
+              <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible no-scrollbar">
+                {images.length > 1
+                  ? images.slice(0, 6).map((img, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedImage(i)}
+                        className={cn(
+                          "w-20 h-20 flex-shrink-0 border rounded-sm overflow-hidden transition-all duration-300",
+                          selectedImage === i
+                            ? "border-brand-white"
+                            : "border-slate/50 hover:border-soft-white/30"
+                        )}
+                      >
+                        <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
+                      </button>
+                    ))
+                  : [0, 1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "w-20 h-20 flex-shrink-0 bg-charcoal border rounded-sm flex items-center justify-center",
+                          i === 0 ? "border-brand-white" : "border-slate/50"
+                        )}
+                      >
+                        <ShoppingBag size={20} className="text-mist/40" />
+                      </div>
+                    ))}
+              </div>
 
-            {/* Thumbnails */}
-            <div className="flex gap-3 overflow-x-auto no-scrollbar">
-              {images.length > 1
-                ? images.slice(0, 6).map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedImage(i)}
-                      className={cn(
-                        "w-20 h-20 flex-shrink-0 border rounded-sm overflow-hidden transition-all duration-300",
-                        selectedImage === i
-                          ? "border-brand-white"
-                          : "border-slate/50 hover:border-soft-white/30"
-                      )}
-                    >
-                      <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
-                    </button>
-                  ))
-                : [0, 1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "w-20 h-20 flex-shrink-0 bg-charcoal border rounded-sm flex items-center justify-center",
-                        i === 0 ? "border-brand-white" : "border-slate/50"
-                      )}
-                    >
-                      <ShoppingBag size={20} className="text-mist/40" />
-                    </div>
-                  ))}
+              {/* Main image */}
+              <div
+                className="flex-1 aspect-[3/4] bg-charcoal border border-slate/50 rounded-sm overflow-hidden cursor-zoom"
+                onClick={() => activeUrl && setLightboxOpen(true)}
+              >
+                {activeUrl ? (
+                  <img
+                    src={activeUrl}
+                    alt={product.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ShoppingBag size={64} className="text-mist/30" />
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
 
@@ -154,7 +200,7 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
                   {t("Fiyat Sorunuz", "Price on Request")}
                 </Button>
               ) : product.price ? (
-                <p className="font-serif text-2xl">{formatPrice(product.price, product.currency)}</p>
+                <p className="font-serif text-3xl tracking-tight">{formatPrice(product.price, product.currency)}</p>
               ) : null}
             </div>
 
@@ -165,7 +211,7 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
               <WishlistButton productId={product._id} />
             </div>
 
-            {/* WhatsApp CTA — desktop only */}
+            {/* WhatsApp CTA -- desktop only */}
             <a
               href={`https://wa.me/908505621313?text=${encodeURIComponent(`Merhaba, bu ürünle ilgileniyorum: ${product.brand} ${product.model}${specs.size ? ` ${specs.size}` : ""} — ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
               target="_blank"
@@ -213,7 +259,7 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
             </div>
 
             {/* Trust badge */}
-            <div className="flex items-center gap-3 py-4 border border-slate/30 rounded-sm px-4 bg-charcoal/50">
+            <div className="flex items-center gap-3 py-4 border-l-2 border-brand-gold rounded-sm px-4 bg-charcoal/50">
               <Shield size={20} className="text-brand-gold flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium">{t("Orijinallik Garantisi", "Authenticity Guaranteed")}</p>
@@ -274,7 +320,7 @@ export function HermesDetailClient({ product }: { product: IProduct }) {
       </section>
 
       {/* Mobile sticky WhatsApp bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden p-3 bg-brand-black/90 backdrop-blur-sm border-t border-slate/30">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-brand-black/90 backdrop-blur-sm border-t border-slate/30">
         <a
           href={`https://wa.me/908505621313?text=${encodeURIComponent(`Merhaba, bu ürünle ilgileniyorum: ${product.brand} ${product.model}${specs.size ? ` ${specs.size}` : ""} — ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
           target="_blank"

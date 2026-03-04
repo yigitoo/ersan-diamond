@@ -199,23 +199,20 @@ export default function SellPage() {
     <div className="min-h-screen pt-32 pb-20">
       {/* Hero */}
       <section className="text-center mb-12 px-6">
-        <motion.h1
+        <motion.div
           variants={fadeUp}
           initial="hidden"
           animate="visible"
-          className="font-serif text-4xl md:text-5xl mb-4"
         >
-          {t("Bize Satın", "Sell to Us")}
-        </motion.h1>
-        <motion.p
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.15 }}
-          className="text-mist text-sm tracking-wider"
-        >
-          {t("Lüks parçalarınızı konsinye bırakın veya bize satın", "Consign or sell your luxury pieces")}
-        </motion.p>
+          <p className="eyebrow--gold mb-4">{t("Satış", "Selling")}</p>
+          <div className="section-divider section-divider--center mb-6" />
+          <h1 className="font-serif text-4xl md:text-5xl mb-4">
+            {t("Bize Satın", "Sell to Us")}
+          </h1>
+          <p className="text-mist text-sm tracking-wider">
+            {t("Lüks parçalarınızı konsinye bırakın veya bize satın", "Consign or sell your luxury pieces")}
+          </p>
+        </motion.div>
       </section>
 
       {/* Form */}
@@ -228,10 +225,15 @@ export default function SellPage() {
       >
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="bg-charcoal border border-slate/50 rounded-sm p-6 md:p-10 space-y-8"
+          className="bg-charcoal border border-slate/50 rounded-sm overflow-hidden"
         >
+          {/* Gold gradient line */}
+          <div className="h-[2px] bg-gradient-to-r from-brand-gold/60 via-brand-gold to-brand-gold/60" />
+
+          <div className="p-6 md:p-10 space-y-8">
           {/* Product Info */}
           <div>
+            <p className="eyebrow--gold mb-2">01 — {t("Ürün Bilgileri", "Product Information")}</p>
             <h2 className="font-serif text-xl mb-6">{t("Ürün Bilgileri", "Product Information")}</h2>
             <div className="space-y-5">
               <Select
@@ -311,6 +313,7 @@ export default function SellPage() {
 
           {/* Photos */}
           <div>
+            <p className="eyebrow--gold mb-2">02 — {t("Fotoğraflar", "Photos")}</p>
             <h2 className="font-serif text-xl mb-6">{t("Fotoğraflar", "Photos")}</h2>
             <p className="text-xs text-mist mb-4">
               {t(
@@ -366,6 +369,7 @@ export default function SellPage() {
 
           {/* Contact */}
           <div>
+            <p className="eyebrow--gold mb-2">03 — {t("İletişim Bilgileri", "Contact Information")}</p>
             <h2 className="font-serif text-xl mb-6">{t("İletişim Bilgileri", "Contact Information")}</h2>
             <div className="space-y-5">
               <Input
@@ -410,6 +414,7 @@ export default function SellPage() {
                 "Your information is kept strictly confidential and will only be used for this evaluation."
               )}
             </p>
+          </div>
           </div>
         </form>
       </motion.div>
