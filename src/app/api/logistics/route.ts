@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db/connection";
 import { requireRole } from "@/lib/auth";
 import Delivery from "@/lib/db/models/delivery";
+import Product from "@/lib/db/models/product";
 import { paginatedResponse, successResponse, errorResponse, parseSearchParams } from "@/lib/utils/api-response";
 
 export async function GET(req: NextRequest) {
@@ -75,6 +76,11 @@ export async function POST(req: NextRequest) {
         },
       ],
     });
+
+    // Teslimat olusturulunca urunu siteden kaldir
+    if (body.productId) {
+      await Product.findByIdAndUpdate(body.productId, { published: false });
+    }
 
     const populated = await Delivery.findById(delivery._id)
       .populate("productId", "brand model slug images category")

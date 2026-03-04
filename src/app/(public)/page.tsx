@@ -128,17 +128,19 @@ export default function HomePage() {
           alt=""
           fill
           priority
-          className="object-cover -z-20 opacity-80"
+          className="object-cover -z-20"
           sizes="100vw"
         />
 
+        {/* Dark overlay for text contrast */}
+        <div className="absolute inset-0 -z-10 bg-black/60" />
 
-        {/* Subtle gold light bleed */}
+        {/* Vignette edges */}
         <div
-          className="absolute inset-0 -z-10 opacity-[0.04]"
+          className="absolute inset-0 -z-10"
           style={{
             background:
-              "radial-gradient(circle at 50% 40%, #C9A84C 0%, transparent 50%)",
+              "radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)",
           }}
         />
 
@@ -163,20 +165,24 @@ export default function HomePage() {
           {/* Subtitle */}
           <p className="md:mt-10 text-white font-bold text-base md:text-lg max-w-xl mx-auto mt-6 leading-relaxed">
             {t(
-              "İstanbul'un en güvenilir adresi",
-              "Istanbul's premier destination for authenticated luxury timepieces and Hermès"
+              "Türkiye'nin en güvenilir adresi",
+              "Türkiye's premier destination for authenticated luxury timepieces and Hermès"
             )}
           </p>
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
             <Link href="/concierge">
-              <Button variant="primary" size="lg">
+              <Button variant="gold" className="rounded-2xl" size="lg">
                 {t("Randevu Al", "Book Appointment")}
               </Button>
             </Link>
             <Link href="/watches">
-              <Button variant="outline" size="lg" className="text-brand-gold hover:border-brand-gold hover:bg-brand-gold hover:text-white">
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-2xl border-white/40 text-white hover:border-white hover:bg-white/10 transition-all duration-500"
+              >
                 {t("Koleksiyonu Keşfet", "Explore Collection")}
               </Button>
             </Link>
@@ -216,10 +222,10 @@ export default function HomePage() {
           >
             {CATEGORIES.slice(0,-1).map((cat) => (
               <motion.div key={cat.title} variants={staggerItem}>
-                <Link href={cat.href} className="group block">
+                <Link href={cat.href} className="group block h-full">
                   <div
                     className={cn(
-                      "bg-charcoal border border-slate/50 rounded p-8 h-full",
+                      "bg-charcoal border border-slate/50 rounded p-8 h-full flex flex-col",
                       "transition-all duration-700",
                       "hover:border-soft-white/30 hover:bg-charcoal/80"
                     )}
@@ -227,7 +233,7 @@ export default function HomePage() {
                     <h3 className="font-serif text-2xl md:text-3xl mb-3">
                       {cat.title}
                     </h3>
-                    <p className="text-mist text-sm leading-relaxed mb-8">
+                    <p className="text-mist text-sm leading-relaxed mb-8 flex-1">
                       {cat.description}
                     </p>
                     <ArrowRight

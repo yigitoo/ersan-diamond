@@ -19,13 +19,10 @@ export async function GET(req: NextRequest) {
         // Don't apply published filter for id lookups
       }
     } else {
-      filter.published = true;
+      const published = req.nextUrl.searchParams.get("published");
+      if (published === "false") filter.published = false;
+      else if (published !== "all") filter.published = true;
     }
-
-    // Published override
-    const published = req.nextUrl.searchParams.get("published");
-    if (published === "true") filter.published = true;
-    if (published === "false") filter.published = false;
 
     // Category filter
     const category = req.nextUrl.searchParams.get("category");
@@ -42,6 +39,10 @@ export async function GET(req: NextRequest) {
     // Availability filter
     const availability = req.nextUrl.searchParams.get("availability");
     if (availability) filter.availability = availability;
+    // Hide SOLD products on public pages (when not fetching all)
+    else if (!ids && req.nextUrl.searchParams.get("published") !== "all") {
+      filter.availability = { $ne: "SOLD" };
+    }
 
     // Price range
     const minPrice = req.nextUrl.searchParams.get("minPrice");

@@ -60,6 +60,15 @@ export async function PATCH(
 
     const updated = await Appointment.findByIdAndUpdate(id, parsed.data, { returnDocument: "after" }).lean();
 
+    // assignedUserId degistiyse CalendarEvent'i senkronize et
+    if (parsed.data.assignedUserId && parsed.data.assignedUserId !== String(before.assignedUserId)) {
+      if (updated?.calendarEventId) {
+        await CalendarEvent.findByIdAndUpdate(updated.calendarEventId, {
+          ownerUserId: parsed.data.assignedUserId,
+        });
+      }
+    }
+
     await logCrud(user.id, user.role, "update", "Appointment", id, {
       before: { status: before.status } as Record<string, unknown>,
       after: parsed.data as Record<string, unknown>,

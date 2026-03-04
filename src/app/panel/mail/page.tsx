@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useSwrPaginated, useSwrFetch } from "@/lib/hooks";
 import { useSWRConfig } from "swr";
+import DOMPurify from "dompurify";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import { formatRelative, formatDateTime } from "@/lib/utils/formatters";
 import { cn } from "@/lib/utils/cn";
 import {
   Mail, Send, Search, Reply, User, Archive, ArchiveRestore,
-  Eye, EyeOff, XCircle, Inbox, PenSquare,
+  Eye, EyeOff, XCircle, Inbox, PenSquare, ArrowLeft,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
@@ -270,6 +271,75 @@ export default function MailPage() {
     );
   };
 
+  /* --------------------------------- HTML Email Viewer --------------------------------- */
+  const HtmlEmailViewer = ({ html }: { html: string }) => {
+    const sanitizedHtml = useMemo(() => DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: [
+        "a", "b", "br", "blockquote", "center", "code", "dd", "div", "dl", "dt",
+        "em", "font", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "i", "img",
+        "li", "ol", "p", "pre", "s", "small", "span", "strong", "sub", "sup",
+        "table", "tbody", "td", "tfoot", "th", "thead", "tr", "u", "ul",
+        "article", "section", "header", "footer", "nav", "main",
+      ],
+      ALLOWED_ATTR: [
+        "href", "src", "alt", "title", "width", "height", "style", "class",
+        "align", "valign", "bgcolor", "color", "border", "cellpadding",
+        "cellspacing", "colspan", "rowspan", "dir", "lang", "target",
+      ],
+      ALLOW_DATA_ATTR: false,
+      ADD_ATTR: ["target"],
+      FORBID_TAGS: ["script", "iframe", "object", "embed", "form", "input", "button", "select", "textarea"],
+    }), [html]);
+
+    const handleLoad = (e: React.SyntheticEvent<HTMLIFrameElement>) => {
+      const iframe = e.currentTarget;
+      try {
+        if (iframe.contentDocument?.body) {
+          // Force all links to open in new tab
+          iframe.contentDocument.querySelectorAll("a").forEach((a) => {
+            a.setAttribute("target", "_blank");
+            a.setAttribute("rel", "noopener noreferrer");
+          });
+          // Initial resize
+          iframe.style.height = iframe.contentDocument.body.scrollHeight + 16 + "px";
+          // Watch for late-loading images etc.
+          const observer = new ResizeObserver(() => {
+            if (iframe.contentDocument?.body) {
+              iframe.style.height = iframe.contentDocument.body.scrollHeight + 16 + "px";
+            }
+          });
+          observer.observe(iframe.contentDocument.body);
+        }
+      } catch {
+        // cross-origin fallback
+      }
+    };
+
+    const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e0e0e0;background:transparent;margin:0;padding:4px;font-size:14px;line-height:1.6;word-break:break-word;}
+a{color:#d4af37;}img{max-width:100%;height:auto;}
+table{max-width:100%!important;width:auto!important;}
+</style></head><body>${sanitizedHtml}</body></html>`;
+
+    return (
+      <iframe
+        srcDoc={srcDoc}
+        onLoad={handleLoad}
+        sandbox="allow-same-origin"
+        className="w-full border-0 min-h-[60px] rounded-sm"
+        style={{ background: "transparent", colorScheme: "dark" }}
+      />
+    );
+  };
+
+  const isHtmlEmail = (email: any) => {
+    if (!email.html) return false;
+    // Skip trivial HTML wrappers around plain text (our own outbound format)
+    const stripped = email.html.replace(/<\/?div[^>]*>/gi, "").replace(/style="[^"]*"/gi, "").trim();
+    // If html has real tags beyond simple wrappers, treat as HTML email
+    return /<(table|tr|td|img|a |p |h[1-6]|br|hr|span|b |strong|em|ul|ol|li|center|header|footer|section|article)/i.test(email.html) || stripped !== (email.text || "").trim();
+  };
+
   /* --------------------------------- Messages List --------------------------------- */
   const MessagesList = () => (
     <div className="flex-1 space-y-4 overflow-y-auto">
@@ -279,6 +349,7 @@ export default function MailPage() {
         threadEmails.map((email: any) => {
           const isOutbound = email.direction === "OUTBOUND";
           const senderEmail = isOutbound ? email.from : (email.from || threadInfo?.customerEmail);
+          const showAsHtml = isHtmlEmail(email);
           return (
             <div
               key={email._id}
@@ -309,9 +380,13 @@ export default function MailPage() {
                   <span className="text-[10px] text-mist shrink-0">{formatDateTime(email.sentAt || email.receivedAt)}</span>
                 </div>
                 {email.subject && <p className="text-[10px] text-mist mb-2">{email.subject}</p>}
-                <div className="text-sm text-brand-white/80 whitespace-pre-wrap break-words">
-                  {email.text || (email.html ? <div dangerouslySetInnerHTML={{ __html: email.html }} /> : t("İçerik yok", "No content"))}
-                </div>
+                {showAsHtml ? (
+                  <HtmlEmailViewer html={email.html} />
+                ) : (
+                  <div className="text-sm text-brand-white/80 whitespace-pre-wrap break-words">
+                    {email.text || t("İçerik yok", "No content")}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -355,10 +430,19 @@ export default function MailPage() {
         {/* Sticky header */}
         <div className="border-b border-slate p-4 space-y-3 shrink-0">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h3 className="font-serif text-lg truncate">{threadInfo?.subject}</h3>
-              <p className="text-sm text-mist mt-0.5">{threadInfo?.customerEmail}</p>
-              <p className="text-xs text-mist mt-0.5">{threadInfo?.messageCount} {t("mesaj", "message(s)")}</p>
+            <div className="flex items-start gap-3 min-w-0">
+              <button
+                onClick={closeThread}
+                className="mt-1 p-1.5 text-mist hover:text-brand-white hover:bg-slate rounded-sm transition-colors shrink-0"
+                title={t("Geri", "Back")}
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <div className="min-w-0">
+                <h3 className="font-serif text-lg truncate">{threadInfo?.subject}</h3>
+                <p className="text-sm text-mist mt-0.5">{threadInfo?.customerEmail}</p>
+                <p className="text-xs text-mist mt-0.5">{threadInfo?.messageCount} {t("mesaj", "message(s)")}</p>
+              </div>
             </div>
           </div>
           <ThreadActions />

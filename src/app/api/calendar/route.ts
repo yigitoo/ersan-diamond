@@ -27,7 +27,10 @@ export async function GET(req: NextRequest) {
     };
 
     if (!hasPermission(user.role, "calendar:view_all")) {
-      filter.ownerUserId = user.id;
+      filter.$or = [
+        { ownerUserId: user.id },
+        { type: "APPOINTMENT" },
+      ];
     }
 
     const userId = req.nextUrl.searchParams.get("userId");

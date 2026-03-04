@@ -42,9 +42,9 @@ export function StatusBadge({ status, type, className }: StatusBadgeProps) {
     }
   } else if (type === "availability") {
     const colors: Record<string, string> = {
-      AVAILABLE: "bg-green-500/20 text-green-400",
-      RESERVED: "bg-yellow-500/20 text-yellow-400",
-      SOLD: "bg-red-500/20 text-red-400",
+      AVAILABLE: "bg-green-600/80 text-white",
+      RESERVED: "bg-yellow-600/80 text-white",
+      SOLD: "bg-red-600/80 text-white",
     };
     label = tl(t, AVAILABILITY_LABELS[status]) || status;
     color = colors[status] || "";

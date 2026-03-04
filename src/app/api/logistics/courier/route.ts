@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db/connection";
 import { requireRole } from "@/lib/auth";
+import { hasPermission } from "@/lib/auth/rbac";
 import Delivery from "@/lib/db/models/delivery";
 import { successResponse, errorResponse } from "@/lib/utils/api-response";
 
@@ -11,9 +12,10 @@ export async function GET(req: NextRequest) {
 
     const showCompleted = req.nextUrl.searchParams.get("completed") === "true";
 
-    const filter: Record<string, unknown> = {
-      courierId: user.id,
-    };
+    const filter: Record<string, unknown> = {};
+    if (!hasPermission(user.role, "logistics:view_all")) {
+      filter.courierId = user.id;
+    }
 
     if (!showCompleted) {
       filter.status = { $nin: ["DELIVERED", "CANCELLED"] };

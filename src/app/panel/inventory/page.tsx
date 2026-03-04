@@ -79,7 +79,7 @@ export default function InventoryPage() {
     { value: "GBP", label: "GBP" },
   ];
 
-  const { data, isLoading } = useSwrPaginated("/api/products", { page, limit: 20, category: category || undefined, availability: availability || undefined, search: search || undefined });
+  const { data, isLoading } = useSwrPaginated("/api/products", { page, limit: 20, published: "all", category: category || undefined, availability: availability || undefined, search: search || undefined });
   const products = (data as any)?.data || [];
   const meta = (data as any)?.meta;
 

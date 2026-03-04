@@ -25,7 +25,7 @@ export function SectionHeading({ title, subtitle, align = "center", className }:
       )}
     >
       <h2 className="luxury-heading text-3xl md:text-4xl lg:text-5xl mb-4">{title}</h2>
-      {subtitle && <p className="text-mist text-sm md:text-base max-w-2xl mx-auto">{subtitle}</p>}
+      {subtitle && <p className={cn("text-mist text-sm md:text-base max-w-2xl", align === "center" && "mx-auto")}>{subtitle}</p>}
     </motion.div>
   );
 }
