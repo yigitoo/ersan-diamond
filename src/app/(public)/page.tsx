@@ -30,6 +30,9 @@ export default function HomePage() {
   const { data: latestProducts } = useSwrFetch<IProduct[]>(
     "/api/products?limit=6&sort=createdAt&published=true"
   );
+  const { data: sliderProducts } = useSwrFetch<IProduct[]>(
+    "/api/products?limit=12&sort=createdAt&published=true"
+  );
 
   /* ─── Helpers ─── */
   const categoryPath = (category: ProductCategory): string => {
@@ -52,6 +55,7 @@ export default function HomePage() {
         "Curated timepieces from the world's finest maisons"
       ),
       href: "/watches",
+      image: "/imgs/cat-watches.jpg",
       featured: true,
     },
     {
@@ -61,6 +65,7 @@ export default function HomePage() {
         "Iconic leather goods, authenticated and pristine"
       ),
       href: "/hermes",
+      image: "/imgs/cat-hermes.jpg",
     },
     {
       title: t("Mücevherat", "Jewelry"),
@@ -69,6 +74,7 @@ export default function HomePage() {
         "A curated collection of fine gemstones and jewelry"
       ),
       href: "/jewelry",
+      image: "/imgs/cat-jewelry.jpg",
     },
   ];
 
@@ -216,54 +222,75 @@ export default function HomePage() {
             viewport={{ once: true, margin: "-100px" }}
             className="grid lg:grid-cols-[2fr_1fr] gap-6"
           >
-            {/* Featured: Watches (large left card) */}
+            {/* Featured: Watches (large left card with bg image) */}
             <motion.div variants={staggerItem}>
               <Link href={CATEGORIES[0].href} className="group block h-full">
                 <div
                   className={cn(
-                    "bg-charcoal border border-slate/50 rounded p-8 h-full flex flex-col justify-end min-h-[280px]",
-                    "transition-all duration-700",
-                    "hover:border-soft-white/30 hover:bg-charcoal/80"
+                    "relative rounded overflow-hidden h-full min-h-[340px] md:min-h-[420px]",
+                    "transition-all duration-700"
                   )}
                 >
-                  <h3 className="font-serif text-3xl md:text-4xl mb-3">
-                    {CATEGORIES[0].title}
-                  </h3>
-                  <p className="text-mist text-sm leading-relaxed mb-8 max-w-md">
-                    {CATEGORIES[0].description}
-                  </p>
-                  <ArrowRight
-                    size={18}
-                    strokeWidth={1.5}
-                    className="text-mist group-hover:text-brand-gold group-hover:translate-x-1 transition-all duration-500"
+                  {/* Background image */}
+                  <img
+                    src={CATEGORIES[0].image}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
+                  {/* Dark gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+                  {/* Content */}
+                  <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10">
+                    <p className="eyebrow text-white/60 mb-3">{t("Koleksiyon", "Collection")}</p>
+                    <h3 className="font-serif text-3xl md:text-5xl text-white mb-3">
+                      {CATEGORIES[0].title}
+                    </h3>
+                    <p className="text-white/70 text-sm leading-relaxed mb-6 max-w-md">
+                      {CATEGORIES[0].description}
+                    </p>
+                    <ArrowRight
+                      size={18}
+                      strokeWidth={1.5}
+                      className="text-white/50 group-hover:text-brand-gold group-hover:translate-x-1 transition-all duration-500"
+                    />
+                  </div>
                 </div>
               </Link>
             </motion.div>
 
-            {/* Right column: Hermès + Jewelry stacked */}
+            {/* Right column: Hermès + Jewelry stacked with bg images */}
             <div className="flex flex-col gap-6">
               {CATEGORIES.slice(1).map((cat) => (
                 <motion.div key={cat.title} variants={staggerItem} className="flex-1">
                   <Link href={cat.href} className="group block h-full">
                     <div
                       className={cn(
-                        "bg-charcoal border border-slate/50 rounded p-8 h-full flex flex-col",
-                        "transition-all duration-700",
-                        "hover:border-soft-white/30 hover:bg-charcoal/80"
+                        "relative rounded overflow-hidden h-full min-h-[200px]",
+                        "transition-all duration-700"
                       )}
                     >
-                      <h3 className="font-serif text-2xl md:text-3xl mb-3">
-                        {cat.title}
-                      </h3>
-                      <p className="text-mist text-sm leading-relaxed mb-6 flex-1">
-                        {cat.description}
-                      </p>
-                      <ArrowRight
-                        size={18}
-                        strokeWidth={1.5}
-                        className="text-mist group-hover:text-brand-gold group-hover:translate-x-1 transition-all duration-500"
+                      {/* Background image */}
+                      <img
+                        src={cat.image}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
+                      {/* Dark gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/25" />
+                      {/* Content */}
+                      <div className="relative z-10 h-full flex flex-col justify-end p-7">
+                        <h3 className="font-serif text-2xl md:text-3xl text-white mb-2">
+                          {cat.title}
+                        </h3>
+                        <p className="text-white/60 text-sm leading-relaxed mb-4">
+                          {cat.description}
+                        </p>
+                        <ArrowRight
+                          size={18}
+                          strokeWidth={1.5}
+                          className="text-white/50 group-hover:text-brand-gold group-hover:translate-x-1 transition-all duration-500"
+                        />
+                      </div>
                     </div>
                   </Link>
                 </motion.div>
@@ -303,6 +330,61 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* ═══════════════════ MARQUEE SLIDER ═══════════════════ */}
+      {sliderProducts && sliderProducts.length > 0 && (
+        <section className="py-16 overflow-hidden">
+          <div className="mx-auto max-w-7xl px-6 mb-10">
+            <p className="eyebrow--gold text-center">
+              {t("Vitrin", "Showcase")}
+            </p>
+          </div>
+          {/* Marquee container with fade edges */}
+          <div className="relative">
+            {/* Left fade */}
+            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-40 bg-gradient-to-r from-brand-black to-transparent z-10 pointer-events-none" />
+            {/* Right fade */}
+            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-40 bg-gradient-to-l from-brand-black to-transparent z-10 pointer-events-none" />
+            {/* Scrolling track — items duplicated for seamless loop */}
+            <div className="marquee-track">
+              {[...sliderProducts, ...sliderProducts].map((product, i) => (
+                <Link
+                  key={`${product._id}-${i}`}
+                  href={`${categoryPath(product.category)}/${product.slug}`}
+                  className="group flex-shrink-0 w-[220px] md:w-[260px] mx-3"
+                >
+                  <div className="relative aspect-[3/4] bg-charcoal border border-slate/50 rounded-sm overflow-hidden transition-all duration-500 hover:border-soft-white/30">
+                    {product.images[0]?.url ? (
+                      <img
+                        src={product.images[0].url}
+                        alt={`${product.brand} ${product.model}`}
+                        loading="lazy"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Watch size={28} strokeWidth={1} className="text-mist/20" />
+                      </div>
+                    )}
+                    {/* Bottom shadow */}
+                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
+                    {/* Gold accent line */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                  </div>
+                  <div className="mt-3 space-y-0.5">
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-mist">
+                      {product.brand}
+                    </p>
+                    <p className="font-serif text-sm leading-tight line-clamp-1">
+                      {product.model}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ═══════════════════ TRUST BLOCK — Numbered ═══════════════════ */}
       <section className="py-28 bg-charcoal">
@@ -383,6 +465,8 @@ export default function HomePage() {
                             <Watch size={32} strokeWidth={1} className="text-mist/20" />
                           </div>
                         )}
+                        {/* Permanent bottom shadow for readability */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
                       </div>
                       {/* Info */}
                       <div className="p-4 md:p-5">

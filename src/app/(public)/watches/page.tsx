@@ -113,12 +113,12 @@ export default function WatchesPage() {
                     <div className="absolute top-3 right-3">
                       <WishlistButton productId={product._id} size={16} />
                     </div>
-                    {/* Hover overlay — gradient */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="mt-auto">
-                        <p className="text-xs text-white font-medium">{product.reference} · {product.year}</p>
-                        <p className="text-xs text-white/70">{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</p>
-                      </div>
+                    {/* Permanent bottom shadow — always visible */}
+                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
+                    {/* Info always visible at bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-[11px] text-white font-medium drop-shadow-lg">{product.reference} · {product.year}</p>
+                      <p className="text-[11px] text-white/80 drop-shadow-lg">{tl(t, CONDITION_LABELS[product.condition]) || product.condition}</p>
                     </div>
                     {/* Gold accent line */}
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />

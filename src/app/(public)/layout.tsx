@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/public/navbar";
 import { Footer } from "@/components/public/footer";
+import { FloatingContact } from "@/components/shared/floating-contact";
 import { WishlistProvider } from "@/lib/wishlist/wishlist-context";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -8,6 +9,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
+      <FloatingContact />
     </WishlistProvider>
   );
 }

@@ -318,6 +318,22 @@ body {
   100% { background-position: -200% 0; }
 }
 
+/* Marquee — infinite horizontal scroll */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 40s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* Liquid glass — light mode fix */
 .liquid-glass--light {
   background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6));
