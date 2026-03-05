@@ -14,15 +14,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/shared/pagination";
 import { DeliveryCard } from "@/components/panel/delivery-card";
 import { DeliveryTimeline } from "@/components/panel/delivery-timeline";
-import { CourierOverview } from "@/components/panel/courier-overview";
+import { LogisticsMap } from "@/components/panel/logistics-map";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
   DELIVERY_STATUS_CONFIG, DELIVERY_PRIORITY_CONFIG, DELIVERY_TIME_SLOT_LABELS,
-  DEFAULT_PICKUP_ADDRESS, tl,
+  DEFAULT_PICKUP_ADDRESS, ISTANBUL_DISTRICTS, AUTO_ASSIGN_LABELS, tl,
 } from "@/lib/utils/constants";
-import { formatDate, formatDateTime } from "@/lib/utils/formatters";
-import { Plus, Search, Truck, Package, Calendar, User, Phone, MapPin } from "lucide-react";
+import { formatDate } from "@/lib/utils/formatters";
+import {
+  Plus, Search, Truck, Package, Calendar, User, Phone, MapPin,
+  Map, List, Zap, Route,
+} from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import type { RouteResult } from "@/types";
+
+type ViewMode = "split" | "map" | "list";
 
 export default function LogisticsPage() {
   const { mutate } = useSWRConfig();
@@ -30,6 +36,14 @@ export default function LogisticsPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("split");
+
+  // Route display
+  const [routeData, setRouteData] = useState<RouteResult | null>(null);
+  const [loadingRoute, setLoadingRoute] = useState<string | null>(null);
+
+  // Auto-assign
+  const [autoAssigning, setAutoAssigning] = useState(false);
 
   // Create dialog
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -47,6 +61,8 @@ export default function LogisticsPage() {
     deliveryCity: "İstanbul",
     deliveryCountry: "Türkiye",
     deliveryNotes: "",
+    deliveryLat: "",
+    deliveryLng: "",
     specialInstructions: "",
     adminNotes: "",
   });
@@ -77,7 +93,7 @@ export default function LogisticsPage() {
   // Data
   const params: Record<string, string | number | undefined> = {
     page,
-    limit: 12,
+    limit: 20,
     search: search || undefined,
     status: statusFilter || undefined,
   };
@@ -99,6 +115,60 @@ export default function LogisticsPage() {
     mutate((key: string) => typeof key === "string" && key.startsWith("/api/logistics"), undefined, { revalidate: true });
   }, [mutate]);
 
+  /* --- Auto-assign all pending --- */
+  const handleAutoAssignAll = async () => {
+    const pendingIds = deliveries.filter((d: any) => d.status === "PENDING").map((d: any) => d._id);
+    if (pendingIds.length === 0) return;
+    setAutoAssigning(true);
+    try {
+      const res = await fetch("/api/logistics/auto-assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deliveryIds: pendingIds }),
+      });
+      if (res.ok) refreshData();
+    } catch { /* ignore */ } finally {
+      setAutoAssigning(false);
+    }
+  };
+
+  /* --- Auto-assign single delivery --- */
+  const handleAutoAssignSingle = async (deliveryId: string) => {
+    setAutoAssigning(true);
+    try {
+      const res = await fetch("/api/logistics/auto-assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deliveryId }),
+      });
+      if (res.ok) {
+        refreshData();
+        mutateDetail();
+      }
+    } catch { /* ignore */ } finally {
+      setAutoAssigning(false);
+    }
+  };
+
+  /* --- Show route for a courier --- */
+  const handleShowRoute = async (courierId: string) => {
+    if (loadingRoute === courierId) return;
+    if (routeData?.courierId === courierId) {
+      setRouteData(null);
+      return;
+    }
+    setLoadingRoute(courierId);
+    try {
+      const res = await fetch(`/api/logistics/route-optimize?courierId=${courierId}`);
+      if (res.ok) {
+        const json = await res.json();
+        setRouteData(json.data || json);
+      }
+    } catch { /* ignore */ } finally {
+      setLoadingRoute(null);
+    }
+  };
+
   /* --- Status tabs --- */
   const statusTabs = [
     { value: "", label: t("Tümü", "All") },
@@ -113,6 +183,15 @@ export default function LogisticsPage() {
   const updateForm = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (formErrors[field]) setFormErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const handleDistrictSelect = (district: string) => {
+    updateForm("deliveryDistrict", district);
+    const coords = ISTANBUL_DISTRICTS[district];
+    if (coords) {
+      updateForm("deliveryLat", String(coords.lat));
+      updateForm("deliveryLng", String(coords.lng));
+    }
   };
 
   const validate = () => {
@@ -150,6 +229,8 @@ export default function LogisticsPage() {
             city: form.deliveryCity,
             country: form.deliveryCountry,
             notes: form.deliveryNotes,
+            lat: form.deliveryLat ? parseFloat(form.deliveryLat) : undefined,
+            lng: form.deliveryLng ? parseFloat(form.deliveryLng) : undefined,
           },
           specialInstructions: form.specialInstructions,
           adminNotes: form.adminNotes,
@@ -175,7 +256,7 @@ export default function LogisticsPage() {
       productId: "", recipientName: "", recipientPhone: "", recipientEmail: "",
       scheduledDate: "", timeSlot: "FLEXIBLE", priority: "NORMAL", courierId: "",
       deliveryStreet: "", deliveryDistrict: "", deliveryCity: "İstanbul", deliveryCountry: "Türkiye",
-      deliveryNotes: "", specialInstructions: "", adminNotes: "",
+      deliveryNotes: "", deliveryLat: "", deliveryLng: "", specialInstructions: "", adminNotes: "",
     });
     setFormErrors({});
     setProductSearch("");
@@ -221,7 +302,6 @@ export default function LogisticsPage() {
     }
   };
 
-  /* --- Next valid status transitions for detail sheet --- */
   const VALID_TRANSITIONS: Record<string, string[]> = {
     PENDING: ["ASSIGNED", "CANCELLED"],
     ASSIGNED: ["PICKED_UP", "CANCELLED"],
@@ -232,6 +312,8 @@ export default function LogisticsPage() {
   };
 
   const dd = deliveryDetail as any;
+  const pendingCount = deliveries.filter((d: any) => d.status === "PENDING").length;
+  const activeCouriers = stats?.activeCouriers || [];
 
   /* ================================= RENDER ================================= */
 
@@ -240,9 +322,23 @@ export default function LogisticsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("Lojistik", "Logistics")}</h2>
-        <Button variant="primary" size="sm" onClick={() => { resetForm(); setDialogOpen(true); }}>
-          <Plus size={16} className="mr-1" /> {t("Yeni Teslimat", "New Delivery")}
-        </Button>
+        <div className="flex items-center gap-2">
+          {pendingCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={autoAssigning}
+              onClick={handleAutoAssignAll}
+              className="text-brand-gold border-brand-gold/30"
+            >
+              <Zap size={14} className="mr-1" />
+              {tl(t, AUTO_ASSIGN_LABELS.button)} ({pendingCount})
+            </Button>
+          )}
+          <Button variant="primary" size="sm" onClick={() => { resetForm(); setDialogOpen(true); }}>
+            <Plus size={16} className="mr-1" /> {t("Yeni Teslimat", "New Delivery")}
+          </Button>
+        </div>
       </div>
 
       {/* Stats cards */}
@@ -255,27 +351,36 @@ export default function LogisticsPage() {
         </div>
       )}
 
-      {/* Courier Overview */}
-      {stats?.activeCouriers && stats.activeCouriers.length > 0 && (
-        <div className="border border-slate/30 rounded-sm p-4">
-          <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-            <Truck size={16} className="text-brand-gold" />
-            {t("Kurye Durumu", "Courier Overview")}
-          </h3>
-          <CourierOverview couriers={stats.activeCouriers} deliveries={deliveries} />
-        </div>
-      )}
-
-      {/* Status tabs + search */}
+      {/* View mode toggle + Status tabs + search */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="overflow-x-auto w-full sm:w-auto">
+        {/* View mode */}
+        <div className="flex items-center gap-1 bg-charcoal border border-slate/30 rounded-sm p-0.5">
+          {([
+            { mode: "split" as ViewMode, icon: <><Map size={14} /><List size={14} /></>, label: "Split" },
+            { mode: "map" as ViewMode, icon: <Map size={14} />, label: t("Harita", "Map") },
+            { mode: "list" as ViewMode, icon: <List size={14} />, label: t("Liste", "List") },
+          ]).map(({ mode, icon, label }) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-sm transition-colors ${
+                viewMode === mode ? "bg-brand-gold/20 text-brand-gold" : "text-mist hover:text-brand-white"
+              }`}
+            >
+              {icon}
+              <span className="hidden sm:inline">{label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="overflow-x-auto flex-1 w-full sm:w-auto">
           <Tabs
             tabs={statusTabs}
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1); }}
           />
         </div>
-        <div className="relative flex-1 max-w-xs ml-auto">
+        <div className="relative max-w-xs ml-auto">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-mist" />
           <input
             placeholder={t("Ara...", "Search...")}
@@ -286,27 +391,114 @@ export default function LogisticsPage() {
         </div>
       </div>
 
-      {/* Delivery grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-48" />)}
-        </div>
-      ) : deliveries.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-mist">
-          <Truck size={40} className="mb-3 opacity-50" />
-          <p className="text-sm">{t("Teslimat bulunamadı", "No deliveries found")}</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {deliveries.map((d: any) => (
-            <DeliveryCard key={d._id} delivery={d} onClick={() => openDetail(d._id)} />
-          ))}
+      {/* Courier Overview with Route buttons */}
+      {activeCouriers.length > 0 && (
+        <div className="border border-slate/30 rounded-sm p-4">
+          <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+            <Truck size={16} className="text-brand-gold" />
+            {t("Kurye Durumu", "Courier Overview")}
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {activeCouriers.map((c: any) => (
+              <div key={c._id} className="border border-slate/30 rounded-sm p-3 bg-charcoal">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center">
+                    <Truck size={14} className="text-brand-gold" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{c.name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-mist">{t("Aktif", "Active")}</span>
+                  <span className="text-sm font-semibold text-brand-gold">{c.activeCount}</span>
+                </div>
+                <button
+                  onClick={() => handleShowRoute(c._id)}
+                  disabled={loadingRoute === c._id}
+                  className={`w-full flex items-center justify-center gap-1 px-2 py-1.5 text-xs rounded-sm border transition-colors ${
+                    routeData?.courierId === c._id
+                      ? "border-brand-gold/50 bg-brand-gold/10 text-brand-gold"
+                      : "border-slate text-mist hover:text-brand-white hover:border-brand-white/30"
+                  }`}
+                >
+                  <Route size={12} />
+                  {loadingRoute === c._id ? "..." : tl(t, AUTO_ASSIGN_LABELS.showRoute)}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Pagination */}
-      {meta && meta.totalPages > 1 && (
-        <Pagination page={page} totalPages={meta.totalPages} onPageChange={setPage} />
+      {/* Route summary banner */}
+      {routeData && routeData.stops.length > 0 && (
+        <div className="border border-brand-gold/30 bg-brand-gold/5 rounded-sm p-3 flex items-center justify-between">
+          <div className="flex items-center gap-4 text-sm">
+            <span className="text-brand-gold font-medium">{routeData.courierName}</span>
+            <span className="text-mist">
+              {routeData.stops.length} {tl(t, AUTO_ASSIGN_LABELS.stops)} | {routeData.totalDistanceKm} km | ~{routeData.totalEtaMinutes} dk
+            </span>
+          </div>
+          <button onClick={() => setRouteData(null)} className="text-xs text-mist hover:text-brand-white">&times;</button>
+        </div>
+      )}
+
+      {/* Main content area: split / map / list */}
+      {viewMode === "list" ? (
+        /* List only */
+        <ListContent
+          deliveries={deliveries}
+          isLoading={isLoading}
+          openDetail={openDetail}
+          meta={meta}
+          page={page}
+          setPage={setPage}
+          t={t}
+        />
+      ) : viewMode === "map" ? (
+        /* Map only */
+        <div className="border border-slate/30 rounded-sm overflow-hidden" style={{ height: "min(600px, 70vh)" }}>
+          <LogisticsMap
+            deliveries={deliveries}
+            couriers={activeCouriers}
+            route={routeData}
+            onDeliveryClick={openDetail}
+          />
+        </div>
+      ) : (
+        /* Split view — stacks vertically on mobile, side-by-side on lg */
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Left: List */}
+          <div className="lg:w-2/5 overflow-y-auto max-h-[50vh] lg:max-h-[600px] space-y-3 pr-1">
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-36" />)
+            ) : deliveries.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-mist">
+                <Truck size={40} className="mb-3 opacity-50" />
+                <p className="text-sm">{t("Teslimat bulunamadı", "No deliveries found")}</p>
+              </div>
+            ) : (
+              deliveries.map((d: any) => (
+                <DeliveryCard key={d._id} delivery={d} onClick={() => openDetail(d._id)} />
+              ))
+            )}
+            {meta && meta.totalPages > 1 && (
+              <Pagination page={page} totalPages={meta.totalPages} onPageChange={setPage} />
+            )}
+          </div>
+
+          {/* Right: Map */}
+          <div className="lg:w-3/5 border border-slate/30 rounded-sm overflow-hidden" style={{ minHeight: 350 }}>
+            <LogisticsMap
+              deliveries={deliveries}
+              couriers={activeCouriers}
+              route={routeData}
+              onDeliveryClick={openDetail}
+              height="min(500px, 60vh)"
+            />
+          </div>
+        </div>
       )}
 
       {/* ---- Detail Sheet ---- */}
@@ -370,20 +562,34 @@ export default function LogisticsPage() {
               )}
             </div>
 
-            {/* Assign courier */}
+            {/* Assign courier / Auto-assign */}
             {dd.status !== "DELIVERED" && dd.status !== "CANCELLED" && (
-              <div className="flex items-end gap-2">
-                <Select
-                  label={t("Kurye Ata", "Assign Courier")}
-                  options={courierOptions}
-                  placeholder={t("Seç...", "Select...")}
-                  value={assignCourier}
-                  onChange={(e) => setAssignCourier(e.target.value)}
-                  className="flex-1"
-                />
-                <Button variant="primary" size="sm" onClick={handleAssignCourier} disabled={!assignCourier || statusChanging}>
-                  {t("Ata", "Assign")}
-                </Button>
+              <div className="space-y-2">
+                <div className="flex items-end gap-2">
+                  <Select
+                    label={t("Kurye Ata", "Assign Courier")}
+                    options={courierOptions}
+                    placeholder={t("Seç...", "Select...")}
+                    value={assignCourier}
+                    onChange={(e) => setAssignCourier(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button variant="primary" size="sm" onClick={handleAssignCourier} disabled={!assignCourier || statusChanging}>
+                    {t("Ata", "Assign")}
+                  </Button>
+                </div>
+                {dd.status === "PENDING" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-brand-gold border-brand-gold/30"
+                    loading={autoAssigning}
+                    onClick={() => handleAutoAssignSingle(dd._id)}
+                  >
+                    <Zap size={14} className="mr-1" />
+                    {tl(t, AUTO_ASSIGN_LABELS.button)}
+                  </Button>
+                )}
               </div>
             )}
 
@@ -517,10 +723,38 @@ export default function LogisticsPage() {
 
           {/* Delivery address */}
           <p className="text-xs font-medium tracking-wider uppercase text-mist pt-2">{t("Teslimat Adresi", "Delivery Address")}</p>
+
+          {/* District quick-select */}
+          <div>
+            <label className="block text-xs text-mist mb-1.5">{t("İlçe Seç", "Select District")}</label>
+            <div className="flex flex-wrap gap-1.5">
+              {Object.keys(ISTANBUL_DISTRICTS).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => handleDistrictSelect(d)}
+                  className={`px-2 py-1 text-xs rounded-sm border transition-colors ${
+                    form.deliveryDistrict === d
+                      ? "border-brand-gold/50 bg-brand-gold/10 text-brand-gold"
+                      : "border-slate text-mist hover:text-brand-white hover:border-brand-white/30"
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <Input label={t("Sokak/Cadde", "Street")} value={form.deliveryStreet} onChange={(e) => updateForm("deliveryStreet", e.target.value)} />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input label={t("İlçe", "District")} value={form.deliveryDistrict} onChange={(e) => updateForm("deliveryDistrict", e.target.value)} />
             <Input label={t("Şehir", "City")} value={form.deliveryCity} onChange={(e) => updateForm("deliveryCity", e.target.value)} error={formErrors.deliveryCity} />
+          </div>
+
+          {/* Manual lat/lng override */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input label="Lat" type="number" value={form.deliveryLat} onChange={(e) => updateForm("deliveryLat", e.target.value)} placeholder="41.0082" />
+            <Input label="Lng" type="number" value={form.deliveryLng} onChange={(e) => updateForm("deliveryLng", e.target.value)} placeholder="28.9784" />
           </div>
 
           <Textarea label={t("Özel Talimatlar", "Special Instructions")} rows={2} value={form.specialInstructions} onChange={(e) => updateForm("specialInstructions", e.target.value)} />
@@ -535,6 +769,33 @@ export default function LogisticsPage() {
         </div>
       </Dialog>
     </div>
+  );
+}
+
+/* --- List content sub-component --- */
+function ListContent({ deliveries, isLoading, openDetail, meta, page, setPage, t }: any) {
+  return (
+    <>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-48" />)}
+        </div>
+      ) : deliveries.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-mist">
+          <Truck size={40} className="mb-3 opacity-50" />
+          <p className="text-sm">{t("Teslimat bulunamadı", "No deliveries found")}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {deliveries.map((d: any) => (
+            <DeliveryCard key={d._id} delivery={d} onClick={() => openDetail(d._id)} />
+          ))}
+        </div>
+      )}
+      {meta && meta.totalPages > 1 && (
+        <Pagination page={page} totalPages={meta.totalPages} onPageChange={setPage} />
+      )}
+    </>
   );
 }
 

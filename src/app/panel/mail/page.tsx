@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { useSwrPaginated, useSwrFetch } from "@/lib/hooks";
+import { useSwrPaginated, useSwrFetch, useFileUpload } from "@/lib/hooks";
 import { useSWRConfig } from "swr";
 import DOMPurify from "dompurify";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,16 @@ import { Sheet } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/shared/pagination";
-import { formatRelative, formatDateTime } from "@/lib/utils/formatters";
+import { AttachmentChip } from "@/components/shared/attachment-chip";
+import { AttachmentDropZone } from "@/components/shared/attachment-drop-zone";
+import { formatRelative, formatDateTime, formatFileSize } from "@/lib/utils/formatters";
 import { cn } from "@/lib/utils/cn";
 import {
   Mail, Send, Search, Reply, User, Archive, ArchiveRestore,
-  Eye, EyeOff, XCircle, Inbox, PenSquare, ArrowLeft,
+  Eye, EyeOff, XCircle, Inbox, PenSquare, ArrowLeft, Trash2, Paperclip,
+  RefreshCw, Star, StarOff, SendHorizonal, FileText, AlertTriangle, MailWarning,
 } from "lucide-react";
+import type { MailFolder } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
 export default function MailPage() {
@@ -26,6 +30,7 @@ export default function MailPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [showArchived, setShowArchived] = useState(false);
+  const [activeFolder, setActiveFolder] = useState<MailFolder | "ALL">("INBOX");
 
   // Compose dialog
   const [composeOpen, setComposeOpen] = useState(false);
@@ -43,18 +48,30 @@ export default function MailPage() {
 
   // Action loading
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Delete confirm dialog
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // File upload hooks
+  const composeUpload = useFileUpload();
+  const replyUpload = useFileUpload();
+
+  // Sync state
+  const [syncing, setSyncing] = useState(false);
 
   // Scroll to bottom of messages
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading } = useSwrPaginated("/api/mail", { page, limit: 20, search: search || undefined });
-  const allThreads = (data as any)?.data || [];
+  const { data, isLoading } = useSwrPaginated("/api/mail", {
+    page,
+    limit: 20,
+    search: search || undefined,
+    folder: activeFolder || undefined,
+    showAll: showArchived ? "true" : undefined,
+  }, { refreshInterval: 30_000 });
+  const threads = (data as any)?.data || [];
   const meta = (data as any)?.meta;
-
-  // Client-side filtering: hide ARCHIVED/CLOSED unless showArchived is on
-  const threads = showArchived
-    ? allThreads
-    : allThreads.filter((thread: any) => !thread.status || thread.status === "OPEN");
 
   // Fetch thread detail
   const { data: threadDetail, mutate: mutateThread } = useSwrFetch<any>(selectedThreadId ? `/api/mail/threads/${selectedThreadId}` : null);
@@ -64,6 +81,26 @@ export default function MailPage() {
   const refreshData = useCallback(() => {
     mutate((key: string) => typeof key === "string" && key.startsWith("/api/mail"), undefined, { revalidate: true });
   }, [mutate]);
+
+  // Trigger IMAP sync → then refresh SWR cache
+  const triggerSync = useCallback(async () => {
+    if (syncing) return;
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/mail/sync", { method: "POST" });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data?.synced > 0) refreshData();
+      }
+    } catch {
+      // silent
+    } finally {
+      setSyncing(false);
+    }
+  }, [syncing, refreshData]);
+
+  // Note: Background sync runs in panel layout every 2 minutes.
+  // Manual sync button (triggerSync) is for on-demand user-initiated sync.
 
   // Auto mark as read when opening a thread
   useEffect(() => {
@@ -99,6 +136,7 @@ export default function MailPage() {
     setMobileSheetOpen(false);
     setSelectedThreadId(null);
     setReplyText("");
+    replyUpload.clearFiles();
   };
 
   const handleThreadAction = async (action: string) => {
@@ -118,6 +156,30 @@ export default function MailPage() {
       // silently fail
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const requestDeleteThread = (threadId?: string) => {
+    const id = threadId || threadInfo?._id;
+    if (!id) return;
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDeleteThread = async () => {
+    if (!deleteConfirmId) return;
+    setDeleteLoading(true);
+    try {
+      const permanent = activeFolder === "TRASH" ? "?permanent=true" : "";
+      const res = await fetch(`/api/mail/threads/${deleteConfirmId}${permanent}`, { method: "DELETE" });
+      if (res.ok) {
+        if (selectedThreadId === deleteConfirmId) closeThread();
+        refreshData();
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setDeleteLoading(false);
+      setDeleteConfirmId(null);
     }
   };
 
@@ -148,6 +210,7 @@ export default function MailPage() {
           subject: composeForm.subject.trim(),
           text: composeForm.text,
           html: `<div style="font-family: sans-serif; white-space: pre-wrap;">${composeForm.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`,
+          attachments: composeUpload.getAttachmentMetas(),
         }),
       });
       if (!res.ok) {
@@ -158,6 +221,7 @@ export default function MailPage() {
       refreshData();
       setComposeOpen(false);
       setComposeForm({ to: "", subject: "", text: "" });
+      composeUpload.clearFiles();
     } catch {
       alert(t("Bağlantı hatası", "Network error"));
     } finally {
@@ -178,6 +242,7 @@ export default function MailPage() {
           text: replyText,
           html: `<div style="font-family: sans-serif; white-space: pre-wrap;">${replyText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`,
           threadId: threadInfo._id,
+          attachments: replyUpload.getAttachmentMetas(),
         }),
       });
       if (!res.ok) {
@@ -186,6 +251,7 @@ export default function MailPage() {
         return;
       }
       setReplyText("");
+      replyUpload.clearFiles();
       mutateThread();
       refreshData();
     } catch {
@@ -263,6 +329,46 @@ export default function MailPage() {
           >
             <EyeOff size={13} />
             {t("Okunmadı", "Mark Unread")}
+          </button>
+        )}
+
+        {threadInfo.starred ? (
+          <button
+            onClick={() => handleThreadAction("unstar")}
+            disabled={actionLoading}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border border-brand-gold/30 rounded-sm text-brand-gold hover:text-brand-gold/80 transition-colors disabled:opacity-50"
+          >
+            <Star size={13} fill="currentColor" />
+            {t("Yıldızlı", "Starred")}
+          </button>
+        ) : (
+          <button
+            onClick={() => handleThreadAction("star")}
+            disabled={actionLoading}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border border-slate rounded-sm text-mist hover:text-brand-white hover:border-brand-white/30 transition-colors disabled:opacity-50"
+          >
+            <Star size={13} />
+            {t("Yıldızla", "Star")}
+          </button>
+        )}
+
+        {threadInfo.folder === "TRASH" ? (
+          <button
+            onClick={() => handleThreadAction("moveToInbox")}
+            disabled={actionLoading}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border border-slate rounded-sm text-mist hover:text-brand-white hover:border-brand-white/30 transition-colors disabled:opacity-50"
+          >
+            <Inbox size={13} />
+            {t("Gelen Kutusuna Taşı", "Move to Inbox")}
+          </button>
+        ) : (
+          <button
+            onClick={() => requestDeleteThread()}
+            disabled={actionLoading || deleteLoading}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border border-red-500/30 rounded-sm text-red-400 hover:text-red-300 hover:border-red-500/50 transition-colors disabled:opacity-50"
+          >
+            <Trash2 size={13} />
+            {t("Sil", "Delete")}
           </button>
         )}
 
@@ -387,6 +493,24 @@ table{max-width:100%!important;width:auto!important;}
                     {email.text || t("İçerik yok", "No content")}
                   </div>
                 )}
+
+                {/* Attachments */}
+                {email.attachmentsMeta && email.attachmentsMeta.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-slate/30 space-y-1.5">
+                    <p className="text-[10px] text-mist font-medium">
+                      {t("Ekler", "Attachments")} ({email.attachmentsMeta.length})
+                    </p>
+                    {email.attachmentsMeta.map((att: any, idx: number) => (
+                      <AttachmentChip
+                        key={idx}
+                        filename={att.filename}
+                        size={att.size}
+                        contentType={att.contentType}
+                        url={att.url}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -405,8 +529,26 @@ table{max-width:100%!important;width:auto!important;}
         value={replyText}
         onChange={(e) => setReplyText(e.target.value)}
       />
-      <div className="flex justify-end">
-        <Button variant="primary" size="sm" loading={replySending} onClick={handleReply} disabled={!replyText.trim()}>
+      {replyUpload.files.length > 0 && (
+        <div className="space-y-1.5">
+          {replyUpload.files.map((f) => (
+            <AttachmentChip
+              key={f.id}
+              filename={f.filename}
+              size={f.size}
+              contentType={f.contentType}
+              url={f.url}
+              progress={f.progress}
+              status={f.status}
+              error={f.error}
+              onRemove={() => replyUpload.removeFile(f.id)}
+            />
+          ))}
+        </div>
+      )}
+      <div className="flex items-center justify-end gap-1">
+        <AttachmentDropZone mode="compact" onFiles={replyUpload.addFiles} disabled={replyUpload.uploading} />
+        <Button variant="primary" size="sm" loading={replySending} onClick={handleReply} disabled={!replyText.trim() || replyUpload.uploading}>
           <Send size={14} className="mr-1" /> {t("Gönder", "Send")}
         </Button>
       </div>
@@ -501,30 +643,35 @@ table{max-width:100%!important;width:auto!important;}
           )}
 
           <div className="flex items-center gap-2 mt-1">
+            {thread.starred && <Star size={11} className="text-brand-gold" fill="currentColor" />}
             <span className="text-[10px] text-mist bg-charcoal px-1.5 py-0.5 rounded-full">
               {thread.messageCount}
             </span>
+            {thread.folder && thread.folder !== "INBOX" && (
+              <span className="text-[9px] text-mist bg-charcoal px-1.5 py-0.5 rounded-full uppercase">
+                {thread.folder === "SENT" ? t("Gönderilen", "Sent") : thread.folder === "TRASH" ? t("Çöp", "Trash") : thread.folder === "DRAFTS" ? t("Taslak", "Draft") : thread.folder === "SPAM" ? "Spam" : ""}
+              </span>
+            )}
             {thread.status && getStatusBadge(thread.status)}
           </div>
         </div>
 
-        {/* Hover actions (desktop only) */}
-        <div className="hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-3 top-3">
+        {/* Hover actions (desktop only) — bottom row to avoid conflicting with date */}
+        <div className="hidden lg:flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity absolute right-3 bottom-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
               setSelectedThreadId(thread._id);
-              // Inline action
               fetch(`/api/mail/threads/${thread._id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action: thread.status === "ARCHIVED" ? "reopen" : "archive" }),
               }).then(() => refreshData());
             }}
-            className="p-1.5 text-mist hover:text-brand-white transition-colors rounded-sm hover:bg-slate"
+            className="p-1 text-mist hover:text-brand-white transition-colors rounded-sm hover:bg-slate"
             title={thread.status === "ARCHIVED" ? t("Yeniden Aç", "Reopen") : t("Arşivle", "Archive")}
           >
-            {thread.status === "ARCHIVED" ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+            {thread.status === "ARCHIVED" ? <ArchiveRestore size={13} /> : <Archive size={13} />}
           </button>
           <button
             onClick={(e) => {
@@ -535,10 +682,20 @@ table{max-width:100%!important;width:auto!important;}
                 body: JSON.stringify({ action: thread.unread ? "markRead" : "markUnread" }),
               }).then(() => refreshData());
             }}
-            className="p-1.5 text-mist hover:text-brand-white transition-colors rounded-sm hover:bg-slate"
+            className="p-1 text-mist hover:text-brand-white transition-colors rounded-sm hover:bg-slate"
             title={thread.unread ? t("Okundu İşaretle", "Mark Read") : t("Okunmadı İşaretle", "Mark Unread")}
           >
-            {thread.unread ? <Eye size={14} /> : <EyeOff size={14} />}
+            {thread.unread ? <Eye size={13} /> : <EyeOff size={13} />}
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              requestDeleteThread(thread._id);
+            }}
+            className="p-1 text-mist hover:text-red-400 transition-colors rounded-sm hover:bg-slate"
+            title={t("Sil", "Delete")}
+          >
+            <Trash2 size={13} />
           </button>
         </div>
       </div>
@@ -552,9 +709,20 @@ table{max-width:100%!important;width:auto!important;}
       {/* Page header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("Posta Merkezi", "Mail Center")}</h2>
-        <Button variant="primary" size="sm" onClick={() => { setComposeForm({ to: "", subject: "", text: "" }); setComposeErrors({}); setComposeOpen(true); }}>
-          <PenSquare size={16} className="mr-1" /> {t("Yeni Mesaj", "Compose")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={triggerSync}
+            disabled={syncing}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-slate rounded-sm text-mist hover:text-brand-white hover:border-brand-white/30 transition-colors disabled:opacity-50"
+            title={t("Tüm klasörleri senkronize et", "Sync all folders")}
+          >
+            <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
+            {t("Senkronize Et", "Sync")}
+          </button>
+          <Button variant="primary" size="sm" onClick={() => { setComposeForm({ to: "", subject: "", text: "" }); setComposeErrors({}); setComposeOpen(true); }}>
+            <PenSquare size={16} className="mr-1" /> {t("Yeni Mesaj", "Compose")}
+          </Button>
+        </div>
       </div>
 
       {/* Split-pane container on desktop, full-width list on mobile */}
@@ -564,6 +732,33 @@ table{max-width:100%!important;width:auto!important;}
           "flex flex-col border-r border-slate/30 shrink-0",
           selectedThreadId ? "hidden lg:flex w-[400px] xl:w-[440px]" : "w-full lg:w-[400px] xl:w-[440px]"
         )}>
+          {/* Folder tabs */}
+          <div className="flex border-b border-slate/30 overflow-x-auto">
+            {([
+              { key: "INBOX" as const, icon: <Inbox size={13} />, label: t("Gelen", "Inbox") },
+              { key: "SENT" as const, icon: <SendHorizonal size={13} />, label: t("Gönderilen", "Sent") },
+              { key: "STARRED" as const, icon: <Star size={13} />, label: t("Yıldızlı", "Starred") },
+              { key: "DRAFTS" as const, icon: <FileText size={13} />, label: t("Taslak", "Drafts") },
+              { key: "TRASH" as const, icon: <Trash2 size={13} />, label: t("Çöp", "Trash") },
+              { key: "SPAM" as const, icon: <MailWarning size={13} />, label: "Spam" },
+              { key: "ALL" as const, icon: <Mail size={13} />, label: t("Tümü", "All") },
+            ]).map(({ key, icon, label }) => (
+              <button
+                key={key}
+                onClick={() => { setActiveFolder(key); setPage(1); }}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2.5 text-xs whitespace-nowrap border-b-2 transition-colors shrink-0",
+                  activeFolder === key
+                    ? "border-brand-gold text-brand-gold"
+                    : "border-transparent text-mist hover:text-brand-white"
+                )}
+              >
+                {icon}
+                <span className="hidden sm:inline">{label}</span>
+              </button>
+            ))}
+          </div>
+
           {/* Search bar */}
           <div className="p-3 border-b border-slate/30">
             <div className="relative">
@@ -658,8 +853,26 @@ table{max-width:100%!important;width:auto!important;}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
               />
-              <div className="flex justify-end">
-                <Button variant="primary" size="sm" loading={replySending} onClick={handleReply} disabled={!replyText.trim()}>
+              {replyUpload.files.length > 0 && (
+                <div className="space-y-1.5">
+                  {replyUpload.files.map((f) => (
+                    <AttachmentChip
+                      key={f.id}
+                      filename={f.filename}
+                      size={f.size}
+                      contentType={f.contentType}
+                      url={f.url}
+                      progress={f.progress}
+                      status={f.status}
+                      error={f.error}
+                      onRemove={() => replyUpload.removeFile(f.id)}
+                    />
+                  ))}
+                </div>
+              )}
+              <div className="flex items-center justify-end gap-1">
+                <AttachmentDropZone mode="compact" onFiles={replyUpload.addFiles} disabled={replyUpload.uploading} />
+                <Button variant="primary" size="sm" loading={replySending} onClick={handleReply} disabled={!replyText.trim() || replyUpload.uploading}>
                   <Send size={14} className="mr-1" /> {t("Gönder", "Send")}
                 </Button>
               </div>
@@ -675,7 +888,7 @@ table{max-width:100%!important;width:auto!important;}
       </Sheet>
 
       {/* Compose Dialog */}
-      <Dialog open={composeOpen} onClose={() => setComposeOpen(false)} title={t("E-posta Yaz", "Compose Email")} className="max-w-xl">
+      <Dialog open={composeOpen} onClose={() => { setComposeOpen(false); composeUpload.clearFiles(); }} title={t("E-posta Yaz", "Compose Email")} className="max-w-xl">
         <div className="space-y-4">
           <Input
             label={t("Kime", "To")}
@@ -700,10 +913,62 @@ table{max-width:100%!important;width:auto!important;}
             error={composeErrors.text}
             placeholder={t("Mesajınızı yazın...", "Write your message...")}
           />
+
+          {/* Attachment drop zone */}
+          <AttachmentDropZone mode="full" onFiles={composeUpload.addFiles} disabled={composeUpload.uploading} />
+
+          {/* Attachment chips */}
+          {composeUpload.files.length > 0 && (
+            <div className="space-y-1.5">
+              {composeUpload.files.map((f) => (
+                <AttachmentChip
+                  key={f.id}
+                  filename={f.filename}
+                  size={f.size}
+                  contentType={f.contentType}
+                  url={f.url}
+                  progress={f.progress}
+                  status={f.status}
+                  error={f.error}
+                  onRemove={() => composeUpload.removeFile(f.id)}
+                />
+              ))}
+              <p className="text-[10px] text-mist">
+                {t("Toplam", "Total")}: {formatFileSize(composeUpload.files.reduce((sum, f) => sum + f.size, 0))}
+              </p>
+            </div>
+          )}
+
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="ghost" size="sm" onClick={() => setComposeOpen(false)}>{t("Vazgeç", "Cancel")}</Button>
-            <Button variant="primary" size="sm" loading={composeSending} onClick={handleComposeSend}>
+            <Button variant="ghost" size="sm" onClick={() => { setComposeOpen(false); composeUpload.clearFiles(); }}>{t("Vazgeç", "Cancel")}</Button>
+            <Button variant="primary" size="sm" loading={composeSending} onClick={handleComposeSend} disabled={composeUpload.uploading}>
               <Send size={14} className="mr-1" /> {t("Gönder", "Send")}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* Delete Confirm Dialog */}
+      <Dialog open={!!deleteConfirmId} onClose={() => setDeleteConfirmId(null)} title={t("Konuşmayı Sil", "Delete Thread")} className="max-w-sm">
+        <div className="space-y-4">
+          <p className="text-sm text-mist">
+            {activeFolder === "TRASH"
+              ? t(
+                  "Bu konuşma ve tüm mesajları kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+                  "This thread and all its messages will be permanently deleted. This action cannot be undone."
+                )
+              : t(
+                  "Bu konuşma çöp kutusuna taşınacak. Çöp kutusundan geri yükleyebilirsiniz.",
+                  "This thread will be moved to trash. You can restore it from trash."
+                )
+            }
+          </p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmId(null)}>
+              {t("Vazgeç", "Cancel")}
+            </Button>
+            <Button variant="primary" size="sm" loading={deleteLoading} onClick={confirmDeleteThread} className="!bg-red-600 hover:!bg-red-700 !border-red-600">
+              <Trash2 size={14} className="mr-1" /> {t("Sil", "Delete")}
             </Button>
           </div>
         </div>

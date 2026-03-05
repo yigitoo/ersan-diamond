@@ -11,6 +11,9 @@ const emailThreadSchema = new Schema(
     messageCount: { type: Number, default: 0 },
     status: { type: String, enum: ["OPEN", "ARCHIVED", "CLOSED"], default: "OPEN" },
     unread: { type: Boolean, default: true },
+    starred: { type: Boolean, default: false },
+    folder: { type: String, enum: ["INBOX", "SENT", "DRAFTS", "TRASH", "SPAM", "STARRED", "ALL"], default: "INBOX" },
+    gmailLabels: [{ type: String }],
   },
   { timestamps: true }
 );
@@ -20,6 +23,7 @@ emailThreadSchema.index({ lastMessageAt: -1 });
 emailThreadSchema.index({ leadId: 1 });
 emailThreadSchema.index({ appointmentId: 1 });
 emailThreadSchema.index({ status: 1 });
+emailThreadSchema.index({ folder: 1 });
 
 export default (models.EmailThread as mongoose.Model<IEmailThread>) ||
   model<IEmailThread>("EmailThread", emailThreadSchema);

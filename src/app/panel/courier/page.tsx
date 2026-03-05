@@ -1,19 +1,21 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useSwrFetch } from "@/lib/hooks";
 import { useSWRConfig } from "swr";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { DELIVERY_STATUS_CONFIG, DELIVERY_TIME_SLOT_LABELS, tl } from "@/lib/utils/constants";
+import { LogisticsMap } from "@/components/panel/logistics-map";
+import { DELIVERY_STATUS_CONFIG, DELIVERY_TIME_SLOT_LABELS, AUTO_ASSIGN_LABELS, tl } from "@/lib/utils/constants";
 import { formatDate } from "@/lib/utils/formatters";
 import {
   Phone, MessageCircle, MapPin, AlertTriangle, Navigation, Package,
-  User, Calendar, Clock,
+  User, Calendar, Clock, Route, ExternalLink,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import type { RouteResult } from "@/types";
 
 export default function CourierPage() {
   const { mutate } = useSWRConfig();
@@ -21,8 +23,12 @@ export default function CourierPage() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [locationSharing, setLocationSharing] = useState(false);
   const watchIdRef = useRef<number | null>(null);
-  const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+
+  // Route mode
+  const [routeMode, setRouteMode] = useState(false);
+  const [routeData, setRouteData] = useState<RouteResult | null>(null);
+  const [loadingRoute, setLoadingRoute] = useState(false);
 
   const { data, isLoading, mutate: mutateDeliveries } = useSwrFetch<any>(
     `/api/logistics/courier?completed=${showCompleted}`
@@ -40,7 +46,6 @@ export default function CourierPage() {
 
     const sendLocation = (position: GeolocationPosition) => {
       const { latitude: lat, longitude: lng } = position.coords;
-      // Send to all active deliveries
       for (const d of deliveries) {
         if (["ASSIGNED", "PICKED_UP", "IN_TRANSIT"].includes(d.status)) {
           fetch(`/api/logistics/${d._id}/location`, {
@@ -74,6 +79,33 @@ export default function CourierPage() {
     }
     return () => stopLocationSharing();
   }, [locationSharing, startLocationSharing, stopLocationSharing]);
+
+  /* --- Fetch my route --- */
+  const fetchRoute = async () => {
+    setLoadingRoute(true);
+    try {
+      const res = await fetch("/api/logistics/route-optimize?courierId=me");
+      if (res.ok) {
+        const json = await res.json();
+        setRouteData(json.data || json);
+        setRouteMode(true);
+      }
+    } catch { /* ignore */ } finally {
+      setLoadingRoute(false);
+    }
+  };
+
+  /* --- Order deliveries by route if in route mode --- */
+  const orderedDeliveries = useMemo(() => {
+    if (!routeMode || !routeData || routeData.stops.length === 0) return deliveries;
+
+    const stopOrder = new Map(routeData.stops.map((s, i) => [s.deliveryId, i]));
+    return [...deliveries].sort((a: any, b: any) => {
+      const aIdx = stopOrder.get(a._id) ?? 999;
+      const bIdx = stopOrder.get(b._id) ?? 999;
+      return aIdx - bIdx;
+    });
+  }, [deliveries, routeData, routeMode]);
 
   /* --- Status update --- */
   const handleStatusUpdate = async (deliveryId: string, newStatus: string) => {
@@ -115,6 +147,14 @@ export default function CourierPage() {
     }
   };
 
+  /* --- Get route stop info for a delivery --- */
+  const getStopInfo = (deliveryId: string) => {
+    if (!routeData) return null;
+    const idx = routeData.stops.findIndex((s) => s.deliveryId === deliveryId);
+    if (idx === -1) return null;
+    return { number: idx + 1, stop: routeData.stops[idx] };
+  };
+
   const todayDeliveries = deliveries.filter((d: any) => {
     const today = new Date();
     const scheduled = new Date(d.scheduledDate);
@@ -126,7 +166,19 @@ export default function CourierPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="font-serif text-xl">{t("Teslimatlarım", "My Deliveries")}</h2>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchRoute}
+            disabled={loadingRoute}
+            className={`flex items-center gap-2 px-3 py-2 rounded-sm text-sm border transition-colors ${
+              routeMode
+                ? "border-brand-gold/50 bg-brand-gold/10 text-brand-gold"
+                : "border-slate text-mist hover:text-brand-white"
+            }`}
+          >
+            <Route size={16} />
+            {loadingRoute ? "..." : tl(t, AUTO_ASSIGN_LABELS.myRoute)}
+          </button>
           <button
             onClick={() => setLocationSharing(!locationSharing)}
             className={`flex items-center gap-2 px-3 py-2 rounded-sm text-sm border transition-colors ${
@@ -140,6 +192,35 @@ export default function CourierPage() {
           </button>
         </div>
       </div>
+
+      {/* Route summary banner */}
+      {routeMode && routeData && routeData.stops.length > 0 && (
+        <div className="border border-brand-gold/30 bg-brand-gold/5 rounded-sm p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-brand-gold font-medium">{tl(t, AUTO_ASSIGN_LABELS.routeSummary)}</span>
+              <span className="text-mist">
+                {routeData.stops.length} {tl(t, AUTO_ASSIGN_LABELS.stops)} | {routeData.totalDistanceKm} km | ~{routeData.totalEtaMinutes} dk
+              </span>
+            </div>
+            <button
+              onClick={() => { setRouteMode(false); setRouteData(null); }}
+              className="text-xs text-mist hover:text-brand-white"
+            >
+              &times;
+            </button>
+          </div>
+
+          {/* Mini map */}
+          <div className="border border-slate/30 rounded-sm overflow-hidden" style={{ height: "min(300px, 50vh)" }}>
+            <LogisticsMap
+              deliveries={deliveries}
+              couriers={[]}
+              route={routeData}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Today summary */}
       <div className="bg-charcoal border border-slate/30 rounded-sm p-4">
@@ -171,7 +252,7 @@ export default function CourierPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {deliveries.map((d: any) => {
+          {orderedDeliveries.map((d: any) => {
             const product = d.productId;
             const productLabel = product
               ? `${product.brand || ""} ${product.model || ""}`.trim()
@@ -180,19 +261,44 @@ export default function CourierPage() {
             const isUpdating = updatingStatus === d._id;
             const timeSlotLabel = tl(t, DELIVERY_TIME_SLOT_LABELS[d.timeSlot]);
             const phone = d.recipientPhone?.replace(/\s/g, "");
+            const stopInfo = getStopInfo(d._id);
+
+            // Build navigation URL with coords if available
+            const deliveryAddr = d.deliveryAddress || {};
+            const navDestination = deliveryAddr.lat && deliveryAddr.lng
+              ? `${deliveryAddr.lat},${deliveryAddr.lng}`
+              : encodeURIComponent(`${deliveryAddr.street || ""} ${deliveryAddr.district || ""} ${deliveryAddr.city || ""}`);
 
             return (
               <div key={d._id} className="border border-slate/30 rounded-sm bg-charcoal overflow-hidden">
                 {/* Card header */}
                 <div className="p-4 space-y-3">
-                  {/* Priority + Status */}
+                  {/* Route stop number + Priority + Status */}
                   <div className="flex items-center justify-between">
-                    <StatusBadge status={d.priority} type="deliveryPriority" />
+                    <div className="flex items-center gap-2">
+                      {stopInfo && (
+                        <span className="w-7 h-7 rounded-full bg-brand-gold text-onyx flex items-center justify-center text-xs font-bold">
+                          #{stopInfo.number}
+                        </span>
+                      )}
+                      <StatusBadge status={d.priority} type="deliveryPriority" />
+                    </div>
                     <StatusBadge status={d.status} type="delivery" />
                   </div>
 
                   {/* Product */}
                   <p className="text-sm font-medium">{productLabel}</p>
+
+                  {/* Route stop info */}
+                  {stopInfo && (
+                    <div className="flex items-center gap-3 text-xs text-brand-gold bg-brand-gold/5 border border-brand-gold/20 rounded-sm px-3 py-2">
+                      <span>{stopInfo.stop.distanceFromPrev} km</span>
+                      <span>&middot;</span>
+                      <span>~{stopInfo.stop.etaMinutes} dk</span>
+                      <span>&middot;</span>
+                      <span>{tl(t, AUTO_ASSIGN_LABELS.totalDistance)}: {stopInfo.stop.cumulativeDistance} km</span>
+                    </div>
+                  )}
 
                   <hr className="border-slate/30" />
 
@@ -206,12 +312,12 @@ export default function CourierPage() {
                   <div className="flex items-center gap-2 text-sm text-brand-white/80">
                     <MapPin size={14} className="text-mist shrink-0" />
                     <span>
-                      {d.deliveryAddress?.district && `${d.deliveryAddress.district}, `}
-                      {d.deliveryAddress?.city}
+                      {deliveryAddr.district && `${deliveryAddr.district}, `}
+                      {deliveryAddr.city}
                     </span>
                   </div>
-                  {d.deliveryAddress?.street && (
-                    <p className="text-xs text-mist ml-6">{d.deliveryAddress.street}</p>
+                  {deliveryAddr.street && (
+                    <p className="text-xs text-mist ml-6">{deliveryAddr.street}</p>
                   )}
 
                   {/* Schedule */}
@@ -226,14 +332,23 @@ export default function CourierPage() {
                   {d.specialInstructions && (
                     <div className="flex items-start gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-sm p-3 text-sm">
                       <AlertTriangle size={16} className="text-yellow-400 shrink-0 mt-0.5" />
-                      <span className="text-yellow-200">{d.specialInstructions}</span>
+                      <span className="text-white-200">{d.specialInstructions}</span>
                     </div>
                   )}
 
                   <hr className="border-slate/30" />
 
-                  {/* Contact buttons */}
-                  <div className="flex items-center gap-2">
+                  {/* Contact + Navigation buttons */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${navDestination}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-brand-gold/30 bg-brand-gold/10 rounded-sm text-brand-gold hover:bg-brand-gold/20 transition-colors"
+                    >
+                      <ExternalLink size={14} />
+                      {t("Navigasyon", "Navigate")}
+                    </a>
                     <a
                       href={`tel:${phone}`}
                       className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-slate rounded-sm text-mist hover:text-brand-white hover:border-brand-white/30 transition-colors"
@@ -249,17 +364,6 @@ export default function CourierPage() {
                     >
                       <MessageCircle size={14} />
                       WhatsApp
-                    </a>
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-                        `${d.deliveryAddress?.street || ""} ${d.deliveryAddress?.district || ""} ${d.deliveryAddress?.city || ""}`
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-slate rounded-sm text-mist hover:text-blue-400 hover:border-blue-400/30 transition-colors"
-                    >
-                      <MapPin size={14} />
-                      {t("Yol Tarifi", "Directions")}
                     </a>
                   </div>
 

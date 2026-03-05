@@ -11,7 +11,27 @@ export type AuditActionType =
   | "FILE:image_upload"
   | "FILE:document_attach"
   | "SETTINGS:role_change"
-  | "SETTINGS:permission_change";
+  | "SETTINGS:permission_change"
+  // Logistics
+  | "LOGISTICS:delivery_created"
+  | "LOGISTICS:delivery_updated"
+  | "LOGISTICS:status_changed"
+  | "LOGISTICS:courier_assigned"
+  | "LOGISTICS:auto_assigned"
+  | "LOGISTICS:location_updated"
+  // Mail
+  | "MAIL:thread_starred"
+  | "MAIL:thread_unstarred"
+  | "MAIL:thread_trashed"
+  | "MAIL:thread_restored"
+  | "MAIL:thread_deleted"
+  | "MAIL:thread_archived"
+  | "MAIL:thread_closed"
+  | "MAIL:thread_opened"
+  // Auth OTP
+  | "AUTH:otp_sent"
+  | "AUTH:otp_verified"
+  | "AUTH:otp_failed";
 
 export type AuditEntityType =
   | "Product"

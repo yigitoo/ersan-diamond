@@ -22,6 +22,22 @@ export async function GET(req: NextRequest) {
       ];
     }
 
+    // Folder filter
+    const folder = req.nextUrl.searchParams.get("folder");
+    if (folder && folder !== "ALL") {
+      if (folder === "STARRED") {
+        filter.starred = true;
+      } else {
+        filter.folder = folder;
+      }
+    }
+
+    // Status filter (default: hide archived/closed unless explicitly requested)
+    const showAll = req.nextUrl.searchParams.get("showAll") === "true";
+    if (!showAll && !folder) {
+      filter.status = "OPEN";
+    }
+
     const [threads, total] = await Promise.all([
       EmailThread.find(filter).sort({ lastMessageAt: -1 }).skip(skip).limit(limit).lean(),
       EmailThread.countDocuments(filter),

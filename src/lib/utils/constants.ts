@@ -145,6 +145,104 @@ export const DEFAULT_PICKUP_ADDRESS = {
   country: "Türkiye",
 };
 
+// Istanbul geographic data
+export const ISTANBUL_CENTER = { lat: 41.0082, lng: 28.9784 };
+export const DEFAULT_PICKUP_COORDS = { lat: 41.0422, lng: 29.0083 }; // Nişantaşı area
+
+export const ISTANBUL_DISTRICTS: Record<string, { lat: number; lng: number }> = {
+  "Kadıköy":     { lat: 40.9927, lng: 29.0230 },
+  "Beşiktaş":    { lat: 41.0430, lng: 29.0056 },
+  "Şişli":       { lat: 41.0602, lng: 28.9877 },
+  "Beyoğlu":     { lat: 41.0370, lng: 28.9770 },
+  "Nişantaşı":   { lat: 41.0480, lng: 28.9950 },
+  "Etiler":      { lat: 41.0800, lng: 29.0340 },
+  "Bebek":       { lat: 41.0770, lng: 29.0440 },
+  "Sarıyer":     { lat: 41.1670, lng: 29.0570 },
+  "Üsküdar":     { lat: 41.0230, lng: 29.0150 },
+  "Bakırköy":    { lat: 40.9800, lng: 28.8770 },
+  "Ataşehir":    { lat: 40.9923, lng: 29.1244 },
+  "Levent":      { lat: 41.0820, lng: 29.0130 },
+  "Fatih":       { lat: 41.0186, lng: 28.9397 },
+  "Taksim":      { lat: 41.0370, lng: 28.9850 },
+  "Maltepe":     { lat: 40.9350, lng: 29.1300 },
+  "Kartal":      { lat: 40.8905, lng: 29.1872 },
+};
+
+// Map tile layer options
+export const MAP_TILE_LAYERS = {
+  dark: {
+    name: { tr: "Koyu", en: "Dark" } as BiLabel,
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    attribution: '&copy; <a href="https://osm.org/copyright">OSM</a> &copy; CartoDB',
+  },
+  light: {
+    name: { tr: "Açık", en: "Light" } as BiLabel,
+    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    attribution: '&copy; <a href="https://osm.org/copyright">OSM</a> &copy; CartoDB',
+  },
+  street: {
+    name: { tr: "Sokak", en: "Street" } as BiLabel,
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>',
+  },
+  satellite: {
+    name: { tr: "Uydu", en: "Satellite" } as BiLabel,
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution: '&copy; Esri',
+  },
+  topo: {
+    name: { tr: "Topoğrafik", en: "Topographic" } as BiLabel,
+    url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+  },
+} as const;
+export type MapTileKey = keyof typeof MAP_TILE_LAYERS;
+
+// Turkey major cities (for address resolution outside Istanbul)
+export const TURKEY_CITIES: Record<string, { lat: number; lng: number }> = {
+  "İstanbul":   { lat: 41.0082, lng: 28.9784 },
+  "Ankara":     { lat: 39.9334, lng: 32.8597 },
+  "İzmir":      { lat: 38.4192, lng: 27.1287 },
+  "Bursa":      { lat: 40.1885, lng: 29.0610 },
+  "Antalya":    { lat: 36.8969, lng: 30.7133 },
+  "Adana":      { lat: 37.0000, lng: 35.3213 },
+  "Konya":      { lat: 37.8746, lng: 32.4932 },
+  "Gaziantep":  { lat: 37.0662, lng: 37.3833 },
+  "Mersin":     { lat: 36.8121, lng: 34.6415 },
+  "Kayseri":    { lat: 38.7312, lng: 35.4787 },
+  "Eskişehir":  { lat: 39.7767, lng: 30.5206 },
+  "Trabzon":    { lat: 41.0027, lng: 39.7168 },
+  "Samsun":     { lat: 41.2867, lng: 36.3300 },
+  "Denizli":    { lat: 37.7765, lng: 29.0864 },
+  "Muğla":      { lat: 37.2153, lng: 28.3636 },
+  "Bodrum":     { lat: 37.0343, lng: 27.4305 },
+  "Diyarbakır": { lat: 37.9144, lng: 40.2306 },
+  "Erzurum":    { lat: 39.9055, lng: 41.2658 },
+  "Malatya":    { lat: 38.3552, lng: 38.3095 },
+  "Tekirdağ":   { lat: 40.9781, lng: 27.5116 },
+};
+
+export const DELIVERY_MAP_COLORS: Record<string, string> = {
+  PENDING:    "#EAB308", // yellow
+  ASSIGNED:   "#3B82F6", // blue
+  PICKED_UP:  "#6366F1", // indigo
+  IN_TRANSIT: "#A855F7", // purple
+  DELIVERED:  "#22C55E", // green
+  CANCELLED:  "#EF4444", // red
+};
+
+export const AUTO_ASSIGN_LABELS = {
+  button: { tr: "Otomatik Ata", en: "Auto-Assign" } as BiLabel,
+  buttonBatch: { tr: "Tümünü Ata", en: "Assign All" } as BiLabel,
+  showRoute: { tr: "Rota Göster", en: "Show Route" } as BiLabel,
+  myRoute: { tr: "Rotam", en: "My Route" } as BiLabel,
+  noRoute: { tr: "Aktif teslimat yok", en: "No active deliveries" } as BiLabel,
+  stops: { tr: "durak", en: "stop(s)" } as BiLabel,
+  estimatedTime: { tr: "Tahmini süre", en: "Estimated time" } as BiLabel,
+  totalDistance: { tr: "Toplam mesafe", en: "Total distance" } as BiLabel,
+  routeSummary: { tr: "Rota Özeti", en: "Route Summary" } as BiLabel,
+};
+
 // Pagination
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;

@@ -50,11 +50,39 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Fetch attachment buffers from R2 for SMTP
+    const smtpAttachments: Array<{ filename: string; content: Buffer; contentType: string }> = [];
+    const attachmentsMeta: Array<{ filename: string; contentType: string; size: number; url: string }> = [];
+
+    if (data.attachments && data.attachments.length > 0) {
+      for (const att of data.attachments) {
+        try {
+          const res = await fetch(att.url);
+          if (!res.ok) throw new Error(`Failed to fetch ${att.url}`);
+          const buffer = Buffer.from(await res.arrayBuffer());
+          smtpAttachments.push({
+            filename: att.filename,
+            content: buffer,
+            contentType: att.contentType,
+          });
+          attachmentsMeta.push({
+            filename: att.filename,
+            contentType: att.contentType,
+            size: att.size,
+            url: att.url,
+          });
+        } catch (err) {
+          console.error("[API] Failed to fetch attachment:", att.filename, err);
+        }
+      }
+    }
+
     // Send email
     const result = await sendEmail({
       to: data.to,
       subject: data.subject,
       html: data.html || data.text || "",
+      attachments: smtpAttachments.length > 0 ? smtpAttachments : undefined,
     });
 
     // Log email
@@ -71,6 +99,7 @@ export async function POST(req: NextRequest) {
       sentByUserId: user.id,
       templateId: data.templateId,
       providerMessageId: result.messageId,
+      attachmentsMeta,
     });
 
     // Update thread

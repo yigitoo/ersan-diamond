@@ -14,6 +14,8 @@ export type EmailTemplateId =
 
 export type ThreadStatus = "OPEN" | "ARCHIVED" | "CLOSED";
 
+export type MailFolder = "INBOX" | "SENT" | "DRAFTS" | "TRASH" | "SPAM" | "STARRED" | "ALL";
+
 export interface IEmailThread {
   _id: string;
   customerEmail: string;
@@ -24,6 +26,9 @@ export interface IEmailThread {
   messageCount: number;
   status: ThreadStatus;
   unread: boolean;
+  starred: boolean;
+  folder: MailFolder;
+  gmailLabels: string[];
   createdAt: Date;
 }
 
@@ -50,5 +55,9 @@ export interface IEmail {
   templateId?: EmailTemplateId;
   providerMessageId?: string;
   attachmentsMeta: AttachmentMeta[];
+  folder: MailFolder;
+  seen: boolean;
+  flagged: boolean;
+  gmailMessageId?: string;
   createdAt: Date;
 }

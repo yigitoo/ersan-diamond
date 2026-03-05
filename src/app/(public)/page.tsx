@@ -1,8 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ChevronRight,
   ArrowRight,
@@ -25,6 +26,15 @@ import type { IProduct, ProductCategory } from "@/types";
 /* ─── Page ─── */
 export default function HomePage() {
   const { t } = useI18n();
+
+  /* ─── Hero scroll-driven crossfade ─── */
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end end"],
+  });
+  const videoOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const imageOpacity = useTransform(scrollYProgress, [0.15, 0.5], [0, 1]);
 
   /* ─── Dynamic data ─── */
   const { data: latestProducts } = useSwrFetch<IProduct[]>(
@@ -116,33 +126,55 @@ export default function HomePage() {
   return (
     <>
       {/* ═══════════════════ HERO ═══════════════════ */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background image */}
-        <Image
-          src="/imgs/hero-bg.jpg"
-          alt=""
-          fill
-          priority
-          className="object-cover -z-20"
-          sizes="100vw"
-        />
+      <div ref={heroRef} className="relative h-[300vh]">
+      <section className="sticky top-0 min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background image (revealed on scroll) */}
+        <motion.div
+          style={{ opacity: imageOpacity }}
+          className="absolute inset-0 -z-20"
+        >
+          <Image
+            src="/imgs/hero-bg.jpg"
+            alt=""
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+        </motion.div>
 
-        {/* Dark overlay for text contrast */}
-        <div className="absolute inset-0 -z-10 bg-black/60" />
+        {/* Background video (fades out on scroll) */}
+        <motion.video
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/imgs/hero-bg.jpg"
+          style={{ opacity: videoOpacity }}
+          className="absolute inset-0 w-full h-full object-cover -z-20"
+        >
+          <source src="/ersan_diamond.webm" type="video/webm" />
+        </motion.video>
 
-        {/* Vignette edges */}
-        <div
+        {/* Dark overlay for text contrast (fades in with image) */}
+        <motion.div style={{ opacity: imageOpacity }} className="absolute inset-0 -z-10 bg-black/55" />
+
+        {/* Vignette edges (fades in with image) */}
+        <motion.div
+          style={{ opacity: imageOpacity }}
           className="absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)",
-          }}
-        />
+        >
+          <div
+            className="w-full h-full"
+            style={{
+              background:
+                "radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)",
+            }}
+          />
+        </motion.div>
 
         <motion.div
-          variants={heroReveal}
-          initial="hidden"
-          animate="visible"
+          style={{ opacity: imageOpacity }}
           className="text-center px-6 max-w-3xl"
         >
           {/* Heritage eyebrow */}
@@ -151,7 +183,7 @@ export default function HomePage() {
           </p>
 
           {/* Main heading */}
-          <h1 className="font-serif text-6xl md:text-8xl font-normal leading-[1.05] tracking-tight text-white">
+          <h1 className="font-serif text-4xl sm:text-6xl md:text-8xl font-normal leading-[1.05] tracking-tight text-white">
             {t("Nadirlik ve Orijinalliğin", "Where Rarity Meets")}
             <br />
             {t("Buluştuğu Yer", "Authenticity")}
@@ -189,9 +221,7 @@ export default function HomePage() {
 
         {/* Scroll indicator */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.8 }}
+          style={{ opacity: imageOpacity }}
           className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
           <span className="text-[10px] uppercase tracking-[0.2em] text-mist/60">
@@ -205,6 +235,7 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
       </section>
+      </div>
 
       {/* ═══════════════════ CATEGORY TILES — Asymmetric ═══════════════════ */}
       <section className="pt-28 pb-20 px-6">

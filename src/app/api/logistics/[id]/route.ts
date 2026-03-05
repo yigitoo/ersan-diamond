@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db/connection";
 import { requireRole } from "@/lib/auth";
 import Delivery from "@/lib/db/models/delivery";
 import { successResponse, errorResponse } from "@/lib/utils/api-response";
+import { logAudit, getRequestMeta } from "@/lib/audit/logger";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   PENDING: ["ASSIGNED", "CANCELLED"],
@@ -45,6 +46,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const delivery = await Delivery.findById(id);
     if (!delivery) return errorResponse("Teslimat bulunamadı", 404);
+
+    const beforeState = { status: delivery.status, courierId: delivery.courierId ? String(delivery.courierId) : undefined };
 
     // Status change with validation
     if (body.status && body.status !== delivery.status) {
@@ -95,6 +98,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (body.proofOfDelivery) delivery.proofOfDelivery = body.proofOfDelivery;
 
     await delivery.save();
+
+    // Determine audit action type
+    const actionType = body.status && body.status !== beforeState.status
+      ? "LOGISTICS:status_changed" as const
+      : body.courierId !== undefined
+        ? "LOGISTICS:courier_assigned" as const
+        : "LOGISTICS:delivery_updated" as const;
+
+    logAudit({
+      actorUserId: user.id, actorRole: user.role,
+      actionType,
+      entityType: "Delivery", entityId: id,
+      before: beforeState,
+      after: { status: delivery.status, courierId: delivery.courierId ? String(delivery.courierId) : undefined },
+      route: `/api/logistics/${id}`,
+      ...getRequestMeta(req),
+    });
 
     const updated = await Delivery.findById(id)
       .populate("productId", "brand model slug images category salePrice currency")

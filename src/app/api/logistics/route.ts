@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth";
 import Delivery from "@/lib/db/models/delivery";
 import Product from "@/lib/db/models/product";
 import { paginatedResponse, successResponse, errorResponse, parseSearchParams } from "@/lib/utils/api-response";
+import { logAudit, getRequestMeta } from "@/lib/audit/logger";
 
 export async function GET(req: NextRequest) {
   try {
@@ -87,6 +88,15 @@ export async function POST(req: NextRequest) {
       .populate("courierId", "name email")
       .populate("createdById", "name email")
       .lean();
+
+    logAudit({
+      actorUserId: user.id, actorRole: user.role,
+      actionType: "LOGISTICS:delivery_created",
+      entityType: "Delivery", entityId: String(delivery._id),
+      after: { recipientName: body.recipientName, status: "PENDING", courierId: body.courierId, scheduledDate: body.scheduledDate },
+      route: "/api/logistics",
+      ...getRequestMeta(req),
+    });
 
     return successResponse(populated, 201);
   } catch (error: any) {

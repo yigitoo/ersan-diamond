@@ -10,6 +10,8 @@ const addressSubSchema = new Schema(
     country: { type: String, default: "Türkiye" },
     postalCode: { type: String },
     notes: { type: String },
+    lat: { type: Number },
+    lng: { type: Number },
   },
   { _id: false }
 );

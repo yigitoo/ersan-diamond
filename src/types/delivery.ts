@@ -10,6 +10,44 @@ export interface DeliveryAddress {
   country: string;
   postalCode?: string;
   notes?: string;
+  lat?: number;
+  lng?: number;
+}
+
+// Route optimization types
+export interface RouteStop {
+  deliveryId: string;
+  recipientName: string;
+  address: DeliveryAddress;
+  status: DeliveryStatus;
+  lat: number;
+  lng: number;
+  distanceFromPrev: number; // km
+  cumulativeDistance: number; // km
+  etaMinutes: number; // cumulative ETA from start
+  durationMinutes?: number; // OSRM leg duration
+  cumulativeDuration?: number; // cumulative OSRM duration
+}
+
+export interface RouteResult {
+  courierId: string;
+  courierName: string;
+  origin: { lat: number; lng: number };
+  stops: RouteStop[];
+  totalDistanceKm: number;
+  totalEtaMinutes: number;
+  geometry?: [number, number][]; // Real road polyline [lat, lng][]
+  trafficMultiplier?: number;
+  routeSource: "osrm" | "haversine";
+}
+
+export interface CourierScore {
+  courierId: string;
+  courierName: string;
+  score: number;
+  activeCount: number;
+  distanceToPickup: number;
+  clusterDistance: number;
 }
 
 export interface DeliveryStatusEntry {

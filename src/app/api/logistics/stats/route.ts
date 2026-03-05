@@ -23,7 +23,16 @@ export async function GET(req: NextRequest) {
       }),
       Delivery.aggregate([
         { $match: { courierId: { $exists: true, $ne: null }, status: { $nin: ["DELIVERED", "CANCELLED"] } } },
-        { $group: { _id: "$courierId", activeCount: { $sum: 1 } } },
+        { $sort: { updatedAt: -1 } },
+        {
+          $group: {
+            _id: "$courierId",
+            activeCount: { $sum: 1 },
+            lastLat: { $first: "$courierLocation.lat" },
+            lastLng: { $first: "$courierLocation.lng" },
+            lastLocationAt: { $first: "$courierLocation.updatedAt" },
+          },
+        },
         {
           $lookup: {
             from: "users",
@@ -39,6 +48,9 @@ export async function GET(req: NextRequest) {
             activeCount: 1,
             name: "$user.name",
             email: "$user.email",
+            lat: "$lastLat",
+            lng: "$lastLng",
+            lastLocationAt: 1,
           },
         },
       ]),

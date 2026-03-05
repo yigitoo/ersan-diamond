@@ -1,6 +1,15 @@
+import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db/connection";
 import AuditLog from "@/lib/db/models/audit-log";
 import type { AuditActionType, AuditEntityType } from "@/types";
+
+/** Extract IP and user-agent from a request */
+export function getRequestMeta(req: NextRequest) {
+  return {
+    ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "",
+    userAgent: req.headers.get("user-agent") || "",
+  };
+}
 
 interface AuditLogParams {
   actorUserId: string;

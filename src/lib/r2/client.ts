@@ -45,8 +45,29 @@ export function getPublicUrl(key: string): string {
   return `${R2_PUBLIC_URL}/${key}`;
 }
 
+export async function uploadBuffer(
+  key: string,
+  buffer: Buffer,
+  contentType: string
+): Promise<string> {
+  const command = new PutObjectCommand({
+    Bucket: R2_BUCKET_NAME,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType,
+  });
+  await s3Client.send(command);
+  return `${R2_PUBLIC_URL}/${key}`;
+}
+
 export function generateImageKey(folder: string, filename: string): string {
   const timestamp = Date.now();
   const sanitized = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
   return `${folder}/${timestamp}-${sanitized}`;
+}
+
+export function generateAttachmentKey(filename: string): string {
+  const timestamp = Date.now();
+  const sanitized = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
+  return `mail-attachments/${timestamp}-${sanitized}`;
 }

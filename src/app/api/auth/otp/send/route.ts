@@ -6,6 +6,7 @@ import User from "@/lib/db/models/user";
 import { sendEmail } from "@/lib/email/smtp";
 import { sendSms } from "@/lib/sms/httpsms";
 import { otpEmailTemplate, otpSmsTemplate } from "@/lib/email/templates/otp";
+import { logAudit, getRequestMeta } from "@/lib/audit/logger";
 
 function generateOtp(): string {
   return crypto.randomInt(100000, 999999).toString();
@@ -71,6 +72,14 @@ export async function POST(req: NextRequest) {
     }
 
     await Promise.allSettled(tasks);
+
+    logAudit({
+      actorUserId: String((user as any)._id), actorRole: (user as any).role || "unknown",
+      actionType: "AUTH:otp_sent",
+      after: { email: email.toLowerCase().trim() },
+      route: "/api/auth/otp/send",
+      ...getRequestMeta(req),
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

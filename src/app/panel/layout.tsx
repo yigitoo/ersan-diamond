@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { Sidebar, MobileMenuButton } from "@/components/panel/sidebar";
 import { LanguageToggle } from "@/components/shared/language-toggle";
 import { useI18n } from "@/lib/i18n";
+import { useMailSync } from "@/lib/hooks";
 import { cn } from "@/lib/utils/cn";
 
 const NAV_LABELS: Record<string, { tr: string; en: string }> = {
@@ -29,6 +30,9 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
   const { data: session } = useSession();
   const { t } = useI18n();
   const userRole = (session?.user as any)?.role || "VIEWER";
+
+  // Background mail sync every 2 minutes (async, non-blocking)
+  useMailSync();
 
   // Don't show sidebar on login page
   if (pathname === "/panel/login") {

@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
         },
         {
           key: "Permissions-Policy",
-          value: "camera=(), microphone=(), geolocation=()",
+          value: "camera=(), microphone=(), geolocation=(self)",
         },
         {
           key: "Content-Security-Policy",
@@ -34,9 +34,10 @@ const nextConfig: NextConfig = {
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
             "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://*.r2.dev",
+            "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://*.r2.dev https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com https://*.tile.opentopomap.org",
+            "media-src 'self' blob:",
             "font-src 'self' data:",
-            "connect-src 'self' https://*.r2.cloudflarestorage.com",
+            "connect-src 'self' https://*.r2.cloudflarestorage.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://router.project-osrm.org https://server.arcgisonline.com https://*.tile.opentopomap.org",
             "frame-src 'self' https://www.google.com https://maps.google.com",
             "frame-ancestors 'none'",
             "base-uri 'self'",

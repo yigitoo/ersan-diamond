@@ -31,10 +31,15 @@ const emailSchema = new Schema(
     templateId: { type: String },
     providerMessageId: { type: String, unique: true, sparse: true },
     attachmentsMeta: [attachmentMetaSchema],
+    folder: { type: String, enum: ["INBOX", "SENT", "DRAFTS", "TRASH", "SPAM", "STARRED", "ALL"], default: "INBOX" },
+    seen: { type: Boolean, default: false },
+    flagged: { type: Boolean, default: false },
+    gmailMessageId: { type: String },
   },
   { timestamps: true }
 );
 
 emailSchema.index({ threadId: 1, sentAt: 1 });
+emailSchema.index({ folder: 1, sentAt: -1 });
 
 export default (models.Email as mongoose.Model<IEmail>) || model<IEmail>("Email", emailSchema);

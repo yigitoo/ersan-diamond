@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+const attachmentSchema = z.object({
+  filename: z.string(),
+  contentType: z.string(),
+  size: z.number(),
+  url: z.string().url(),
+  key: z.string(),
+});
+
 export const sendEmailSchema = z.object({
   to: z.string().email("Geçerli bir email adresi girin"),
   subject: z.string().min(1, "Konu zorunlu"),
@@ -10,6 +18,7 @@ export const sendEmailSchema = z.object({
   threadId: z.string().optional(),
   relatedLeadId: z.string().optional(),
   relatedAppointmentId: z.string().optional(),
+  attachments: z.array(attachmentSchema).max(10).optional().default([]),
 });
 
 export const contactFormSchema = z.object({
