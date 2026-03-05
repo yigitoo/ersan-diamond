@@ -1,5 +1,5 @@
 export function getAppUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL || "https://ersandiamond.com";
+  return process.env.NEXT_PUBLIC_APP_URL || "https://ersandiamonds.com";
 }
 
 const LOGO_URL = "https://pub-2f86ee5ec40043559538f242150ae7b6.r2.dev/logo-horizontal.png";

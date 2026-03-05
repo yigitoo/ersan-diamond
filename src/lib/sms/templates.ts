@@ -37,7 +37,7 @@ export const smsTemplates = {
   },
 
   appointmentCancelled(name: string) {
-    return `Sayın ${name}, randevunuz iptal edildi. Yeni randevu: ersandiamond.com/concierge Ersan Diamond`;
+    return `Sayın ${name}, randevunuz iptal edildi. Yeni randevu: ersandiamonds.com/concierge Ersan Diamond`;
   },
 
   reminder24h(time: string) {

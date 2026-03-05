@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     const emailRecord = await Email.create({
       threadId: thread._id,
       direction: "OUTBOUND",
-      from: process.env.SMTP_FROM || "info@ersandiamond.com",
+      from: process.env.SMTP_FROM || "info@ersandiamonds.com",
       to: data.to,
       subject: data.subject,
       html: data.html,

@@ -202,7 +202,7 @@ export default function LoginPage() {
           <p className="text-mist text-sm">{t("Sadece Yetkili Personel", "Internal Use Only")}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">
-          <Input label={t("E-posta", "Email")} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@ersandiamond.com" required />
+          <Input label={t("E-posta", "Email")} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@ersandiamonds.com" required />
           <Input label={t("Şifre", "Password")} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
           <Button type="submit" variant="primary" size="lg" className="w-full" loading={loading}>

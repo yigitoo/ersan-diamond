@@ -13,7 +13,7 @@ export function enLabel(label?: BiLabel | string): string {
 
 // Brand
 export const BRAND_NAME = "Ersan Diamond";
-export const BRAND_EMAIL = "info@ersandiamond.com";
+export const BRAND_EMAIL = "info@ersandiamonds.com";
 export const BRAND_PHONE = "0850 562 13 13";
 export const BRAND_WHATSAPP = "https://wa.me/908505621313";
 export const BRAND_INSTAGRAM = "https://instagram.com/ersandiamond";

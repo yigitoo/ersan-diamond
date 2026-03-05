@@ -19,7 +19,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://ersandiamond.com"
+    process.env.NEXT_PUBLIC_APP_URL || "https://ersandiamonds.com"
   ),
   title: {
     default: "Ersan Diamond | Lüks Saat & Hermès",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "tr_TR",
     alternateLocale: "en_US",
-    url: "https://ersandiamond.com",
+    url: "https://ersandiamonds.com",
     siteName: "Ersan Diamond",
     title: "Ersan Diamond | Lüks Saat & Hermès",
     description:

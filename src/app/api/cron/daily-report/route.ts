@@ -163,7 +163,7 @@ export async function GET(req: NextRequest) {
     </div>
     `;
 
-    const adminEmail = process.env.ADMIN_EMAIL || "ersan@ersandiamond.com";
+    const adminEmail = process.env.ADMIN_EMAIL || "ersan@ersandiamonds.com";
 
     await sendEmail({
       to: adminEmail,
