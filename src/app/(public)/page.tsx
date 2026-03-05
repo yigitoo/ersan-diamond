@@ -28,7 +28,7 @@ export default function HomePage() {
   const { t } = useI18n();
 
   /* ─── Hero scroll-driven crossfade ─── */
-  const heroRef = useRef<HTMLElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end end"],
